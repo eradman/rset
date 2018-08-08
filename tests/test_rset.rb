@@ -29,8 +29,8 @@ def eq(a, b)
 end
 
 $usage_text = \
-        "release: 0.1\n" +
-        "usage: rset [-v] host_pattern\n"
+        "release: 0.2\n" +
+        "usage: rset [-nv] host_pattern\n"
 
 # Install or update utilities
 
@@ -98,6 +98,19 @@ try "Format an SSH command line" do
     eq err, ""
     eq status.success?, true
     eq out, File.read('expected/sshcmd.out')
+end
+
+# Dry Run
+
+try "Show matching routes and hosts" do
+    out, err, status = nil
+    Dir.chdir("input") do
+        cmd = "../../rset -nv t420"
+        out, err, status = Open3.capture3(cmd)
+    end
+    eq err, ""
+    eq status.success?, true
+    eq out, File.read('expected/dry_run.out')
 end
 
 puts "\e[32m---\e[0m"

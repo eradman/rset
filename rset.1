@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 07 2018
+.Dd August 08 2018
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -21,7 +21,7 @@
 .Nd configure systems using labeled scripts
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl v
+.Op Fl vn
 .Ar host_regex
 .Sh DESCRIPTION
 .Nm
@@ -34,16 +34,19 @@ to configure.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.It Fl n
+Do not execute commands.
+Instead hostnames are highlighted to show what characters the regex matched.
 .It Fl v
 Verbose mode.
 Prints the label name of each script before execution of each script.
 .El
 .Sh FILES
-Available hosts and the pathnames to labeled scrits to run are read from
+Available hosts and the pathnames to labeled scripts to run are read from
 .Pa routes.pln ,
 located in the current working directory.
 .Pp
-A ssh master is established at the beginning of a session and all subseqnent
+A ssh master is established at the beginning of a session and all subsequent
 interactions with a host are run over a socket at
 .Pa /tmp/rset_{hostname} .
 .Pp

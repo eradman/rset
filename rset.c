@@ -29,6 +29,8 @@
 /* forwards */
 
 static void usage();
+static void hl_line(const char *s, int t);
+static void hl_range(const char *s, unsigned so, unsigned eo);
 
 /* globals used by input.l */
 
@@ -39,9 +41,8 @@ Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
 Options current_options;
 
-/* globals */
 int verbose_opt;
-
+int dryrun_opt;
 
 int main(int argc, char *argv[])
 {
@@ -59,8 +60,11 @@ int main(int argc, char *argv[])
 	Options toplevel_options;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "v")) != -1)
+	while ((ch = getopt(argc, argv, "nv")) != -1)
 		switch (ch) {
+		case 'n':
+			dryrun_opt = 1;
+			break;
 		case 'v':
 			verbose_opt = 1;
 			break;
@@ -76,17 +80,19 @@ int main(int argc, char *argv[])
 	/* Select a port to communicate on */
 	http_port = get_socket();
 
-	/* start the web server */
-	http_server_pid = fork();
-	if (http_server_pid == 0) {
-		inputstring = malloc(PATH_MAX);
-		snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(TOP_LEVEL_ROUTE_FILE), http_port);
-		/* elide copyright and other startup notices */
-		close(STDOUT_FILENO);
-		/* Convert http server command line into a vector */
-		str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
-		execvp(http_srv_argv[0], http_srv_argv);
-		err(1, "%s", http_srv_argv[0]);
+	if (!dryrun_opt) {
+		/* start the web server */
+		http_server_pid = fork();
+		if (http_server_pid == 0) {
+			inputstring = malloc(PATH_MAX);
+			snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(TOP_LEVEL_ROUTE_FILE), http_port);
+			/* elide copyright and other startup notices */
+			close(STDOUT_FILENO);
+			/* Convert http server command line into a vector */
+			str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
+			execvp(http_srv_argv[0], http_srv_argv);
+			err(1, "%s", http_srv_argv[0]);
+		}
 	}
 
 	/* parse route labels */
@@ -114,23 +120,32 @@ int main(int argc, char *argv[])
 			if (!host_labels[0])
 				continue;
 
-			printf(ANSI_YELLOW "%s" ANSI_RESET "\n", host_name);
-			socket_path = start_connection(host_name, http_port);
+			if (dryrun_opt)
+				hl_range(host_name, regmatch.rm_so, regmatch.rm_eo);
+			else {
+				hl_line(host_name, 1);
+				socket_path = start_connection(host_name, http_port);
+			}
 			for (j=0; host_labels[j]; j++) {
 				if (verbose_opt)
-					printf(ANSI_CYAN "%s" ANSI_RESET "\n", host_labels[j]->name);
+					hl_line(host_labels[j]->name, 2);
+				if (dryrun_opt)
+					continue;
+				else
 				cmd = ssh_command(host_name, socket_path, host_labels[j]->name,
 				    &host_labels[j]->options, http_port);
 				pipe_cmd(cmd, host_labels[j]->content, host_labels[j]->content_size);
 				free(cmd);
 			}
-			end_connection(socket_path, host_name, http_port);
+			if (!dryrun_opt)
+				end_connection(socket_path, host_name, http_port);
 
 			memcpy(&current_options, &toplevel_options, sizeof(current_options));
 		}
 	}
 
-	kill(http_server_pid, SIGTERM);
+	if (!dryrun_opt)
+		kill(http_server_pid, SIGTERM);
 	return 0;
 }
 
@@ -139,6 +154,32 @@ int main(int argc, char *argv[])
 void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-v] host_pattern\n");
+	fprintf(stderr, "usage: rset [-nv] host_pattern\n");
 	exit(1);
+}
+
+void
+hl_line(const char *s, int t) {
+	switch (t) {
+		case 1:
+			printf(ANSI_YELLOW "%s" ANSI_RESET "\n", s);
+			break;
+		case 2:
+			printf(ANSI_CYAN "%s" ANSI_RESET "\n", s);
+			break;
+		default:
+			printf("%s\n", s);
+	}
+}
+
+void
+hl_range(const char *s, unsigned so, unsigned eo) {
+	char *start, *match;
+
+	start = strndup(s, so);
+	match = strndup(s+so, eo-so);
+
+	printf(ANSI_YELLOW "%s" ANSI_REVERSE "%s" ANSI_RESET ANSI_YELLOW "%s"
+	    ANSI_RESET "\n", start, match, s+eo);
+	free(start); free(match);
 }

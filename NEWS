@@ -1,3 +1,8 @@
+= Next Release: 0.2
+
+ - Add dry run option ('-n') prints hosts and hilights regex match
+ - Add verbose ('-v') option lists each label
+
 = Release History
 
 == 0.1: August 8, 2018
