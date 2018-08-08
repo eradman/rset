@@ -1,0 +1,2 @@
+ssh -S /tmp/my_socket  -T eradman.com  env LABEL='/etc/resolv.conf' INSTALL_URL=http://localhost:6000 _=/tmp/rset_3330 /bin/sh
+ssh -S /tmp/my_socket -v -T -l eradman eradman.com doas env LABEL='/etc/resolv.conf' INSTALL_URL=http://localhost:6000 _=/tmp/rset_3331 /bin/ksh -x

@@ -1,0 +1,14 @@
+# routes are hostnames and a list of rules
+
+t420s:
+	common/openbsd.pln
+	t420s.pln
+
+# options
+
+username=eradman
+ssh_options=-T
+execute_with=doas
+interpreter=/bin/sh
+
+# vim:noexpandtab:syntax=sh:ts=4

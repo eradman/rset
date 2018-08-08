@@ -1,0 +1,9 @@
+= Release History
+
+== 0.1: August 8, 2018
+
+ - Initial release at https://bitbucket.org/eradman/rset
+ - Basic wiki at https://scriptedconfiguration.org/
+ - Builds on OpenBSD, issues commands over SSH socket
+ - Support for 'username', 'interpreter', 'execute_using', and 'ssh_options'
+ - tar sent of '_rutils' directory and installation over ephemeral HTTP server

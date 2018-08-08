@@ -1,0 +1,62 @@
+.\"
+.\" Copyright (c) 2018 Eric Radman <ericshane@eradman.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd August 04 2018
+.Dt PLN 5
+.Os
+.Sh NAME
+.Nm pln
+.Nd progressive label notation
+.Sh DESCRIPTION
+Progressive Label Notation
+is a configuration format used by
+.Xr rset 1 ,
+and is designed to be evaluated sequentially.
+.Nm
+supports options defined by
+.Em key=value
+pairs and text fragments designated by tab indentation
+.Bd -literal -offset indent
+interpreter=/bin/ksh -x
+
+packages:
+	pkg_add -I nginx ruby
+	ln -sf /usr/local/bin/ruby25 /usr/local/bin/ruby
+	ln -sf /usr/local/bin/irb25 /usr/local/bin/irb
+
+username=www
+
+/var/www/htdocs/pub:
+	mkdir -p $LABEL
+
+# vim:noexpandtab:syntax=sh:ts=4
+.Ed
+.Sh OPTIONS
+.Pp
+Each option may be set multiple times, and is effective for labels that follow.
+Reset an option to the implementation-defined default using
+.Ql \&=
+without a value.
+.Sh LABELS
+Label names do not need to be unique and may contain any series of
+characters except for
+.Ql \&:
+which must terminate the line. The label name is made available to the script as
+an environment variable.
+.Sh
+.Sh COMMENTS
+Comments begin with a hash
+.Pq Ql \&#
+character, and can only be used the beginning of a line.

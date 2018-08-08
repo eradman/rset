@@ -1,0 +1,62 @@
+PREFIX ?= /usr/local
+MANPREFIX ?= ${PREFIX}/man
+RELEASE = 0.2
+CPPFLAGS += -DRELEASE=\"${RELEASE}\"
+LDFLAGS = -ll
+SRCS = rset.c input.c execute.c
+OBJS = rset rinstall
+
+all: config.h versioncheck rset rinstall
+
+env:
+	@echo "CC         = ${CC}"
+	@echo "DESTDIR    = ${DESTDIR}"
+	@echo "EXTRA_SRC  = ${EXTRA_SRC}"
+	@echo "LDFLAGS    = ${LDFLAGS}"
+	@echo "MANPREFIX  = ${MANPREFIX}"
+	@echo "PREFIX     = ${PREFIX}"
+	@echo "SRC        = ${SRC}"
+
+config.h: config.def.h
+	cp config.def.h $@
+
+.l.c:
+	${LEX} -o $@ $<
+
+rinstall: rinstall.sh
+	sed -e 's/$${release}/${RELEASE}/' rinstall.sh > $@
+	@chmod +x $@
+
+install: rset
+	install rset ${DESTDIR}${PREFIX}/bin
+	install rinstall ${DESTDIR}${PREFIX}/bin
+	install -m 644 rset.1 ${DESTDIR}${MANPREFIX}/man1
+	install -m 644 pln.5 ${DESTDIR}${MANPREFIX}/man5
+
+uninstall:
+	rm ${DESTDIR}${PREFIX}/bin/rset
+	rm ${DESTDIR}${PREFIX}/bin/rinstall
+	rm ${DESTDIR}${MANPREFIX}/man1/rset.1
+	rm ${DESTDIR}${MANPREFIX}/man1/rinstall.1
+	rm ${DESTDIR}${MANPREFIX}/man5/pln.5
+
+config.h: config.def.h
+	cp config.def.h $@
+
+rset: ${SRCS}
+	${CC} ${CFLAGS} ${CPPFLAGS} $> -o $@ ${LDFLAGS}
+
+test: ${OBJS}
+	@make -C tests
+
+clean:
+	rm -f input.c *.o *.core rset rinstall
+	make -C tests clean
+
+distclean:
+	rm -f config.h Makefile
+
+versioncheck:
+	@head -n3 NEWS | egrep -q "^= Next Release: ${RELEASE}|^== ${RELEASE}: "
+
+.PHONY: all clean distclean test versioncheck

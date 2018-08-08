@@ -1,0 +1,71 @@
+.\"
+.\" Copyright (c) 2018 Eric Radman <ericshane@eradman.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd August 04 2018
+.Dt RINSTALL 1
+.Os
+.Sh NAME
+.Nm rinstall
+.Nd fetch and install scripts over http
+.Sh SYNOPSIS
+.Nm rinstall
+.Op Fl o Ar owner:group
+.Op Fl m Ar mode
+.Ar src
+.Ar target
+.Sh DESCRIPTION
+.Nm
+is shipped to remote machines by
+.Xr rset 1
+to provide a standard method of installing files made available over HTTP.
+.Pp
+If the
+.Ar target
+does not exist it is created.
+If the
+.Ar target
+exists but is not the same,
+.Xr diff 1
+is called to display the difference before the
+.Ar target
+is updated.
+The arguments are as follows:
+.Bl -tag -width Ds
+.It Fl o
+Owner:group to set. This argument is passed to
+.Xr chown 8
+.It Fl m
+Mode to set. This argument is passed to
+.Xr chmod 8
+.El
+.Sh ENVIRONMENT
+The
+.Ar src
+argument is a relative path that is appended to
+the environment variable
+.Ev INSTALL_URL .
+.Sh EXIT STATUS
+The
+.Nm
+utility exits with one of the following values:
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It Li 0
+File was installed or updated
+.It Li 1
+No changes were made
+.It Li 2
+Incorrect parameters
+.El

@@ -1,0 +1,81 @@
+.\"
+.\" Copyright (c) 2018 Eric Radman <ericshane@eradman.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd August 07 2018
+.Dt RSET 1
+.Os
+.Sh NAME
+.Nm rset
+.Nd configure systems using labeled scripts
+.Sh SYNOPSIS
+.Nm rset
+.Op Fl v
+.Ar host_regex
+.Sh DESCRIPTION
+.Nm
+evaluates script fragments written in Progressive Label Notation
+.Pq Xr pln 5 ,
+executing each one in tern over ssh.
+.Nm
+requires one parameter specifying the regular expression matching hosts
+to configure.
+.Pp
+The arguments are as follows:
+.Bl -tag -width Ds
+.It Fl v
+Verbose mode.
+Prints the label name of each script before execution of each script.
+.El
+.Sh FILES
+Available hosts and the pathnames to labeled scrits to run are read from
+.Pa routes.pln ,
+located in the current working directory.
+.Pp
+A ssh master is established at the beginning of a session and all subseqnent
+interactions with a host are run over a socket at
+.Pa /tmp/rset_{hostname} .
+.Pp
+The local directory
+.Pa _rutils
+must exist, and is shipped to the remote host at the beginning of each
+execution. The location of these utilites is identified by the
+environment variable
+.Ev _ .
+.Sh ENVIRONMENT
+Execution on the remote host sets the following environment variables:
+.Ev LABEL ,
+.Ev INSTALL_URL
+.Sh OPTIONS
+.Pa Most options are not set in the command line, but are modified using key
+value-pairs in the
+.Xr pln 5
+files
+.Ss \&username=
+The username to connect as. This parameter has no default.
+.Ss \&interpreter=
+The interpreter to run a script fragment with.
+Defaults to
+.Pa /bin/sh ,
+but any language may be used that is capable of reading scripts over STDIN.
+.Ss \&execute_using=
+Command for elevating privileges, such as
+.Xr doas 1
+and
+.Xr sudo 8 .
+.Ss \&ssh_options=
+Flags to pass to
+.Xr ssh 1 .
+.Sh SEE ALSO
+.Xr re_format 7

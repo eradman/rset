@@ -1,0 +1,15 @@
+# a comment
+
+username=eradman
+interpreter=/bin/ksh -x
+
+common_packages:
+	pkg_add rsync-- vpnc noto-fonts hermit-font anonymous-pro vim--gtk2 ruby%2.4 heimdal
+	echo "add vether0" > /etc/hostname.bridge0
+	
+	cat <<-EOF > /dev/null
+	fake label:
+	# comment
+	EOF
+
+# vim:noexpandtab:syntax=sh:ts=4
