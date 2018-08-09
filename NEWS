@@ -2,6 +2,7 @@
 
  - Add dry run option ('-n') prints hosts and hilights regex match
  - Add verbose ('-v') option lists each label
+ - Use $_ to indicate the current label and change PWD to the staging dir
 
 = Release History
 

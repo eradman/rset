@@ -16,25 +16,25 @@ trap 'printf "$0: exit code $? on line $LINENO\n" >&2; exit 1' ERR \
 trap '' HUP
 set +o posix
 
-[ $# == 0 ] && usage
-
-cd /tmp
 while [ $# -gt 2 ]; do
 	case "$1" in
 		-o) OWNER="$2"; shift ;;
 		-m) MODE="$2"; shift ;;
+		 *) usage ;;
 	esac
 	shift
 done
+[ $# == 2 ] || usage
 
 name=$(basename $1)
 target=$2
-ftp $INSTALL_URL/$1 -o $name
+
+
+ftp -n $INSTALL_URL/$1 -o $name
 [ -e $target ] && diff -C2 -u $target $name || {
-	cp $name $target
+	mv $name $target
 	[ -n "$OWNER" ] && chown $OWNER $target
 	[ -n "$MODE" ] && chmod $MODE $target
 	ret=0
 }
-rm $name
 exit $ret

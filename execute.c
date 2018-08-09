@@ -93,9 +93,9 @@ ssh_command(char *host_name, char *socket_path, char *label_name, Options* optio
 
 	cmd = malloc(PATH_MAX);
 	snprintf(cmd, PATH_MAX, "ssh -S %s %s %s %s "
-	    "env LABEL='%s' INSTALL_URL=%s _=" REMOTE_TMP_PATH " %s",
+	    "'sh -c \"cd " REMOTE_TMP_PATH "; _=%s INSTALL_URL=%s exec %s\"'",
 	    socket_path, op.ssh_options, host_name, op.execute_with,
-	    label_name, install_url, http_port, op.interpreter);
+	    http_port, label_name, install_url, op.interpreter);
 
 	return cmd;
 }

@@ -42,7 +42,7 @@ end
 
 def write_file(fn, contents)
     f = File.new("#{$systmp}/" + fn, "w")
-    f.write "123"
+    f.write contents
     f.close
 end
 
@@ -73,6 +73,20 @@ try "install a file from a remote URL" do
     eq status.success?, true
     eq "123", File.read(dst)
     eq File.stat(dst).mode.to_s(8), '100644'
+end
+
+try "install a file from a remote URL to the staging area" do
+    dst = $systmp + "/test3.txt"
+    write_file("test.txt", "678")
+    cmd = "/usr/bin/env INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall test.txt #{dst}"
+    Dir.chdir($systmp) do
+        out, err, status = Open3.capture3(cmd)
+        eq err, ""
+        eq out, ""
+        eq status.success?, true
+        eq "678", File.read(dst)
+        eq File.stat(dst).mode.to_s(8), '100644'
+    end
 end
 
 puts "\e[32m---\e[0m"
