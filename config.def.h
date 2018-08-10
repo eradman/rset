@@ -11,7 +11,7 @@
 #define DEFAULT_INSTALL_PORT 6000
 #define DEFAULT_INSTALL_URL "http://localhost:6000"
 #define TOP_LEVEL_ROUTE_FILE "routes.pln"
-#define UTILITIES_TO_SEND "_rutils"
+#define REPLICATED_DIRECTORY "_rutils"
 
 /* colors */
 #define ANSI_RESET   "\x1b[0m"

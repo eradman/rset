@@ -21,8 +21,9 @@
 .Nd configure systems using labeled scripts
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl vn
+.Op Fl ln
 .Ar host_regex
+.Op Ar label
 .Sh DESCRIPTION
 .Nm
 evaluates script fragments written in Progressive Label Notation
@@ -31,15 +32,19 @@ executing each one in tern over ssh.
 .Nm
 requires one parameter specifying the regular expression matching hosts
 to configure.
+A
+.Ar label
+name may be specified in order to run scripts with a specific label name.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl n
 Do not execute commands.
-Instead hostnames are highlighted to show what characters the regex matched.
-.It Fl v
-Verbose mode.
-Prints the label name of each script before execution of each script.
+Instead hostnames are highlighted to show what characters the
+.Ar host_regex
+matched.
+.It Fl l
+List the name of each label before execution.
 .El
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from

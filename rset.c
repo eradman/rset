@@ -41,7 +41,7 @@ Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
 Options current_options;
 
-int verbose_opt;
+int list_opt;
 int dryrun_opt;
 
 int main(int argc, char *argv[])
@@ -50,9 +50,11 @@ int main(int argc, char *argv[])
 	int ch;
 	int i, j;
 	int rv;
+	int labels_matched = 0;
 	int http_port;
 	pid_t http_server_pid;
 	char *cmd, *socket_path;
+	char *selected_label;
 	char *host_pattern, *host_name;
 	char *http_srv_argv[9], *inputstring;
 	regmatch_t regmatch;
@@ -60,40 +62,45 @@ int main(int argc, char *argv[])
 	Options toplevel_options;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "nv")) != -1)
+	while ((ch = getopt(argc, argv, "ln")) != -1)
 		switch (ch) {
+		case 'l':
+			list_opt = 1;
+			break;
 		case 'n':
 			dryrun_opt = 1;
 			break;
-		case 'v':
-			verbose_opt = 1;
-			break;
+		default:
+			usage();
 	}
-
 	if (optind >= argc) usage();
-	host_pattern = argv[optind];
+	if (argc > optind+2) usage();
 
-	/* Auto-upgrade utilities and verify path */
-	snprintf(buf, sizeof(buf), "%s/rinstall", dirname(argv[0]));
-	install_if_new(buf, UTILITIES_TO_SEND "/rinstall");
+	host_pattern = argv[optind];
+	selected_label = argv[optind+1];
 
 	/* Select a port to communicate on */
 	http_port = get_socket();
 
 	if (!dryrun_opt) {
-		/* start the web server */
-		http_server_pid = fork();
-		if (http_server_pid == 0) {
-			inputstring = malloc(PATH_MAX);
-			snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(TOP_LEVEL_ROUTE_FILE), http_port);
-			/* elide copyright and other startup notices */
-			close(STDOUT_FILENO);
-			/* Convert http server command line into a vector */
-			str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
-			execvp(http_srv_argv[0], http_srv_argv);
-			err(1, "%s", http_srv_argv[0]);
-		}
+		/* Auto-upgrade utilities and verify path */
+		snprintf(buf, sizeof(buf), "%s/rinstall", dirname(argv[0]));
+		install_if_new(buf, REPLICATED_DIRECTORY "/rinstall");
 	}
+
+	/* start the web server */
+	http_server_pid = fork();
+	if (http_server_pid == 0) {
+		inputstring = malloc(PATH_MAX);
+		snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(TOP_LEVEL_ROUTE_FILE), http_port);
+		/* elide copyright and other startup notices */
+		close(STDOUT_FILENO);
+		/* Convert http server command line into a vector */
+		str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
+		execvp(http_srv_argv[0], http_srv_argv);
+		err(1, "%s", http_srv_argv[0]);
+	}
+	
 
 	/* parse route labels */
 	n_labels = 0;
@@ -127,7 +134,11 @@ int main(int argc, char *argv[])
 				socket_path = start_connection(host_name, http_port);
 			}
 			for (j=0; host_labels[j]; j++) {
-				if (verbose_opt)
+				if (selected_label)
+					if (strcmp(selected_label, host_labels[j]->name) != 0)
+						continue;
+				labels_matched++;
+				if (list_opt)
 					hl_line(host_labels[j]->name, 2);
 				if (dryrun_opt)
 					continue;
@@ -144,8 +155,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (!dryrun_opt)
-		kill(http_server_pid, SIGTERM);
+	if (selected_label && labels_matched == 0)
+		warnx("no matching labels found");
+
+	kill(http_server_pid, SIGTERM);
 	return 0;
 }
 
@@ -154,7 +167,7 @@ int main(int argc, char *argv[])
 void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-nv] host_pattern\n");
+	fprintf(stderr, "usage: rset [-ln] host_pattern [label]\n");
 	exit(1);
 }
 

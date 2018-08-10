@@ -1,8 +1,9 @@
 = Next Release: 0.2
 
  - Add dry run option ('-n') prints hosts and hilights regex match
- - Add verbose ('-v') option lists each label
+ - Add list ('-l') option to list each label before execution
  - Use $_ to indicate the current label and change PWD to the staging dir
+ - Optionally specify a label name to run
 
 = Release History
 

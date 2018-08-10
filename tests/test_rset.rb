@@ -30,7 +30,7 @@ end
 
 $usage_text = \
         "release: 0.2\n" +
-        "usage: rset [-nv] host_pattern\n"
+        "usage: rset [-ln] host_pattern [label]\n"
 
 # Install or update utilities
 
@@ -105,7 +105,7 @@ end
 try "Show matching routes and hosts" do
     out, err, status = nil
     Dir.chdir("input") do
-        cmd = "../../rset -nv t420"
+        cmd = "../../rset -ln t420"
         out, err, status = Open3.capture3(cmd)
     end
     eq err, ""

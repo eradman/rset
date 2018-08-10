@@ -118,11 +118,11 @@ start_connection(char *host_name, int http_port) {
 	if (system(cmd) != 0)
 		err(1, "mkdir failed");
 
-	snprintf(cmd, PATH_MAX, "tar -cf - -C " UTILITIES_TO_SEND " ./ | "
+	snprintf(cmd, PATH_MAX, "tar -cf - -C " REPLICATED_DIRECTORY " ./ | "
 	   "ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
 	    socket_path, host_name, http_port);
 	if (system(cmd) != 0)
-		err(1, "transfer failed for " UTILITIES_TO_SEND);
+		err(1, "transfer failed for " REPLICATED_DIRECTORY);
 
 	return socket_path;
 }
