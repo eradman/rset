@@ -92,8 +92,8 @@ ssh_command(char *host_name, char *socket_path, char *label_name, Options* optio
 		strlcpy(op.execute_with, "", sizeof(op.execute_with));
 
 	cmd = malloc(PATH_MAX);
-	snprintf(cmd, PATH_MAX, "ssh -S %s %s %s %s "
-	    "'sh -c \"cd " REMOTE_TMP_PATH "; _=%s INSTALL_URL=%s exec %s\"'",
+	snprintf(cmd, PATH_MAX, "exec ssh -S %s %s %s %s "
+	    "'sh -c \"cd " REMOTE_TMP_PATH "; LABEL=%s INSTALL_URL=%s exec %s\"'",
 	    socket_path, op.ssh_options, host_name, op.execute_with,
 	    http_port, label_name, install_url, op.interpreter);
 
@@ -108,18 +108,18 @@ start_connection(char *host_name, int http_port) {
 	socket_path = malloc(128);
 	snprintf(socket_path, 128, LOCAL_SOCKET_PATH, host_name);
 
-	snprintf(cmd, PATH_MAX, "ssh -q -fnNT -R %d:localhost:%d -S %s -M %s",
+	snprintf(cmd, PATH_MAX, "exec ssh -q -fnNT -R %d:localhost:%d -S %s -M %s",
 	    DEFAULT_INSTALL_PORT, http_port, socket_path, host_name);
 	if (system(cmd) != 0)
 		err(1, "ssh -M");
 
-	snprintf(cmd, PATH_MAX, "ssh -q -S %s %s mkdir " REMOTE_TMP_PATH,
+	snprintf(cmd, PATH_MAX, "exec ssh -q -S %s %s mkdir " REMOTE_TMP_PATH,
 	    socket_path, host_name, http_port);
 	if (system(cmd) != 0)
 		err(1, "mkdir failed");
 
 	snprintf(cmd, PATH_MAX, "tar -cf - -C " REPLICATED_DIRECTORY " ./ | "
-	   "ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
+	   "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
 	    socket_path, host_name, http_port);
 	if (system(cmd) != 0)
 		err(1, "transfer failed for " REPLICATED_DIRECTORY);
@@ -131,14 +131,14 @@ void
 end_connection(char *socket_path, char *host_name, int http_port) {
 	char cmd[PATH_MAX];
 
-	snprintf(cmd, PATH_MAX, "ssh -q -S %s %s rm -r " REMOTE_TMP_PATH,
+	snprintf(cmd, PATH_MAX, "exec ssh -q -S %s %s rm -r " REMOTE_TMP_PATH,
 	    socket_path, host_name, http_port);
 	if (system(cmd) != 0)
 		err(1, "remote tmp dir");
 
-	snprintf(cmd, PATH_MAX, "ssh -q -S %s -O exit %s", socket_path, host_name);
+	snprintf(cmd, PATH_MAX, "exec ssh -q -S %s -O exit %s", socket_path, host_name);
 	if (system(cmd) != 0)
-		err(1, "ssh -O exit");
+		err(1, "exec ssh -O exit");
 
 	unlink(socket_path);
 	free(socket_path);

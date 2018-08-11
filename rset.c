@@ -23,6 +23,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/wait.h>
+
 #include "config.h"
 #include "execute.h"
 
@@ -53,12 +55,15 @@ int main(int argc, char *argv[])
 	int labels_matched = 0;
 	int http_port;
 	pid_t http_server_pid;
+	pid_t rset_pid;
+	int status;
 	char *cmd, *socket_path;
 	char *selected_label;
 	char *host_pattern, *host_name;
 	char *http_srv_argv[9], *inputstring;
 	regmatch_t regmatch;
 	regex_t reg;
+	sigset_t set;
 	Options toplevel_options;
 
 	opterr = 0;
@@ -100,7 +105,18 @@ int main(int argc, char *argv[])
 		execvp(http_srv_argv[0], http_srv_argv);
 		err(1, "%s", http_srv_argv[0]);
 	}
-	
+	/* watchdog to ensure that the http server is shut down*/
+	rset_pid = fork();
+	if (rset_pid > 0) {
+		setproctitle("watch on pid %d", rset_pid);
+		sigfillset(&set);
+		sigprocmask(SIG_BLOCK, &set, NULL);
+		if (waitpid(rset_pid, &status, 0) == -1)
+			warn("wait on rset with pid %d", rset_pid);
+		if (kill(http_server_pid, SIGTERM) == -1)
+			err(1, "terminate http_server with pid %d", http_server_pid);
+		exit(WEXITSTATUS(status));
+	}
 
 	/* parse route labels */
 	n_labels = 0;
@@ -156,9 +172,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (selected_label && labels_matched == 0)
-		warnx("no matching labels found");
+		errx(1, "no matching labels found");
 
-	kill(http_server_pid, SIGTERM);
 	return 0;
 }
 
