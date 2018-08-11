@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 08 2018
+.Dd August 11, 2018
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -28,7 +28,7 @@
 .Nm
 evaluates script fragments written in Progressive Label Notation
 .Pq Xr pln 5 ,
-executing each one in tern over ssh.
+executing each one in tern using ssh connection multiplexing.
 .Nm
 requires one parameter specifying the regular expression matching hosts
 to configure.
@@ -38,40 +38,42 @@ name may be specified in order to run scripts with a specific label name.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.It Fl l
+List the name of each label before execution.
 .It Fl n
 Do not execute commands.
 Instead hostnames are highlighted to show what characters the
 .Ar host_regex
 matched.
-.It Fl l
-List the name of each label before execution.
 .El
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from
 .Pa routes.pln ,
-located in the current working directory.
+located in the current directory.
 .Pp
 A ssh master is established at the beginning of a session and all subsequent
 interactions with a host are run over a socket at
-.Pa /tmp/rset_{hostname} .
+.Pa /tmp/rset_control_{hostname} .
 .Pp
 The local directory
 .Pa _rutils
 must exist, and is shipped to the remote host at the beginning of each
-execution. The location of these utilites is identified by the
-environment variable
-.Ev _ .
+execution as a temporary directory named
+.Pa /tmp/rset_staging_{http_port} .
+This is used to set the current working directory in the environment of the
+remote host, hence the capabilities of
+.Nm
+may easily be extend by accessing utilities at this location.
 .Sh ENVIRONMENT
 Execution on the remote host sets the following environment variables:
 .Ev LABEL ,
 .Ev INSTALL_URL .
 .Sh OPTIONS
 .Pa Most options are not set in the command line, but are modified using key
-value-pairs in the
-.Xr pln 5
-files
+value-pairs.
 .Ss \&username=
-The username to connect as. This parameter has no default.
+The username to connect as.
+This parameter has no default.
 .Ss \&interpreter=
 The interpreter to run a script fragment with.
 Defaults to

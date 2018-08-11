@@ -1,12 +1,12 @@
-= Next Release: 0.2
+= Release History
+
+== 0.2: August 11, 2018
 
  - Add dry run option ('-n') prints hosts and highlights regex match
  - Add list ('-l') option to list each label before execution
  - Change the current directory to temporary staging dir
  - Optionally specify a label name to run
  - Add a watchdog process for terminating the http server reliably
-
-= Release History
 
 == 0.1: August 8, 2018
 
