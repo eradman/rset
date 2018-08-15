@@ -41,9 +41,10 @@ extern Label **host_labels;     /* child */
 
 /* forwards */
 
-static char* ltrim(char *s, int c);
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
-void read_option(char *text, Options *op);
 void install_if_new(const char *src, const char *dst);
 void str_to_array(char *argv[], char *input, int siz);
+
+static char* ltrim(char *s, int c);
+static void read_option(char *text, Options *op);

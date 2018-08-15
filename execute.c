@@ -11,7 +11,8 @@
  * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.  */
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -31,6 +32,10 @@
 #include "config.h"
 #include "execute.h"
 
+
+/*
+ * append - add a list of arguments to an array
+ */
 int
 append(char *argv[], int argc, char *arg1, ...) {
 	char *s;
@@ -44,6 +49,9 @@ append(char *argv[], int argc, char *arg1, ...) {
 	return argc;
 }
 
+/*
+ * run - standard function for running a subprocess
+ */
 int
 run(char *const argv[]) {
 	int status;
@@ -64,6 +72,9 @@ run(char *const argv[]) {
 	return status;
 }
 
+/*
+ * pipe_cmd - attach an input string to stdin and execute a utility
+ */
 int
 pipe_cmd(char *const argv[], char *input, size_t len) {
 	int status;
@@ -91,6 +102,9 @@ pipe_cmd(char *const argv[], char *input, size_t len) {
 	return status;
 }
 
+/*
+ * get_socket - return an unused TCP port
+ */
 int
 get_socket() {
 	int sock, port;
@@ -112,6 +126,13 @@ get_socket() {
 	return port;
 }
 
+/*
+ *  SSH functions
+ *
+ *  ssh_command      - main function for executing a script on a remote host
+ *  start_connection - start an SSH control master and copy _rutils
+ *  end_connection   - stop an SSH control master and remove temporary files
+ */
 int
 ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port) {
 	int argc;
@@ -121,20 +142,9 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 
 	/* construct command to execute on remote host  */
 
-	if (strlen(host_label->options.install_url) > 0)
-		strlcpy(op.install_url, host_label->options.install_url, sizeof(op.install_url));
-	else
-		strlcpy(op.install_url, DEFAULT_INSTALL_URL, sizeof(op.install_url));
-
-	if (strlen(host_label->options.interpreter) > 0)
-		strlcpy(op.interpreter, host_label->options.interpreter, sizeof(op.interpreter));
-	else
-		strlcpy(op.interpreter, "/bin/sh", sizeof(op.interpreter));
-
-	if (strlen(host_label->options.execute_with) > 0)
-		strlcpy(op.execute_with, host_label->options.execute_with, sizeof(op.interpreter));
-	else
-		strlcpy(op.execute_with, "", sizeof(op.interpreter));
+	apply_default(op.install_url, host_label->options.install_url, INSTALL_URL);
+	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
+	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' INSTALL_URL='%s' exec %s\"",
 	    op.execute_with, http_port, host_label->name, op.install_url, op.interpreter);
@@ -147,7 +157,7 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 	if (strlen(host_label->options.username) > 0)
 		argc = append(argv, argc, "-l", host_label->options.username, NULL);
 
-	argc = append(argv, argc, host_name, cmd, NULL);
+	(void)append(argv, argc, host_name, cmd, NULL);
 	return pipe_cmd(argv, host_label->content, host_label->content_size);
 }
 
@@ -163,14 +173,17 @@ start_connection(char *host_name, int http_port) {
 	socket_path = malloc(128);
 	snprintf(socket_path, 128, LOCAL_SOCKET_PATH, host_name);
 
-	snprintf(port_forwarding, 64, "%d:localhost:%d", DEFAULT_INSTALL_PORT, http_port);
+	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
 	if (stat(socket_path, &sb) != -1) {
 		warnx("%s already exists", socket_path);
+		free(socket_path);
 		return NULL;
 	}
 
-	append(argv, 0, "ssh", "-fnNT", "-R", port_forwarding, "-S", socket_path, "-M", host_name, NULL);
+	append(argv, 0, "ssh", "-fnNT",
+		"-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no",
+	    "-R", port_forwarding, "-S", socket_path, "-M", host_name, NULL);
 	run(argv);
 
 	snprintf(tmp_path, sizeof(tmp_path), "mkdir " REMOTE_TMP_PATH, http_port);
@@ -204,3 +217,14 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 	unlink(socket_path);
 	free(socket_path);
 }
+
+/* internal utility functions */
+
+static void
+apply_default(char *option, const char *user_option, const char *default_option) {
+	if (strlen(user_option) > 0)
+		memcpy(option, user_option, strlen(user_option)+1);
+	else
+		memcpy(option, default_option, strlen(default_option)+1);
+}
+

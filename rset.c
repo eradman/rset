@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 				if (dryrun_opt)
 					continue;
 				else
-					rv = ssh_command(host_name, socket_path, host_labels[j], http_port);
+					(void)ssh_command(host_name, socket_path, host_labels[j], http_port);
 			}
 			if (!dryrun_opt)
 				end_connection(socket_path, host_name, http_port);
@@ -176,16 +176,16 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-/* Utility functions */
+/* internal utilty functions */
 
-void
+static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr, "usage: rset [-ln] host_pattern [label]\n");
 	exit(1);
 }
 
-void
+static void
 hl_line(const char *s, int t) {
 	switch (t) {
 		case 1:
@@ -199,7 +199,7 @@ hl_line(const char *s, int t) {
 	}
 }
 
-void
+static void
 hl_range(const char *s, unsigned so, unsigned eo) {
 	char *start, *match;
 

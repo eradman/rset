@@ -73,15 +73,9 @@ int len;
 }
 %%
 
-char*
-ltrim(char *s, int c) {
-	int offset=0;
-
-	while (s[offset] == c && s[offset] != '\0')
-		offset++;
-	return s + offset;
-}
-
+/*
+ * alloc_labels - allocate memory for Label struct
+ */
 Label**
 alloc_labels() {
 	Label **new_labels;
@@ -92,6 +86,9 @@ alloc_labels() {
 	return new_labels;
 }
 
+/*
+ * read_host_labels - read a label an its contents
+ */
 void
 read_host_labels(Label *route_label) {
 	char *line, *next_line;
@@ -115,28 +112,9 @@ read_host_labels(Label *route_label) {
 	}
 }
 
-void
-read_option(char *text, Options *op) {
-	char *k, *v;
-
-	k = text;
-	strsep(&text, "=");
-	v = text;
-
-	if (strcmp(k, "username") == 0)
-		strlcpy(op->username, v, sizeof(op->username));
-	else if (strcmp(k, "execute_with") == 0)
-		strlcpy(op->execute_with, v, sizeof(op->execute_with));
-	else if (strcmp(k, "interpreter") == 0)
-		strlcpy(op->interpreter, v, sizeof(op->interpreter));
-	else if (strcmp(k, "install_url") == 0)
-		strlcpy(op->install_url, v, sizeof(op->install_url));
-	else {
-		fprintf(stderr, "rset: unknown option '%s=%s'\n", k, v);
-		exit(1);
-	}
-}
-
+/*
+ * install_if_new - install a file and parent directory if it does not already exist
+ */
 void
 install_if_new(const char *src, const char *dst) {
 	int pid;
@@ -158,11 +136,13 @@ install_if_new(const char *src, const char *dst) {
 		}
 		waitpid(pid, &status, 0);
 		if (status != 0)
-			exit(1);
+			warnx("copy failed %s -> %s", src, dst);
 	}
 }
 
-/* For converting command line into a vector for execvp(3) */
+/*
+ * str_to_array - map space-separated tokens to an array
+ */
 void
 str_to_array(char *argv[], char *inputstring, int siz) {
 	char **ap;
@@ -173,4 +153,37 @@ str_to_array(char *argv[], char *inputstring, int siz) {
 				ap++;
 	}
 	*ap = NULL;
+}
+
+ /* internal utility functions */
+
+static char*
+ltrim(char *s, int c) {
+	int offset=0;
+
+	while (s[offset] == c && s[offset] != '\0')
+		offset++;
+	return s + offset;
+}
+
+static void
+read_option(char *text, Options *op) {
+	char *k, *v;
+
+	k = text;
+	strsep(&text, "=");
+	v = text;
+
+	if (strcmp(k, "username") == 0)
+		strlcpy(op->username, v, sizeof(op->username));
+	else if (strcmp(k, "execute_with") == 0)
+		strlcpy(op->execute_with, v, sizeof(op->execute_with));
+	else if (strcmp(k, "interpreter") == 0)
+		strlcpy(op->interpreter, v, sizeof(op->interpreter));
+	else if (strcmp(k, "install_url") == 0)
+		strlcpy(op->install_url, v, sizeof(op->install_url));
+	else {
+		fprintf(stderr, "rset: unknown option '%s=%s'\n", k, v);
+		exit(1);
+	}
 }

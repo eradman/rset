@@ -1,6 +1,7 @@
 = Next Release: 0.3
 
  - A label may contain any character except for single or double quotes
+ - Set ssh UserKnownHostsFile to /dev/null
 
 = Release History
 
