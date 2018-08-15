@@ -18,8 +18,11 @@
 
 /* forwards */
 
+int append(char *argv[], int argc, char *arg, ...);
+int run(char *const argv[]);
+int pipe_cmd(char *const argv[], char *input, size_t len);
 int get_socket();
-int pipe_cmd(char *command, char *input, size_t len);
-char * start_connection(char *host_name, int http_port);
-char* ssh_command(char *host_name, char *socket_path, char *label_name, Options* op, int http_port);
+char *start_connection(char *host_name, int http_port);
+int ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port);
 void end_connection(char *socket_path, char *host_name, int http_port);
+

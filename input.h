@@ -20,7 +20,6 @@
 
 typedef struct {
 	char username[LOGIN_NAME_MAX];
-	char ssh_options[64];
 	char execute_with[64];
 	char interpreter[64];
 	char install_url[1024];

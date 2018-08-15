@@ -7,7 +7,6 @@ t420s:
 # options
 
 username=eradman
-ssh_options=-T
 execute_with=doas
 interpreter=/bin/sh
 

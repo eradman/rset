@@ -29,7 +29,7 @@ def eq(a, b)
 end
 
 $usage_text = \
-        "release: 0.2\n" +
+        "release: 0.3\n" +
         "usage: rset [-ln] host_pattern [label]\n"
 
 # Install or update utilities
@@ -48,7 +48,7 @@ end
 # Execute and pipe to STDIN
 
 try "Try a simple pipe" do
-    cmd = "./pipe input/whereami.sh cat"
+    cmd = "./pipe input/whereami.sh"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
     eq status.success?, true
@@ -92,12 +92,12 @@ end
 
 # Execution
 
-try "Format an SSH command line" do
-    cmd = "./sshcmd eradman.com /etc/resolv.conf"
+try "Format and run a command line" do
+    cmd = "./args"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
     eq status.success?, true
-    eq out, File.read('expected/sshcmd.out')
+    eq out, File.read('expected/args.out')
 end
 
 # Dry Run

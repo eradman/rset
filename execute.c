@@ -16,10 +16,13 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 
 #include <err.h>
 #include <limits.h>
 #include <netdb.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +30,66 @@
 
 #include "config.h"
 #include "execute.h"
+
+int
+append(char *argv[], int argc, char *arg1, ...) {
+	char *s;
+	va_list ap;
+
+	va_start(ap, arg1);
+	for (s = arg1; s != NULL; s = va_arg(ap, char *))
+		argv[argc++] = s;
+	va_end(ap);
+	argv[argc] = NULL;
+	return argc;
+}
+
+int
+run(char *const argv[]) {
+	int status;
+	pid_t pid;
+	
+	pid = fork();
+	switch (pid) {
+		case -1:
+			err(1, "fork");
+		case 0:
+			execvp(argv[0], argv);
+			err(1, "%s", argv[0]);
+	}
+	if (waitpid(pid, &status, 0) == -1)
+		err(1, "waitpid on %d", pid);
+	if (status != 0)
+		warn("%s returned exit code %d", argv[0], status);
+	return status;
+}
+
+int
+pipe_cmd(char *const argv[], char *input, size_t len) {
+	int status;
+	int fd[2];
+	pid_t pid;
+
+	pipe(fd);
+	pid = fork();
+	if (pid == -1)
+		err(1, "fork");
+
+	if (pid == 0) {
+		close(fd[1]);
+		dup2(fd[0], STDIN_FILENO);
+		execvp(argv[0], argv);
+		err(1, "could not exec %s", argv[0]);
+	}
+	close(fd[0]);
+	if (write(fd[1], input, len) == -1)
+		err(1, "write to child");
+	close(fd[1]);
+	if (waitpid(pid, &status, 0) == -1)
+		err(1, "wait on pid %d", pid);
+
+	return status;
+}
 
 int
 get_socket() {
@@ -50,72 +113,69 @@ get_socket() {
 }
 
 int
-pipe_cmd(char *command, char *input, size_t len) {
-	FILE *fd;
-
-	fd = popen(command, "w");
-	if (fd == NULL)
-		err(1, "popen");
-	fwrite(input, len, 1, fd);
-	pclose(fd);
-
-	return 0;
-}
-
-char*
-ssh_command(char *host_name, char *socket_path, char *label_name, Options* options, int http_port) {
-	char install_url[1024];
-	char *cmd;
+ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port) {
+	int argc;
+	char cmd[PATH_MAX];
+	char *argv[ARG_MAX];
 	Options op;
 
-	if (strlen(options->install_url) > 0)
-		strlcpy(install_url, options->install_url, sizeof(install_url));
-	else
-		strlcpy(install_url, DEFAULT_INSTALL_URL, sizeof(install_url));
+	/* construct command to execute on remote host  */
 
-	if (strlen(options->username) > 0)
-		snprintf(op.ssh_options, sizeof(op.ssh_options), "%s -T -l %s",
-		    options->ssh_options, options->username);
+	if (strlen(host_label->options.install_url) > 0)
+		strlcpy(op.install_url, host_label->options.install_url, sizeof(op.install_url));
 	else
-		snprintf(op.ssh_options, sizeof(op.ssh_options), "%s -T",
-		    options->ssh_options);
+		strlcpy(op.install_url, DEFAULT_INSTALL_URL, sizeof(op.install_url));
 
-	if (strlen(options->interpreter) > 0)
-		strlcpy(op.interpreter, options->interpreter, sizeof(op.interpreter));
+	if (strlen(host_label->options.interpreter) > 0)
+		strlcpy(op.interpreter, host_label->options.interpreter, sizeof(op.interpreter));
 	else
 		strlcpy(op.interpreter, "/bin/sh", sizeof(op.interpreter));
 
-	if (strlen(options->execute_with) > 0)
-		strlcpy(op.execute_with, options->execute_with,
-			sizeof(op.execute_with));
+	if (strlen(host_label->options.execute_with) > 0)
+		strlcpy(op.execute_with, host_label->options.execute_with, sizeof(op.interpreter));
 	else
-		strlcpy(op.execute_with, "", sizeof(op.execute_with));
+		strlcpy(op.execute_with, "", sizeof(op.interpreter));
 
-	cmd = malloc(PATH_MAX);
-	snprintf(cmd, PATH_MAX, "exec ssh -S %s %s %s %s "
-	    "'sh -c \"cd " REMOTE_TMP_PATH "; LABEL=%s INSTALL_URL=%s exec %s\"'",
-	    socket_path, op.ssh_options, host_name, op.execute_with,
-	    http_port, label_name, install_url, op.interpreter);
+	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' INSTALL_URL='%s' exec %s\"",
+	    op.execute_with, http_port, host_label->name, op.install_url, op.interpreter);
 
-	return cmd;
+	/* construct ssh command */
+
+	argc = 0;
+	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
+
+	if (strlen(host_label->options.username) > 0)
+		argc = append(argv, argc, "-l", host_label->options.username, NULL);
+
+	argc = append(argv, argc, host_name, cmd, NULL);
+	return pipe_cmd(argv, host_label->content, host_label->content_size);
 }
 
 char *
 start_connection(char *host_name, int http_port) {
 	char cmd[PATH_MAX];
+	char tmp_path[64];
+	char port_forwarding[64];
 	char *socket_path;
+	char *argv[ARG_MAX];
+	struct stat sb;
 
 	socket_path = malloc(128);
 	snprintf(socket_path, 128, LOCAL_SOCKET_PATH, host_name);
 
-	snprintf(cmd, PATH_MAX, "exec ssh -q -fnNT -R %d:localhost:%d -S %s -M %s",
-	    DEFAULT_INSTALL_PORT, http_port, socket_path, host_name);
-	if (system(cmd) != 0)
-		err(1, "ssh -M");
+	snprintf(port_forwarding, 64, "%d:localhost:%d", DEFAULT_INSTALL_PORT, http_port);
 
-	snprintf(cmd, PATH_MAX, "exec ssh -q -S %s %s mkdir " REMOTE_TMP_PATH,
-	    socket_path, host_name, http_port);
-	if (system(cmd) != 0)
+	if (stat(socket_path, &sb) != -1) {
+		warnx("%s already exists", socket_path);
+		return NULL;
+	}
+
+	append(argv, 0, "ssh", "-fnNT", "-R", port_forwarding, "-S", socket_path, "-M", host_name, NULL);
+	run(argv);
+
+	snprintf(tmp_path, sizeof(tmp_path), "mkdir " REMOTE_TMP_PATH, http_port);
+	append(argv, 0, "ssh", "-q", "-S", socket_path, host_name, tmp_path, NULL);
+	if (run(argv) != 0)
 		err(1, "mkdir failed");
 
 	snprintf(cmd, PATH_MAX, "tar -cf - -C " REPLICATED_DIRECTORY " ./ | "
@@ -129,15 +189,16 @@ start_connection(char *host_name, int http_port) {
 
 void
 end_connection(char *socket_path, char *host_name, int http_port) {
-	char cmd[PATH_MAX];
+	char tmp_path[64];
+	char *argv[ARG_MAX];
 
-	snprintf(cmd, PATH_MAX, "exec ssh -q -S %s %s rm -r " REMOTE_TMP_PATH,
-	    socket_path, host_name, http_port);
-	if (system(cmd) != 0)
+	snprintf(tmp_path, sizeof(tmp_path), REMOTE_TMP_PATH, http_port);
+	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-r", tmp_path , NULL);
+	if (run(argv) != 0)
 		err(1, "remote tmp dir");
 
-	snprintf(cmd, PATH_MAX, "exec ssh -q -S %s -O exit %s", socket_path, host_name);
-	if (system(cmd) != 0)
+	append(argv, 0, "ssh", "-q", "-S", socket_path, "-O", "exit", host_name, NULL);
+	if (run(argv) != 0)
 		err(1, "exec ssh -O exit");
 
 	unlink(socket_path);

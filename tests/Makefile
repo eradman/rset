@@ -1,6 +1,6 @@
 CFLAGS = -I..
 LDFLAGS =
-OBJS = getsocket parser pipe sshcmd copyfile
+OBJS = getsocket parser pipe copyfile args
 
 all: test_rinstall test_rset
 
@@ -16,8 +16,8 @@ copyfile: copyfile.c ../input.c
 pipe: pipe.c ../execute.c
 	cc ${CFLAGS} $> ${LDFLAGS} -o pipe
 
-sshcmd: sshcmd.c ../execute.c
-	cc ${CFLAGS} $> ${LDFLAGS} -o sshcmd
+args: args.c ../execute.c
+	cc ${CFLAGS} $> ${LDFLAGS} -o args
 
 test_rinstall: ../rinstall getsocket
 	@ruby test_rinstall.rb

@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	int status;
-	char *cmd, *socket_path;
+	char *socket_path;
 	char *selected_label;
 	char *host_pattern, *host_name;
 	char *http_srv_argv[9], *inputstring;
@@ -148,6 +148,8 @@ int main(int argc, char *argv[])
 			else {
 				hl_line(host_name, 1);
 				socket_path = start_connection(host_name, http_port);
+				if (socket_path == NULL)
+					continue;
 			}
 			for (j=0; host_labels[j]; j++) {
 				if (selected_label)
@@ -159,10 +161,7 @@ int main(int argc, char *argv[])
 				if (dryrun_opt)
 					continue;
 				else
-				cmd = ssh_command(host_name, socket_path, host_labels[j]->name,
-				    &host_labels[j]->options, http_port);
-				pipe_cmd(cmd, host_labels[j]->content, host_labels[j]->content_size);
-				free(cmd);
+					rv = ssh_command(host_name, socket_path, host_labels[j], http_port);
 			}
 			if (!dryrun_opt)
 				end_connection(socket_path, host_name, http_port);
