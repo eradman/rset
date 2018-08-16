@@ -33,6 +33,7 @@
 static void usage();
 static void hl_line(const char *s, int t);
 static void hl_range(const char *s, unsigned so, unsigned eo);
+static void handle_exit(int sig);
 
 /* globals used by input.l */
 
@@ -46,6 +47,11 @@ Options current_options;
 int list_opt;
 int dryrun_opt;
 
+/* globals used by signal handlers */
+char *socket_path;
+char *host_name;
+int http_port;
+
 int main(int argc, char *argv[])
 {
 	char buf[_POSIX2_LINE_MAX];
@@ -53,17 +59,16 @@ int main(int argc, char *argv[])
 	int i, j;
 	int rv;
 	int labels_matched = 0;
-	int http_port;
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	int status;
-	char *socket_path;
 	char *selected_label;
-	char *host_pattern, *host_name;
+	char *host_pattern;
 	char *http_srv_argv[9], *inputstring;
 	regmatch_t regmatch;
 	regex_t reg;
 	sigset_t set;
+	struct sigaction act;
 	Options toplevel_options;
 
 	opterr = 0;
@@ -117,6 +122,15 @@ int main(int argc, char *argv[])
 			err(1, "terminate http_server with pid %d", http_server_pid);
 		exit(WEXITSTATUS(status));
 	}
+
+	/* terminate SSH connection if user aborts */
+	act.sa_flags = 0;
+	act.sa_flags = SA_RESETHAND;
+	act.sa_handler = handle_exit;
+	if (sigemptyset(&act.sa_mask) & (sigaction(SIGINT, &act, NULL) != 0))
+		err(1, "Failed to set SIGINT handler");
+	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
+		err(1, "Failed to set SIGTERM handler");
 
 	/* parse route labels */
 	n_labels = 0;
@@ -174,6 +188,19 @@ int main(int argc, char *argv[])
 		errx(1, "no matching labels found");
 
 	return 0;
+}
+
+/* signal handlers */
+
+void
+handle_exit(int sig) {
+	if (socket_path && host_name && http_port) {
+		printf("caught signal %d, terminating connection to '%s'\n", sig,
+			host_name);
+		/* clean up socket and SSH connection; leaving staging dir */
+		execlp("ssh", "ssh", "-S", socket_path, "-O", "exit", host_name, NULL);
+		fprintf(stderr, "failed to end ssh session %s\n", socket_path);
+	}
 }
 
 /* internal utilty functions */

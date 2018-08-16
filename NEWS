@@ -2,6 +2,7 @@
 
  - A label may contain any character except for single or double quotes
  - Set ssh UserKnownHostsFile to /dev/null
+ - Catch SIGINT and SIGTERM and shut down SSH master connection
 
 = Release History
 
