@@ -214,7 +214,6 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 	if (run(argv) != 0)
 		err(1, "exec ssh -O exit");
 
-	unlink(socket_path);
 	free(socket_path);
 }
 

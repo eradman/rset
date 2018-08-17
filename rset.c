@@ -65,6 +65,8 @@ int main(int argc, char *argv[])
 	char *selected_label;
 	char *host_pattern;
 	char *http_srv_argv[9], *inputstring;
+	char *routes_file = ROUTES_FILE;
+	char routes_realpath[PATH_MAX], rset_realpath[PATH_MAX];
 	regmatch_t regmatch;
 	regex_t reg;
 	sigset_t set;
@@ -72,8 +74,11 @@ int main(int argc, char *argv[])
 	Options toplevel_options;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "ln")) != -1)
+	while ((ch = getopt(argc, argv, "lnf:")) != -1)
 		switch (ch) {
+		case 'f':
+			routes_file = argv[optind-1];
+			break;
 		case 'l':
 			list_opt = 1;
 			break;
@@ -88,21 +93,29 @@ int main(int argc, char *argv[])
 
 	host_pattern = argv[optind];
 	selected_label = argv[optind+1];
+	(void) realpath(argv[0], rset_realpath);
 
-	/* Select a port to communicate on */
-	http_port = get_socket();
+	/* all operations must be relative to the routes file */
+	if (realpath(dirname(routes_file), routes_realpath) == NULL)
+		err(1, "realpath %s", routes_file);
+	if (chdir(routes_realpath) == -1)
+		err(1, "chdir %s", routes_realpath);
+	routes_file = basename(routes_file);
 
 	if (!dryrun_opt) {
 		/* Auto-upgrade utilities and verify path */
-		snprintf(buf, sizeof(buf), "%s/rinstall", dirname(argv[0]));
+		snprintf(buf, sizeof(buf), "%s/rinstall", dirname(rset_realpath));
 		install_if_new(buf, REPLICATED_DIRECTORY "/rinstall");
 	}
+
+	/* Select a port to communicate on */
+	http_port = get_socket();
 
 	/* start the web server */
 	http_server_pid = fork();
 	if (http_server_pid == 0) {
 		inputstring = malloc(PATH_MAX);
-		snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(TOP_LEVEL_ROUTE_FILE), http_port);
+		snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(routes_file), http_port);
 		/* elide copyright and other startup notices */
 		close(STDOUT_FILENO);
 		/* Convert http server command line into a vector */
@@ -110,6 +123,7 @@ int main(int argc, char *argv[])
 		execvp(http_srv_argv[0], http_srv_argv);
 		err(1, "%s", http_srv_argv[0]);
 	}
+
 	/* watchdog to ensure that the http server is shut down*/
 	rset_pid = fork();
 	if (rset_pid > 0) {
@@ -123,7 +137,7 @@ int main(int argc, char *argv[])
 		exit(WEXITSTATUS(status));
 	}
 
-	/* terminate SSH connection if user aborts */
+	/* terminate SSH connection if a signal is caught */
 	act.sa_flags = 0;
 	act.sa_flags = SA_RESETHAND;
 	act.sa_handler = handle_exit;
@@ -136,13 +150,13 @@ int main(int argc, char *argv[])
 	n_labels = 0;
 	route_labels = alloc_labels();
 	host_labels = route_labels;
-	yyin = fopen(TOP_LEVEL_ROUTE_FILE, "r");
+	yyin = fopen(routes_file, "r");
 	if (!yyin)
-		err(1, "%s", TOP_LEVEL_ROUTE_FILE);
+		err(1, "%s", routes_file);
 	yylex();
 	fclose(yyin);
 
-	if ((rv = regcomp(&reg, host_pattern, REG_EXTENDED)) != 0) {
+	if ((regcomp(&reg, host_pattern, REG_EXTENDED)) != 0) {
 		regerror(rv, &reg, buf, sizeof(buf));
 		errx(1, "bad expression: %s", buf);
 	}
@@ -179,6 +193,7 @@ int main(int argc, char *argv[])
 			}
 			if (!dryrun_opt)
 				end_connection(socket_path, host_name, http_port);
+			socket_path = NULL;
 
 			memcpy(&current_options, &toplevel_options, sizeof(current_options));
 		}
@@ -199,7 +214,7 @@ handle_exit(int sig) {
 			host_name);
 		/* clean up socket and SSH connection; leaving staging dir */
 		execlp("ssh", "ssh", "-S", socket_path, "-O", "exit", host_name, NULL);
-		fprintf(stderr, "failed to end ssh session %s\n", socket_path);
+		err(1, "ssh -O exit");
 	}
 }
 
@@ -208,7 +223,7 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-ln] host_pattern [label]\n");
+	fprintf(stderr, "usage: rset [-ln] [-f routes_file] host_pattern [label]\n");
 	exit(1);
 }
 

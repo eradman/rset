@@ -22,6 +22,7 @@
 .Sh SYNOPSIS
 .Nm rset
 .Op Fl ln
+.Op Fl f Ar route_file
 .Ar host_regex
 .Op Ar label
 .Sh DESCRIPTION
@@ -45,6 +46,14 @@ Do not execute commands.
 Instead hostnames are highlighted to show what characters the
 .Ar host_regex
 matched.
+.It Fl f
+Specify a
+.Ar route_file .
+This file is composed of labels which correspond to
+hostnames or IP addresses which are matched against
+.Ar host_regex.
+The default is
+.Pa routes.pln .
 .El
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from
@@ -85,4 +94,5 @@ Command for elevating privileges, such as
 and
 .Xr sudo 8 .
 .Sh SEE ALSO
-.Xr re_format 7
+.Xr re_format 7 ,
+.Xr ssh_config 5

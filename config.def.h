@@ -9,7 +9,7 @@
 
 /* defaults */
 #define INSTALL_PORT 6000
-#define TOP_LEVEL_ROUTE_FILE "routes.pln"
+#define ROUTES_FILE "routes.pln"
 #define REPLICATED_DIRECTORY "_rutils"
 
 /* option defaults */

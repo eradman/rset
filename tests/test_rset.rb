@@ -30,7 +30,7 @@ end
 
 $usage_text = \
         "release: 0.3\n" +
-        "usage: rset [-ln] host_pattern [label]\n"
+        "usage: rset [-ln] [-f routes_file] host_pattern [label]\n"
 
 # Install or update utilities
 

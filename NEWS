@@ -2,7 +2,9 @@
 
  - A label may contain any character except for single or double quotes
  - Set ssh UserKnownHostsFile to /dev/null
- - Catch SIGINT and SIGTERM and shut down SSH master connection
+ - Shut down SSH master connection if SIGINT or SIGTERM are caught
+ - Add ('-f') option for specifying the route file to parse
+ - Always change to the directory where the route file is located
 
 = Release History
 
