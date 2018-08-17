@@ -2,7 +2,7 @@
 # A helper utility for rset(1)
 # Install files from a remote URL
 
-let -i ret=1
+ret=1
 
 usage() {
 	>&2 echo "release: ${release}"
@@ -11,10 +11,7 @@ usage() {
 	exit 1
 }
 
-trap 'printf "$0: exit code $? on line $LINENO\n" >&2; exit 1' ERR \
-	2> /dev/null || exec bash $0 "$@"
 trap '' HUP
-set +o posix
 
 while [ $# -gt 2 ]; do
 	case "$1" in

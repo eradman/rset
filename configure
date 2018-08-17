@@ -6,7 +6,7 @@ copy_mk() {
 }
 
 case `uname` in
-    OpenBSD) copy_mk bsd ;;
+    OpenBSD|FreeBSD) copy_mk bsd ;;
     *)       echo "Unsupported platform: `uname`"; exit 1 ;;
 esac
 

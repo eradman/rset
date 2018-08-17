@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
 		/* Convert http server command line into a vector */
 		str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
 		execvp(http_srv_argv[0], http_srv_argv);
+		fprintf(stderr, "Fatal: unable to start web server\n");
 		err(1, "%s", http_srv_argv[0]);
 	}
 
@@ -156,7 +157,7 @@ int main(int argc, char *argv[])
 	yylex();
 	fclose(yyin);
 
-	if ((regcomp(&reg, host_pattern, REG_EXTENDED)) != 0) {
+	if ((rv = regcomp(&reg, host_pattern, REG_EXTENDED)) != 0) {
 		regerror(rv, &reg, buf, sizeof(buf));
 		errx(1, "bad expression: %s", buf);
 	}

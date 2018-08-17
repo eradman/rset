@@ -1,10 +1,11 @@
 = Next Release: 0.3
 
  - A label may contain any character except for single or double quotes
- - Set ssh UserKnownHostsFile to /dev/null
+ - Set SSH options UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no
  - Shut down SSH master connection if SIGINT or SIGTERM are caught
  - Add ('-f') option for specifying the route file to parse
  - Always change to the directory where the route file is located
+ - Builds on FreeBSD 11
 
 = Release History
 
@@ -20,6 +21,6 @@
 
  - Initial release at https://bitbucket.org/eradman/rset
  - Basic tutorials at https://scriptedconfiguration.org/
- - Builds on OpenBSD, issues commands over SSH socket
+ - Builds on OpenBSD 6.3, issues commands over SSH socket
  - Support for 'username', 'interpreter', 'execute_using'
  - tar sent of '_rutils' directory and installation over ephemeral HTTP server

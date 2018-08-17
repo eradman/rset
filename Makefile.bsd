@@ -40,9 +40,6 @@ uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man1/rinstall.1
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5
 
-config.h: config.def.h
-	cp config.def.h $@
-
 rset: ${SRCS}
 	${CC} ${CFLAGS} ${CPPFLAGS} $> -o $@ ${LDFLAGS}
 
