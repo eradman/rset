@@ -1,4 +1,6 @@
-= Next Release: 0.3
+= Release History
+
+== 0.3: August 17, 2018
 
  - A label may contain any character except for single or double quotes
  - Set SSH options UserKnownHostsFile=/dev/null,StrictHostKeyChecking=no
@@ -6,8 +8,6 @@
  - Add ('-f') option for specifying the route file to parse
  - Always change to the directory where the route file is located
  - Builds on FreeBSD 11
-
-= Release History
 
 == 0.2: August 11, 2018
 
