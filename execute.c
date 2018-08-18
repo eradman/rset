@@ -176,9 +176,12 @@ start_connection(char *host_name, int http_port) {
 	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
 	if (stat(socket_path, &sb) != -1) {
-		warnx("%s already exists", socket_path);
+		fprintf(stderr, "Error: socket for '%s' already exists, run\n"
+		    "  fstat %s\n"
+		    "and remove the file if no process is listed.\n",
+		    host_name, socket_path);
 		free(socket_path);
-		return NULL;
+		exit(1);
 	}
 
 	(void) append(argv, 0, "ssh", "-fnNT", "-R", port_forwarding, "-S",

@@ -1,3 +1,7 @@
+= Next Release: 0.4
+
+ - Provide instructions for handling a control socket that already exists
+
 = Release History
 
 == 0.3: August 17, 2018

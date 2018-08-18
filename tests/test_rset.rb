@@ -29,7 +29,7 @@ def eq(a, b)
 end
 
 $usage_text = \
-        "release: 0.3\n" +
+        "release: 0.4\n" +
         "usage: rset [-ln] [-f routes_file] host_pattern [label]\n"
 
 # Install or update utilities
