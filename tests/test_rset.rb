@@ -90,8 +90,6 @@ try "Recursively parse routes and hosts" do
     eq out, File.read('expected/recursive.out')
 end
 
-# Execution
-
 try "Format and run a command line" do
     cmd = "./args"
     out, err, status = Open3.capture3(cmd)
@@ -111,6 +109,19 @@ try "Show matching routes and hosts" do
     eq err, ""
     eq status.success?, true
     eq out, File.read('expected/dry_run.out')
+end
+
+# Error Handling
+
+try "Show matching routes and hosts" do
+    out, err, status = nil
+    Dir.chdir("input") do
+        cmd = "../../rset -ln 't[42'"
+        out, err, status = Open3.capture3(cmd)
+    end
+    eq err, "rset: bad expression: brackets ([ ]) not balanced\n"
+    eq status.success?, false
+    eq out, ""
 end
 
 puts "\e[32m---\e[0m"

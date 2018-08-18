@@ -11,6 +11,7 @@
 #define INSTALL_PORT 6000
 #define ROUTES_FILE "routes.pln"
 #define REPLICATED_DIRECTORY "_rutils"
+#define SSH_OPTIONS "-o", "UserKnownHostsFile=/dev/null", "-o", "StrictHostKeyChecking=no"
 
 /* option defaults */
 #define EXECUTE_WITH ""

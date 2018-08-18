@@ -181,9 +181,8 @@ start_connection(char *host_name, int http_port) {
 		return NULL;
 	}
 
-	append(argv, 0, "ssh", "-fnNT", "-R", port_forwarding, "-S", socket_path,
-		"-M", host_name, "-o", "UserKnownHostsFile=/dev/null",
-		"-o", "StrictHostKeyChecking=no", NULL);
+	(void) append(argv, 0, "ssh", "-fnNT", "-R", port_forwarding, "-S",
+		socket_path, "-M", SSH_OPTIONS, host_name, NULL);
 	run(argv);
 
 	snprintf(tmp_path, sizeof(tmp_path), "mkdir " REMOTE_TMP_PATH, http_port);
