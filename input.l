@@ -15,6 +15,7 @@
  */
 
 %option yylineno
+%option noyywrap
 
 %{
 #include <sys/stat.h>
@@ -30,6 +31,7 @@
 
 /* globals */
 
+Label **host_labels;
 Options current_options;
 int n_labels;
 Label *lp;
@@ -116,7 +118,7 @@ read_host_labels(Label *route_label) {
  * install_if_new - install a file and parent directory if it does not already exist
  */
 void
-install_if_new(const char *src, const char *dst) {
+install_if_new(const char *src, char *dst) {
 	int pid;
 	int status;
 	mode_t dir_mode;

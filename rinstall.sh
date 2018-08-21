@@ -27,8 +27,15 @@ name=$(basename $1)
 target=$2
 
 
-ftp -n $INSTALL_URL/$1 -o $name
-[ -e $target ] && diff -C2 -u $target $name || {
+case `uname` in
+	Darwin)
+		curl -s -o $name $INSTALL_URL/$1
+		;;
+	*)
+		ftp -n $INSTALL_URL/$1 -o $name
+		;;
+esac
+[ -e $target ] && diff -U 2 $target $name || {
 	mv $name $target
 	[ -n "$OWNER" ] && chown $OWNER $target
 	[ -n "$MODE" ] && chmod $MODE $target

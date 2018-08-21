@@ -1,6 +1,7 @@
 = Next Release: 0.4
 
  - Provide instructions for handling a control socket that already exists
+ - Builds on MacOS 10.13
 
 = Release History
 

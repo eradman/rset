@@ -4,20 +4,20 @@ OBJS = getsocket parser pipe copyfile args
 
 all: test_rinstall test_rset
 
-getsocket: getsocket.c ../execute.c
-	cc ${CFLAGS} $> ${LDFLAGS} -o getsocket
+getsocket: getsocket.c
+	cc ${CFLAGS} $< ../execute.c ${LDFLAGS} -o getsocket
 
-parser: parser.c ../input.c
-	cc ${CFLAGS} $> ${LDFLAGS} -ll -o parser
+parser: parser.c
+	cc ${CFLAGS} $< ../input.c ${LDFLAGS} -ll -o parser
 
-copyfile: copyfile.c ../input.c
-	cc ${CFLAGS} $> ${LDFLAGS} -ll -o copyfile
+copyfile: copyfile.c
+	cc ${CFLAGS} $< ../input.c ${LDFLAGS} -ll -o copyfile
 
-pipe: pipe.c ../execute.c
-	cc ${CFLAGS} $> ${LDFLAGS} -o pipe
+pipe: pipe.c
+	cc ${CFLAGS} $< ../execute.c ${LDFLAGS} -o pipe
 
-args: args.c ../execute.c
-	cc ${CFLAGS} $> ${LDFLAGS} -o args
+args: args.c
+	cc ${CFLAGS} $< ../execute.c ${LDFLAGS} -o args
 
 test_rinstall: ../rinstall getsocket
 	@ruby test_rinstall.rb

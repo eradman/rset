@@ -43,7 +43,7 @@ extern Label **host_labels;     /* child */
 
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
-void install_if_new(const char *src, const char *dst);
+void install_if_new(const char *src, char *dst);
 void str_to_array(char *argv[], char *input, int siz);
 
 static char* ltrim(char *s, int c);

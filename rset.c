@@ -25,6 +25,8 @@
 
 #include <sys/wait.h>
 
+#include "missing/compat.h"
+
 #include "config.h"
 #include "execute.h"
 
@@ -116,7 +118,7 @@ int main(int argc, char *argv[])
 	if (http_server_pid == 0) {
 		inputstring = malloc(PATH_MAX);
 		snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(routes_file), http_port);
-		/* elide copyright and other startup notices */
+		/* elide startup notices */
 		close(STDOUT_FILENO);
 		/* Convert http server command line into a vector */
 		str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
