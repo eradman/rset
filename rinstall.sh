@@ -26,7 +26,6 @@ done
 name=$(basename $1)
 target=$2
 
-
 case `uname` in
 	Darwin)
 		curl -s -o $name $INSTALL_URL/$1

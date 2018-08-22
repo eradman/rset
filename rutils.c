@@ -47,7 +47,7 @@ install_if_new(const char *src, char *dst) {
 		(void) mkdir(dirname(dst), dir_mode);
 	}
 	else {
-		if (src_sb.st_mtim.tv_sec > dst_sb.st_mtim.tv_sec)
+		if (src_sb.st_mtime > dst_sb.st_mtime)
 			printf("Updating '%s'\n", dst);
 		else
 			return;
