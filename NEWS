@@ -2,6 +2,9 @@
 
  - Provide instructions for handling a control socket that already exists
  - Builds on MacOS 10.13
+ - Print informational message when _rutils is created
+ - Update _rutils/rinstall if a newer version is available
+ - Quickly continue if ssh master connection fails
 
 = Release History
 

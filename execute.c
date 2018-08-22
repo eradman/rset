@@ -67,9 +67,7 @@ run(char *const argv[]) {
 	}
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "waitpid on %d", pid);
-	if (status != 0)
-		warn("%s returned exit code %d", argv[0], status);
-	return status;
+	return WEXITSTATUS(status);
 }
 
 /*
@@ -181,12 +179,15 @@ start_connection(char *host_name, int http_port) {
 		    "and remove the file if no process is listed.\n",
 		    host_name, socket_path);
 		free(socket_path);
-		exit(1);
+		return NULL;
 	}
 
 	(void) append(argv, 0, "ssh", "-fnNT", "-R", port_forwarding, "-S",
 		socket_path, "-M", SSH_OPTIONS, host_name, NULL);
-	run(argv);
+	if (run(argv) == 255) {
+		free(socket_path);
+		return NULL;
+	}
 
 	snprintf(tmp_path, sizeof(tmp_path), "mkdir " REMOTE_TMP_PATH, http_port);
 	append(argv, 0, "ssh", "-q", "-S", socket_path, host_name, tmp_path, NULL);

@@ -3,7 +3,7 @@ MANPREFIX ?= ${PREFIX}/man
 RELEASE = 0.4
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
 LDFLAGS = -ll
-OBJS = rset.o input.o execute.o
+OBJS = rutils.o input.o execute.o rset.o
 
 all: config.h versioncheck rset rinstall
 

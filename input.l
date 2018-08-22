@@ -18,11 +18,7 @@
 %option noyywrap
 
 %{
-#include <sys/stat.h>
-#include <sys/wait.h>
-
 #include <err.h>
-#include <libgen.h>
 
 #include "input.h"
 
@@ -115,34 +111,6 @@ read_host_labels(Label *route_label) {
 }
 
 /*
- * install_if_new - install a file and parent directory if it does not already exist
- */
-void
-install_if_new(const char *src, char *dst) {
-	int pid;
-	int status;
-	mode_t dir_mode;
-	struct stat src_sb;
-	struct stat dst_sb;
-
-	if (stat(src, &src_sb) == -1)
-		err(1, "%s", src);
-
-	if (stat(dst, &dst_sb) == -1) {
-		pid = fork();
-		if (pid == 0) {
-			dir_mode = 0750;
-			mkdir(dirname(dst), dir_mode);
-			if (execl("/usr/bin/install", "/usr/bin/install", "-p", src, dst, NULL) != -1)
-				err(1, "%s", dst);
-		}
-		waitpid(pid, &status, 0);
-		if (status != 0)
-			warnx("copy failed %s -> %s", src, dst);
-	}
-}
-
-/*
  * str_to_array - map space-separated tokens to an array
  */
 void
@@ -157,7 +125,7 @@ str_to_array(char *argv[], char *inputstring, int siz) {
 	*ap = NULL;
 }
 
- /* internal utility functions */
+/* internal utility functions */
 
 static char*
 ltrim(char *s, int c) {

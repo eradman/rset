@@ -14,6 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/wait.h>
+
 #include <err.h>
 #include <libgen.h>
 #include <regex.h>
@@ -23,18 +25,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <sys/wait.h>
-
 #include "missing/compat.h"
 
 #include "config.h"
+#include "rutils.h"
 #include "execute.h"
 
 /* forwards */
 
 static void usage();
-static void hl_line(const char *s, int t);
-static void hl_range(const char *s, unsigned so, unsigned eo);
 static void handle_exit(int sig);
 
 /* globals used by input.l */
@@ -175,9 +174,9 @@ int main(int argc, char *argv[])
 				continue;
 
 			if (dryrun_opt)
-				hl_range(host_name, regmatch.rm_so, regmatch.rm_eo);
+				hl_range(host_name, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
 			else {
-				hl_line(host_name, 1);
+				hl_range(host_name, HL_HOST, 0, 0);
 				socket_path = start_connection(host_name, http_port);
 				if (socket_path == NULL)
 					continue;
@@ -188,7 +187,7 @@ int main(int argc, char *argv[])
 						continue;
 				labels_matched++;
 				if (list_opt)
-					hl_line(host_labels[j]->name, 2);
+					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
 				if (dryrun_opt)
 					continue;
 				else
@@ -228,30 +227,4 @@ usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr, "usage: rset [-ln] [-f routes_file] host_pattern [label]\n");
 	exit(1);
-}
-
-static void
-hl_line(const char *s, int t) {
-	switch (t) {
-		case 1:
-			printf(ANSI_YELLOW "%s" ANSI_RESET "\n", s);
-			break;
-		case 2:
-			printf(ANSI_CYAN "%s" ANSI_RESET "\n", s);
-			break;
-		default:
-			printf("%s\n", s);
-	}
-}
-
-static void
-hl_range(const char *s, unsigned so, unsigned eo) {
-	char *start, *match;
-
-	start = strndup(s, so);
-	match = strndup(s+so, eo-so);
-
-	printf(ANSI_YELLOW "%s" ANSI_REVERSE "%s" ANSI_RESET ANSI_YELLOW "%s"
-	    ANSI_RESET "\n", start, match, s+eo);
-	free(start); free(match);
 }

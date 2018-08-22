@@ -1,1 +1,6 @@
+config.h
 input.c
+Makefile
+
+syntax: glob
+*.o

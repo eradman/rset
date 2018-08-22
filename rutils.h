@@ -14,36 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <limits.h>
-
-/* data */
-
-typedef struct {
-	char username[32];
-	char execute_with[64];
-	char interpreter[64];
-	char install_url[1024];
-} Options;
-
-typedef struct Label Label;
-
-typedef struct Label {
-	char name[PATH_MAX];
-	char* content;
-	int content_size;
-	int content_allocation;
-	Options options;
-	struct Label **labels;
-} Label;
-
-extern Label **route_labels;    /* parent */
-extern Label **host_labels;     /* child */
-
 /* forwards */
 
-void read_host_labels(Label *route_label);
-Label** alloc_labels();
-void str_to_array(char *argv[], char *input, int siz);
+void hl_range(const char *s, int t, unsigned so, unsigned eo);
+void install_if_new(const char *src, char *dst);
 
-static char* ltrim(char *s, int c);
-static void read_option(char *text, Options *op);
+#define HL_INIT  1
+#define HL_HOST  2
+#define HL_LABEL 3
