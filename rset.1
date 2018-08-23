@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 11, 2018
+.Dd August 22, 2018
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -55,6 +55,10 @@ hostnames or IP addresses which are matched against
 The default is
 .Pa routes.pln .
 .El
+.Sh ENVIRONMENT
+Execution on the remote host sets the following environment variables:
+.Ev LABEL ,
+.Ev INSTALL_URL .
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from
 .Pa routes.pln ,
@@ -73,10 +77,6 @@ This is used to set the current working directory in the environment of the
 remote host, hence the capabilities of
 .Nm
 may easily be extend by accessing utilities at this location.
-.Sh ENVIRONMENT
-Execution on the remote host sets the following environment variables:
-.Ev LABEL ,
-.Ev INSTALL_URL .
 .Sh OPTIONS
 .Pa Most options are not set in the command line, but are modified using key
 value-pairs.

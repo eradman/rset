@@ -1,12 +1,12 @@
-= Next Release: 0.4
+= Release History
+
+== 0.4: August 22, 2018
 
  - Provide instructions for handling a control socket that already exists
  - Builds on MacOS 10.13
  - Print informational message when _rutils is created
  - Update _rutils/rinstall if a newer version is available
  - Quickly continue if ssh master connection fails
-
-= Release History
 
 == 0.3: August 17, 2018
 
