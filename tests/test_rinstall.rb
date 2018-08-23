@@ -22,6 +22,8 @@ $wwwserver = fork do
     ).start
 end
 at_exit { `rm -r #{$systmp}`; Process.kill(15, $wwwserver); }
+# wait for web server to initialize
+sleep 0.1
 
 def try(descr)
     start = Time.now
@@ -29,8 +31,7 @@ def try(descr)
     $test_description = descr
     yield
     delta = "%.3f" % (Time.now - start)
-    # highlight slow tests
-    delta = "\e[7m#{delta}\e[27m" if (Time.now - start) > 0.1
+    delta = "\e[37m#{delta}\e[39m"
     puts "#{delta}: #{descr}"
 end
 
@@ -47,7 +48,7 @@ def write_file(fn, contents)
 end
 
 $usage_text = \
-        "release: 0.4\n" +
+        "release: 0.5\n" +
         "usage: rinstall [-m mode] [-o owner]\n" +
         "                source target\n"
 
@@ -64,9 +65,9 @@ end
 
 try "install a file from a remote URL" do
     dst = $systmp + "/dst/test2.txt"
-    Dir.mkdir "#{$systmp}/dst/"
+    Dir.mkdir "#{$systmp}/dst"
     write_file("test.txt", "123")
-    cmd = "/usr/bin/env INSTALL_URL=#{$install_url} ../rinstall test.txt #{dst}"
+    cmd = "INSTALL_URL=#{$install_url} ../rinstall -m 644 test.txt #{dst}"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
     eq out, ""
@@ -77,16 +78,13 @@ end
 
 try "install a file from a remote URL to the staging area" do
     dst = $systmp + "/test3.txt"
-    write_file("test.txt", "678")
-    cmd = "/usr/bin/env INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall test.txt #{dst}"
-    Dir.chdir($systmp) do
-        out, err, status = Open3.capture3(cmd)
-        eq err, ""
-        eq out, ""
-        eq status.success?, true
-        eq "678", File.read(dst)
-        eq File.stat(dst).mode.to_s(8), '100644'
-    end
+    Dir.mkdir "#{$systmp}/src"
+    write_file("src/test.txt", "678")
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 664 src/test.txt #{dst}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, ""
+    eq out, ""
+    eq status.success?, true
+    eq File.stat(dst).mode.to_s(8), '100664'
+    eq "678", File.read(dst)
 end
-
-puts "\e[32m---\e[0m"

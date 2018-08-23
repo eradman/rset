@@ -20,6 +20,8 @@
 %{
 #include <err.h>
 
+#include "missing/compat.h"
+
 #include "input.h"
 
 #define LABELS_MAX 100

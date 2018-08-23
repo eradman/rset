@@ -1,0 +1,7 @@
+CPPFLAGS += -D_LINUX_PORT
+MANPREFIX ?= ${PREFIX}/share/man
+EXTRA_SRC = missing/setproctitle.c missing/strlcpy.c
+LDFLAGS = -lfl
+
+include Makefile.bsd
+

@@ -16,8 +16,9 @@
 
 /* forwards */
 
+char * xdirname(const char *path);
+void install_if_new(const char *src, const char *dst);
 void hl_range(const char *s, int t, unsigned so, unsigned eo);
-void install_if_new(const char *src, char *dst);
 
 #define HL_INIT  1
 #define HL_HOST  2

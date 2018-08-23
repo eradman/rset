@@ -17,8 +17,7 @@ def try(descr)
     $test_description = descr
     yield
     delta = "%.3f" % (Time.now - start)
-    # highlight slow tests
-    delta = "\e[7m#{delta}\e[27m" if (Time.now - start) > 0.1
+    delta = "\e[37m#{delta}\e[39m"
     puts "#{delta}: #{descr}"
 end
 
@@ -29,7 +28,7 @@ def eq(a, b)
 end
 
 $usage_text = \
-        "release: 0.4\n" +
+        "release: 0.5\n" +
         "usage: rset [-ln] [-f routes_file] host_pattern [label]\n"
 
 # Install or update utilities
@@ -131,9 +130,7 @@ try "Report a bad regex" do
         cmd = "../../rset -ln 't[42'"
         out, err, status = Open3.capture3(cmd)
     end
-    eq err, "rset: bad expression: brackets ([ ]) not balanced\n"
+    eq err[0..20], "rset: bad expression:"
     eq status.success?, false
     eq out, ""
 end
-
-puts "\e[32m---\e[0m"

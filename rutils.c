@@ -19,19 +19,33 @@
 
 #include <err.h>
 #include <libgen.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "missing/compat.h"
+
 #include "config.h"
 #include "rutils.h"
+
+/*
+ * Mimic dirname(3) on OpenBSD which does not modify it's input
+ */
+char *
+xdirname(const char *path) {
+	static char dname[PATH_MAX];
+
+	strlcpy(dname, path, sizeof(dname));
+	return dirname(dname);
+}
 
 /*
  * install_if_new - install a file and parent directory if it does not already exist
  */
 void
-install_if_new(const char *src, char *dst) {
+install_if_new(const char *src, const char *dst) {
 	int pid;
 	int status;
 	mode_t dir_mode;
@@ -42,9 +56,9 @@ install_if_new(const char *src, char *dst) {
 		err(1, "%s", src);
 
 	if (stat(dst, &dst_sb) == -1) {
-		printf("Initialized directory '%s'\n", dirname(dst));
+		printf("Initialized directory '%s'\n", xdirname(dst));
 		dir_mode = 0750;
-		(void) mkdir(dirname(dst), dir_mode);
+		(void) mkdir(xdirname(dst), dir_mode);
 	}
 	else {
 		if (src_sb.st_mtime > dst_sb.st_mtime)

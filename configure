@@ -5,8 +5,14 @@ copy_mk() {
     echo "$cmd"; $cmd
 }
 
+link_deps() {
+    cmd="ln -sf ../missing tests/missing"
+    echo "$cmd"; $cmd
+}
+
 case `uname` in
-    Darwin) copy_mk macos ;;
+    Darwin) copy_mk macos; link_deps ;;
+     Linux) copy_mk linux; link_deps ;;
          *) copy_mk bsd ;;
 esac
 

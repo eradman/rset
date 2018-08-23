@@ -29,6 +29,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "missing/compat.h"
+
 #include "config.h"
 #include "execute.h"
 
@@ -135,7 +137,7 @@ int
 ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port) {
 	int argc;
 	char cmd[PATH_MAX];
-	char *argv[ARG_MAX];
+	char *argv[32];
 	Options op;
 
 	/* construct command to execute on remote host  */
@@ -165,7 +167,7 @@ start_connection(char *host_name, int http_port) {
 	char tmp_path[64];
 	char port_forwarding[64];
 	char *socket_path;
-	char *argv[ARG_MAX];
+	char *argv[32];
 	struct stat sb;
 
 	socket_path = malloc(128);
@@ -206,7 +208,7 @@ start_connection(char *host_name, int http_port) {
 void
 end_connection(char *socket_path, char *host_name, int http_port) {
 	char tmp_path[64];
-	char *argv[ARG_MAX];
+	char *argv[32];
 
 	snprintf(tmp_path, sizeof(tmp_path), REMOTE_TMP_PATH, http_port);
 	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-r", tmp_path , NULL);

@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	(void) realpath(argv[0], rset_realpath);
 
 	/* all operations must be relative to the routes file */
-	if (realpath(dirname(routes_file), routes_realpath) == NULL)
+	if (realpath(xdirname(routes_file), routes_realpath) == NULL)
 		err(1, "realpath %s", routes_file);
 	if (chdir(routes_realpath) == -1)
 		err(1, "chdir %s", routes_realpath);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
 	if (!dryrun_opt) {
 		/* Auto-upgrade utilities and verify path */
-		snprintf(buf, sizeof(buf), "%s/rinstall", dirname(rset_realpath));
+		snprintf(buf, sizeof(buf), "%s/rinstall", xdirname(rset_realpath));
 		install_if_new(buf, REPLICATED_DIRECTORY "/rinstall");
 	}
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 	http_server_pid = fork();
 	if (http_server_pid == 0) {
 		inputstring = malloc(PATH_MAX);
-		snprintf(inputstring, PATH_MAX, WEB_SERVER, dirname(routes_file), http_port);
+		snprintf(inputstring, PATH_MAX, WEB_SERVER, xdirname(routes_file), http_port);
 		/* elide startup notices */
 		close(STDOUT_FILENO);
 		/* Convert http server command line into a vector */

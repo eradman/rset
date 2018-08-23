@@ -1,28 +1,18 @@
 CFLAGS = -I..
-LDFLAGS =
-OBJS = getsocket parser pipe copyfile args
+LDFLAGS ?= -ll
+OBJS = getsocket copyfile parser pipe args
+RSET_LIBS = ../rutils.o ../input.o ../execute.o
 
-all: test_rinstall test_rset
+all: rset.o test
 
-getsocket: getsocket.c ../execute.c
-	cc ${CFLAGS} $< ../execute.c ${LDFLAGS} -o $@
+rset.o: ${RSET_LIBS}
+	${LD} -r ${RSET_LIBS} -o $@
 
-parser: parser.c ../input.c
-	cc ${CFLAGS} $< ../input.c ${LDFLAGS} -ll -o $@
+.c: rset.o
+	${CC} ${CFLAGS} ${EXTRA_SRC} $< rset.o ${LDFLAGS} -o $@
 
-copyfile: copyfile.c ../rutils.c
-	cc ${CFLAGS} $< ../rutils.c ${LDFLAGS} -ll -o $@
-
-pipe: pipe.c ../execute.c
-	cc ${CFLAGS} $< ../execute.c ${LDFLAGS} -o $@
-
-args: args.c ../execute.c
-	cc ${CFLAGS} $< ../execute.c ${LDFLAGS} -o $@
-
-test_rinstall: ../rinstall getsocket
+test: ../rinstall ${OBJS}
 	@ruby test_rinstall.rb
-
-test_rset: ${OBJS}
 	@ruby test_rset.rb
 
 lint:
@@ -31,6 +21,6 @@ lint:
 	@mandoc -Tlint ../rset.1
 
 clean:
-	rm -f *.core ${OBJS}
+	rm -f *.core ${OBJS} *.o
 
-.PHONY: all clean test regen
+.PHONY: all clean test

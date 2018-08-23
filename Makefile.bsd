@@ -1,8 +1,8 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 0.4
+RELEASE = 0.5
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
-LDFLAGS = -ll
+LDFLAGS ?= -ll
 OBJS = rutils.o input.o execute.o rset.o
 
 all: config.h versioncheck rset rinstall
@@ -47,7 +47,7 @@ uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5
 
 test: rset rinstall
-	@make -C tests
+	make EXTRA_SRC="${EXTRA_SRC}" LDFLAGS="${LDFLAGS}" -C tests
 
 clean:
 	rm -f input.c *.o *.core rset rinstall

@@ -21,12 +21,15 @@ while [ $# -gt 2 ]; do
 	esac
 	shift
 done
-[ $# == 2 ] || usage
+[ $# -eq 2 ] || usage
 
 name=$(basename $1)
 target=$2
 
 case `uname` in
+	Linux)
+		wget -nv -O $name $INSTALL_URL/$1 > /dev/null
+		;;
 	Darwin)
 		curl -s -o $name $INSTALL_URL/$1
 		;;
@@ -34,6 +37,9 @@ case `uname` in
 		ftp -n $INSTALL_URL/$1 -o $name
 		;;
 esac
+[ $? -ne 0 ] && {
+	exit 1
+}
 [ -e $target ] && diff -U 2 $target $name || {
 	mv $name $target
 	[ -n "$OWNER" ] && chown $OWNER $target
