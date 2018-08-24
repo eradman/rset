@@ -28,17 +28,18 @@ target=$2
 
 case `uname` in
 	Linux)
-		wget -nv -O $name $INSTALL_URL/$1 > /dev/null
+		fetch_cmd="wget -q -O $name $INSTALL_URL/$1"
 		;;
 	Darwin)
-		curl -s -o $name $INSTALL_URL/$1
+		fetch_cmd="curl -s -o $name $INSTALL_URL/$1"
 		;;
 	*)
-		ftp -n $INSTALL_URL/$1 -o $name
+		fetch_cmd="ftp -n $INSTALL_URL/$1 -o $name"
 		;;
 esac
-[ $? -ne 0 ] && {
-	exit 1
+$fetch_cmd || {
+	>&2 echo "Error fetching $INSTALL_URL/$1"
+	exit 3
 }
 [ -e $target ] && diff -U 2 $target $name || {
 	mv $name $target

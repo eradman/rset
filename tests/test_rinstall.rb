@@ -63,7 +63,7 @@ end
 
 # Functional tests
 
-try "install a file from a remote URL" do
+try "Install a file from a remote URL" do
     dst = $systmp + "/dst/test2.txt"
     Dir.mkdir "#{$systmp}/dst"
     write_file("test.txt", "123")
@@ -76,7 +76,7 @@ try "install a file from a remote URL" do
     eq File.stat(dst).mode.to_s(8), '100644'
 end
 
-try "install a file from a remote URL to the staging area" do
+try "Install a file from a remote URL to the staging area" do
     dst = $systmp + "/test3.txt"
     Dir.mkdir "#{$systmp}/src"
     write_file("src/test.txt", "678")
@@ -87,4 +87,15 @@ try "install a file from a remote URL to the staging area" do
     eq status.success?, true
     eq File.stat(dst).mode.to_s(8), '100664'
     eq "678", File.read(dst)
+end
+
+try "Try to fetch a file that does not exist" do
+    dst = $systmp + "/dst/my.txt"
+    write_file("test.txt", "123")
+    cmd = "INSTALL_URL=#{$install_url} ../rinstall -m 644 bogus.txt #{dst}"
+    out, err, status = Open3.capture3(cmd)
+    eq status.exitstatus, 3
+    eq err.split(/\n/)[-1], "Error fetching #{$install_url}/bogus.txt"
+    eq out, ""
+    eq File.exists?(dst), false
 end

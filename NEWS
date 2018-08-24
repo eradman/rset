@@ -1,6 +1,7 @@
 = Next Release: 0.5
 
  - Builds on Ubuntu Linux
+ - rinstall reports an error and exit code 3 if file transfer fails
 
 = Release History
 
