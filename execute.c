@@ -30,10 +30,8 @@
 #include <unistd.h>
 
 #include "missing/compat.h"
-
 #include "config.h"
 #include "execute.h"
-
 
 /*
  * append - add a list of arguments to an array

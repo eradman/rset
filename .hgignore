@@ -1,6 +1,7 @@
 config.h
-input.c
 Makefile
+input.c
+compat.c
 
 syntax: glob
 *.o

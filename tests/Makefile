@@ -1,7 +1,7 @@
 CFLAGS = -I..
 LDFLAGS ?= -ll
 OBJS = getsocket copyfile parser pipe args
-RSET_LIBS = ../rutils.o ../input.o ../execute.o
+RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o
 
 all: rset.o test
 
@@ -9,7 +9,7 @@ rset.o: ${RSET_LIBS}
 	${LD} -r ${RSET_LIBS} -o $@
 
 .c: rset.o
-	${CC} ${CFLAGS} ${EXTRA_SRC} $< rset.o ${LDFLAGS} -o $@
+	${CC} ${CFLAGS} $< rset.o ${LDFLAGS} -o $@
 
 test: ../rinstall ${OBJS}
 	@ruby test_rinstall.rb
