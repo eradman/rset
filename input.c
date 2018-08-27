@@ -14,11 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-%option yylineno
-%option noyywrap
-
-%{
 #include <err.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "missing/compat.h"
 
@@ -29,49 +28,73 @@
 
 /* globals */
 
+FILE* yyin;
 Label **host_labels;
 Options current_options;
 int n_labels;
 Label *lp;
-int len;
-%}
 
-%%
-\n  /* ignore */
-^[_a-z]+=.*$ {
-	read_option(yytext, &current_options);
-}
-^[^\t].+:$ {
-	host_labels[n_labels] = malloc(sizeof(Label));
-	host_labels[n_labels]->content = malloc(BUFSIZE);
-	host_labels[n_labels]->content_allocation = BUFSIZE;
-	host_labels[n_labels]->content_size = 0;
-	host_labels[n_labels]->labels = 0;
-	memcpy(&host_labels[n_labels]->options, &current_options, sizeof(current_options));
-	len = strlcpy(host_labels[n_labels]->name, ltrim(yytext, '\n'), PATH_MAX);
-	host_labels[n_labels]->name[len-1] = '\0';
-	n_labels++;
-	if (n_labels == LABELS_MAX) {
-		fprintf(stderr, "Error: maximum number of labels (%d) exceeded\n", n_labels);
-		exit(1);
+void
+yylex() {
+	unsigned n = 0;
+	char *line = NULL;
+	size_t linesize = 0;
+	ssize_t linelen;
+
+	while ((linelen = getline(&line, &linesize, yyin)) != -1) {
+		n++;
+
+		/* empty lines and comments */
+		if (line[0] == '\n' || line[0] == '#');
+
+		/* tab-intended content */
+		else if (line[0] == '\t') {
+			lp = host_labels[n_labels-1];
+			while ((linelen + lp->content_size) >= lp->content_allocation) {
+				lp->content_allocation += BUFSIZE;
+				lp->content = realloc(lp->content, lp->content_allocation);
+			}
+			memcpy(lp->content+lp->content_size, line+1, linelen-1);
+			lp->content_size += linelen-1;
+		}
+
+		/* label */
+		else if (line[linelen-2] == ':') {
+			host_labels[n_labels] = malloc(sizeof(Label));
+			host_labels[n_labels]->content = malloc(BUFSIZE);
+			host_labels[n_labels]->content_allocation = BUFSIZE;
+			host_labels[n_labels]->content_size = 0;
+			host_labels[n_labels]->labels = 0;
+			memcpy(&host_labels[n_labels]->options, &current_options,
+			    sizeof(current_options));
+			strlcpy(host_labels[n_labels]->name, ltrim(line, '\n'), PATH_MAX);
+			host_labels[n_labels]->name[linelen-2] = '\0';
+			n_labels++;
+			if (n_labels == LABELS_MAX) {
+				fprintf(stderr, "Error: maximum number of labels (%d) "
+				    "exceeded\n", n_labels);
+				exit(1);
+			}
+		}
+		
+		/* option */
+		else if (strchr(line, '=')) {
+			line[linelen-1] = '\0';
+			read_option(line, &current_options);
+		}
+
+		/* uknown */
+		else {
+			line[linelen-1] = '\0';
+			fprintf(stderr, "rset: unknown symbol at line %d: '%s'\n", n, line);
+			exit(1);
+		}
 	}
+
+	free(line);
+	if (ferror(yyin))
+		err(1, "getline");
 }
-^\t.*\n {
-	len = strlen(yytext+1);
-	lp = host_labels[n_labels-1];
-	while ((len + lp->content_size) >= lp->content_allocation) {
-		lp->content_allocation += BUFSIZE;
-		lp->content = realloc(lp->content, lp->content_allocation);
-	}
-	memcpy(lp->content+lp->content_size, yytext+1, len);
-	lp->content_size += len;
-}
-^#.*$ /* comment */
-^.+$ {
-	fprintf(stderr, "unknown token at line %d: '%s'\n", yylineno, yytext);
-	exit(1);
-}
-%%
 
 /*
  * alloc_labels - allocate memory for Label struct
@@ -110,6 +133,7 @@ read_host_labels(Label *route_label) {
 		fclose(yyin);
 		line = next_line+1;
 	}
+	free(content);
 }
 
 /*

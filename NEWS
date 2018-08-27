@@ -2,6 +2,8 @@
 
  - Builds on Ubuntu Linux
  - rinstall reports an error and exit code 3 if file transfer fails
+ - Parse pln(5) files without flex(1)
+ - Raise error on Mac if rinstall(1) does not receive an HTTP 200 for a fetch
 
 = Release History
 

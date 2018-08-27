@@ -41,6 +41,7 @@ extern Label **host_labels;     /* child */
 
 /* forwards */
 
+void yylex();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
 void str_to_array(char *argv[], char *input, int siz);

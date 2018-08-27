@@ -2,10 +2,10 @@ PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
 RELEASE = 0.5
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
-LDFLAGS ?= -ll
+LDFLAGS ?=
 OBJS = rutils.o input.o execute.o rset.o compat.o
 
-all: config.h versioncheck rset rinstall
+all: versioncheck rset rinstall
 
 env:
 	@echo "CC         = ${CC}"
@@ -16,16 +16,13 @@ env:
 	@echo "PREFIX     = ${PREFIX}"
 	@echo "SRC        = ${SRC}"
 
-config.h: config.def.h
-	cp config.def.h $@
-
 .l.c:
 	${LEX} -o $@ $<
 
 compat.c:
-	cat ${EXTRA_SRC} > compat.c
+	cat /dev/null ${EXTRA_SRC} > compat.c
 
-.c.o: input.c compat.c
+.c.o: compat.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -c $<
 
 rset: ${OBJS}
@@ -50,14 +47,14 @@ uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5
 
 test: rset rinstall
-	make LDFLAGS="${LDFLAGS}" -C tests
+	make -C tests
 
 clean:
-	rm -f input.c compat.c *.o *.core rset rinstall
+	rm -f compat.c *.o *.core rset rinstall
 	make -C tests clean
 
 distclean:
-	rm -f config.h Makefile
+	rm -f Makefile
 
 versioncheck:
 	@head -n3 NEWS | egrep -q "^= Next Release: ${RELEASE}|^== ${RELEASE}: "

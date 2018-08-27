@@ -9,7 +9,6 @@
 /* globals */
 
 FILE* yyin;
-int yylex();
 int n_labels;
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */

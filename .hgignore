@@ -1,6 +1,5 @@
 config.h
 Makefile
-input.c
 compat.c
 
 syntax: glob

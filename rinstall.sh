@@ -31,7 +31,7 @@ case `uname` in
 		fetch_cmd="wget -q -O $name $INSTALL_URL/$1"
 		;;
 	Darwin)
-		fetch_cmd="curl -s -o $name $INSTALL_URL/$1"
+		fetch_cmd="curl -f -s -o $name $INSTALL_URL/$1"
 		;;
 	*)
 		fetch_cmd="ftp -n $INSTALL_URL/$1 -o $name"

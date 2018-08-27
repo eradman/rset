@@ -38,7 +38,6 @@ static void handle_exit(int sig);
 /* globals used by input.l */
 
 FILE* yyin;
-int yylex();
 int n_labels;
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
