@@ -12,4 +12,5 @@ common packages:
 	# comment
 	EOF
 
+
 # vim:noexpandtab:syntax=sh:ts=4

@@ -6,6 +6,10 @@
 
 #include "input.h"
 
+/* forwards */
+
+static char * format_options(Options *op);
+
 /* globals */
 
 FILE* yyin;
@@ -59,6 +63,8 @@ int main(int argc, char *argv[])
 		for (j=0; host_labels[j]; j++) {
 			printf("%s, content_size: %d\n",
 			    host_labels[j]->name, host_labels[j]->content_size);
+			printf("%s, options: %s\n",
+			    host_labels[j]->name, format_options(&host_labels[j]->options));
 		}
 		break;
 	defualt:
@@ -66,4 +72,22 @@ int main(int argc, char *argv[])
 	}
 
 	return 0;
+}
+
+static char *
+format_options(Options *op) {
+	static char buf[256];
+	int pos = 0;
+
+	if (*op->username)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "username=%s,", op->username);
+	if (*op->interpreter)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "interpreter=%s,", op->interpreter);
+	if (*op->execute_with)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "execute_with=%s,", op->execute_with);
+	if (*op->install_url)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "install_url=%s,", op->install_url);
+	buf[pos-1] = '\0';
+
+	return buf;
 }

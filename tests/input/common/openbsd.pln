@@ -1,0 +1,6 @@
+chroot:
+	[ -f /var/www/etc/resolv.conf ] || {
+	    install -d -o www -g www /var/www/etc/
+	    install -m 644 -o www -g www /etc/resolv.conf /var/www/etc/
+	}
+

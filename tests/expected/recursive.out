@@ -1,2 +1,5 @@
 [0] t420s
+chroot, content_size: 146
+chroot, options: execute_with=doas
 common packages, content_size: 178
+common packages, options: username=eradman,interpreter=/bin/ksh -x,execute_with=doas

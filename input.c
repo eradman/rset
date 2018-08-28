@@ -67,7 +67,7 @@ yylex() {
 			host_labels[n_labels]->labels = 0;
 			memcpy(&host_labels[n_labels]->options, &current_options,
 			    sizeof(current_options));
-			strlcpy(host_labels[n_labels]->name, ltrim(line, '\n'), PATH_MAX);
+			strlcpy(host_labels[n_labels]->name, line, PATH_MAX);
 			host_labels[n_labels]->name[linelen-2] = '\0';
 			n_labels++;
 			if (n_labels == LABELS_MAX) {
@@ -126,6 +126,9 @@ read_host_labels(Label *route_label) {
 		next_line = strchr(line, '\n');
 		*next_line = '\0';
 
+		/* inherit option state from the routes file */
+		memcpy(&current_options, &route_label->options,
+		    sizeof(current_options));
 		yyin = fopen(line, "r");
 		if (!yyin)
 			err(1, "%s", line);
@@ -151,17 +154,9 @@ str_to_array(char *argv[], char *inputstring, int siz) {
 	*ap = NULL;
 }
 
-/* internal utility functions */
-
-static char*
-ltrim(char *s, int c) {
-	int offset=0;
-
-	while (s[offset] == c && s[offset] != '\0')
-		offset++;
-	return s + offset;
-}
-
+/*
+ * read_option - set one of the available options
+ */
 static void
 read_option(char *text, Options *op) {
 	char *k, *v;
