@@ -1,6 +1,6 @@
 = Next Release: 0.6
 
- - Verbose option ('-v') displays options set for each label
+ - Specify ('-ll') more than once to display options for each label
  - Drop 'username' option, use ssh_config(5) instead
 
 = Release History

@@ -21,7 +21,7 @@
 .Nd configure systems using labeled scripts
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl lnv
+.Op Fl lln
 .Op Fl f Ar route_file
 .Ar host_regex
 .Op Ar label
@@ -41,13 +41,12 @@ The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl l
 List the name of each label before execution.
+Specify more than once to list options associated with each label.
 .It Fl n
 Do not execute commands.
 Instead hostnames are highlighted to show what characters the
 .Ar host_regex
 matched.
-.It Fl v
-Display options set for each label.
 .It Fl f
 Specify a
 .Ar route_file .

@@ -45,7 +45,6 @@ Options current_options;
 
 int list_opt;
 int dryrun_opt;
-int verbose_opt;
 
 /* globals used by signal handlers */
 char *socket_path;
@@ -77,13 +76,10 @@ int main(int argc, char *argv[])
 	while ((ch = getopt(argc, argv, "lnvf:")) != -1)
 		switch (ch) {
 		case 'l':
-			list_opt = 1;
+			list_opt += 1;
 			break;
 		case 'n':
 			dryrun_opt = 1;
-			break;
-		case 'v':
-			verbose_opt = 1;
 			break;
 		case 'f':
 			routes_file = argv[optind-1];
@@ -191,14 +187,13 @@ int main(int argc, char *argv[])
 					if (strcmp(selected_label, host_labels[j]->name) != 0)
 						continue;
 				labels_matched++;
-				if (list_opt) {
-					if (verbose_opt) {
-						snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
-						hl_range(buf, HL_LABEL, 0, 0);
-						printf("  %s", format_options(&host_labels[j]->options));
-					}
-					else
-						hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+				if (list_opt > 1) {
+					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
+					hl_range(buf, HL_LABEL, 0, 0);
+					printf("  %s\n", format_options(&host_labels[j]->options));
+				}
+				else if (list_opt) {
+					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
 					printf("\n");
 				}
 				if (dryrun_opt)
@@ -238,6 +233,6 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-lnv] [-f routes_file] host_pattern [label]\n");
+	fprintf(stderr, "usage: rset [-lln] [-f routes_file] host_pattern [label]\n");
 	exit(1);
 }
