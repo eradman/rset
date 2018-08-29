@@ -1,6 +1,5 @@
 # a comment
 
-username=eradman
 interpreter=/bin/ksh -x
 
 common packages:

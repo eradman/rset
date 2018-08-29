@@ -28,8 +28,8 @@ def eq(a, b)
 end
 
 $usage_text = \
-        "release: 0.5\n" +
-        "usage: rset [-ln] [-f routes_file] host_pattern [label]\n"
+        "release: 0.6\n" +
+        "usage: rset [-lnv] [-f routes_file] host_pattern [label]\n"
 
 # Install or update utilities
 
@@ -38,7 +38,7 @@ try "Install a missing file" do
     cmd = "./copyfile input/whereami.sh #{dst}"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
-    eq out, "Initialized directory '#{$systmp}/_rutils'\n"
+    eq out, "rset: initialized directory '#{$systmp}/_rutils'\n"
     eq status.success?, true
     eq File.stat(dst).mode.to_s(8), '100755'
     eq File.stat(File.dirname(dst)).mode.to_s(8), '40750'
@@ -50,7 +50,7 @@ try "Update an existing file" do
     FileUtils.touch dst, :mtime => 0
     out, err, status = Open3.capture3(cmd)
     eq err, ""
-    eq out, "Updating '#{dst}'\n"
+    eq out, "rset: updating '#{dst}'\n"
     eq status.success?, true
     eq File.stat(dst).mode.to_s(8), '100755'
     eq File.stat(File.dirname(dst)).mode.to_s(8), '40750'
@@ -114,7 +114,7 @@ end
 try "Show matching routes and hosts" do
     out, err, status = nil
     Dir.chdir("input") do
-        cmd = "../../rset -ln t420"
+        cmd = "../../rset -lnv t420"
         out, err, status = Open3.capture3(cmd)
     end
     eq err, ""

@@ -18,8 +18,10 @@
 
 /* data */
 
+#ifndef _RSET_INPUT_H_
+#define _RSET_INPUT_H_
+
 typedef struct {
-	char username[32];
 	char execute_with[64];
 	char interpreter[64];
 	char install_url[1024];
@@ -48,3 +50,5 @@ void str_to_array(char *argv[], char *input, int siz);
 
 static char* ltrim(char *s, int c);
 static void read_option(char *text, Options *op);
+
+#endif /* _RSET_INPUT_H_ */

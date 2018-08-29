@@ -21,7 +21,7 @@
 .Nd configure systems using labeled scripts
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl ln
+.Op Fl lnv
 .Op Fl f Ar route_file
 .Ar host_regex
 .Op Ar label
@@ -46,6 +46,8 @@ Do not execute commands.
 Instead hostnames are highlighted to show what characters the
 .Ar host_regex
 matched.
+.It Fl v
+Display options set for each label.
 .It Fl f
 Specify a
 .Ar route_file .
@@ -80,9 +82,6 @@ may easily be extend by accessing utilities at this location.
 .Sh OPTIONS
 .Pa Most options are not set in the command line, but are modified using key
 value-pairs.
-.Ss \&username=
-The username to connect as.
-This parameter has no default.
 .Ss \&interpreter=
 The interpreter to run a script fragment with.
 Defaults to

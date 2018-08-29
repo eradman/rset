@@ -14,12 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "input.h"
+
 /* forwards */
 
-char * xdirname(const char *path);
+char *xdirname(const char *path);
 void install_if_new(const char *src, const char *dst);
-void hl_range(const char *s, int t, unsigned so, unsigned eo);
-
-#define HL_INIT  1
-#define HL_HOST  2
-#define HL_LABEL 3
+void hl_range(const char *s, const char *color, unsigned so, unsigned eo);
+char *format_options(Options *op);

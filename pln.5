@@ -29,14 +29,14 @@ supports options defined by
 .Em key=value
 pairs and text fragments designated by tab indentation
 .Bd -literal -offset indent
-interpreter=/bin/ksh -x
+interpreter=/bin/sh -x
 
 packages:
 	pkg_add -I nginx ruby
 	ln -sf /usr/local/bin/ruby25 /usr/local/bin/ruby
 	ln -sf /usr/local/bin/irb25 /usr/local/bin/irb
 
-username=www
+interpreter=
 
 /var/www/htdocs/pub:
 	mkdir -p $LABEL

@@ -1,3 +1,8 @@
+= Next Release: 0.6
+
+ - Verbose option ('-v') displays options set for each label
+ - Drop 'username' option, use ssh_config(5) instead
+
 = Release History
 
 == 0.5: August 27, 2018

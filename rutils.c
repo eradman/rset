@@ -55,13 +55,13 @@ install_if_new(const char *src, const char *dst) {
 		err(1, "%s", src);
 
 	if (stat(dst, &dst_sb) == -1) {
-		printf("Initialized directory '%s'\n", xdirname(dst));
+		printf("rset: initialized directory '%s'\n", xdirname(dst));
 		dir_mode = 0750;
 		(void) mkdir(xdirname(dst), dir_mode);
 	}
 	else {
 		if (src_sb.st_mtime > dst_sb.st_mtime)
-			printf("Updating '%s'\n", dst);
+			printf("rset: updating '%s'\n", dst);
 		else
 			return;
 	}
@@ -80,28 +80,36 @@ install_if_new(const char *src, const char *dst) {
  * hl_range - colorize a line, reversing parts that match a range
  */
 void
-hl_range(const char *s, int t, unsigned so, unsigned eo) {
+hl_range(const char *s, const char *color, unsigned so, unsigned eo) {
 	char *start, *match;
-	char *color;
-
-	switch (t) {
-		case HL_HOST:
-			color = ANSI_YELLOW;
-			break;
-		case HL_LABEL:
-			color = ANSI_CYAN;
-			break;
-		default:
-			color = "";
-	}
 
 	if (so == 0 && eo == 0)
-		printf("%s%s" ANSI_RESET "\n", color, s);
+		printf("%s%s" HL_RESET, color, s);
 	else {
 		start = strndup(s, so);
 		match = strndup(s+so, eo-so);
-		printf("%s%s" ANSI_REVERSE "%s" ANSI_RESET "%s%s"
-		    ANSI_RESET "\n", color, start, match, color, s+eo);
+		printf("%s%s" HL_REVERSE "%s" HL_RESET "%s%s"
+		    HL_RESET, color, start, match, color, s+eo);
 		free(start); free(match);
 	}
+}
+
+/*
+ * format_options - provide a concise representation of options
+ */
+
+char *
+format_options(Options *op) {
+	static char buf[2048];
+	int pos = 0;
+
+	if (*op->interpreter)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "interpreter=%s,", op->interpreter);
+	if (*op->execute_with)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "execute_with=%s,", op->execute_with);
+	if (*op->install_url)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "install_url=%s,", op->install_url);
+	buf[pos-1] = '\0';
+
+	return buf;
 }

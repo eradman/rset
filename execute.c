@@ -152,9 +152,6 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 	argc = 0;
 	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
 
-	if (strlen(host_label->options.username) > 0)
-		argc = append(argv, argc, "-l", host_label->options.username, NULL);
-
 	(void)append(argv, argc, host_name, cmd, NULL);
 	return pipe_cmd(argv, host_label->content, host_label->content_size);
 }

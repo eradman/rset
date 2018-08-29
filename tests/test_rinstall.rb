@@ -48,7 +48,7 @@ def write_file(fn, contents)
 end
 
 $usage_text = \
-        "release: 0.5\n" +
+        "release: 0.6\n" +
         "usage: rinstall [-m mode] [-o owner]\n" +
         "                source target\n"
 

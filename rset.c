@@ -45,6 +45,7 @@ Options current_options;
 
 int list_opt;
 int dryrun_opt;
+int verbose_opt;
 
 /* globals used by signal handlers */
 char *socket_path;
@@ -73,16 +74,19 @@ int main(int argc, char *argv[])
 	Options toplevel_options;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "lnf:")) != -1)
+	while ((ch = getopt(argc, argv, "lnvf:")) != -1)
 		switch (ch) {
-		case 'f':
-			routes_file = argv[optind-1];
-			break;
 		case 'l':
 			list_opt = 1;
 			break;
 		case 'n':
 			dryrun_opt = 1;
+			break;
+		case 'v':
+			verbose_opt = 1;
+			break;
+		case 'f':
+			routes_file = argv[optind-1];
 			break;
 		default:
 			usage();
@@ -171,10 +175,13 @@ int main(int argc, char *argv[])
 			if (!host_labels[0])
 				continue;
 
-			if (dryrun_opt)
+			if (dryrun_opt) {
 				hl_range(host_name, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+				printf("\n");
+			}
 			else {
 				hl_range(host_name, HL_HOST, 0, 0);
+				printf("\n");
 				socket_path = start_connection(host_name, http_port);
 				if (socket_path == NULL)
 					continue;
@@ -184,8 +191,16 @@ int main(int argc, char *argv[])
 					if (strcmp(selected_label, host_labels[j]->name) != 0)
 						continue;
 				labels_matched++;
-				if (list_opt)
-					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+				if (list_opt) {
+					if (verbose_opt) {
+						snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
+						hl_range(buf, HL_LABEL, 0, 0);
+						printf("  %s", format_options(&host_labels[j]->options));
+					}
+					else
+						hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+					printf("\n");
+				}
 				if (dryrun_opt)
 					continue;
 				else
@@ -223,6 +238,6 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-ln] [-f routes_file] host_pattern [label]\n");
+	fprintf(stderr, "usage: rset [-lnv] [-f routes_file] host_pattern [label]\n");
 	exit(1);
 }

@@ -165,9 +165,7 @@ read_option(char *text, Options *op) {
 	strsep(&text, "=");
 	v = text;
 
-	if (strcmp(k, "username") == 0)
-		strlcpy(op->username, v, sizeof(op->username));
-	else if (strcmp(k, "execute_with") == 0)
+	if (strcmp(k, "execute_with") == 0)
 		strlcpy(op->execute_with, v, sizeof(op->execute_with));
 	else if (strcmp(k, "interpreter") == 0)
 		strlcpy(op->interpreter, v, sizeof(op->interpreter));
