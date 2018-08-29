@@ -157,7 +157,8 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 }
 
 char *
-start_connection(char *host_name, int http_port) {
+start_connection(char *host_name, int http_port, const char *ssh_config) {
+	int argc;
 	char cmd[PATH_MAX];
 	char tmp_path[64];
 	char port_forwarding[64];
@@ -179,15 +180,20 @@ start_connection(char *host_name, int http_port) {
 		return NULL;
 	}
 
-	(void) append(argv, 0, "ssh", "-fnNT", "-R", port_forwarding, "-S",
-		socket_path, "-M", SSH_OPTIONS, host_name, NULL);
+	argc = 0;
+	argc = append(argv, argc, "ssh", "-fN", "-R", port_forwarding, "-S",
+		socket_path, "-M", NULL);
+	if (ssh_config)
+		(void) append(argv, argc, "-F", ssh_config, host_name, NULL);
+	else
+		(void) append(argv, argc, host_name, NULL);
 	if (run(argv) == 255) {
 		free(socket_path);
 		return NULL;
 	}
 
 	snprintf(tmp_path, sizeof(tmp_path), "mkdir " REMOTE_TMP_PATH, http_port);
-	append(argv, 0, "ssh", "-q", "-S", socket_path, host_name, tmp_path, NULL);
+	append(argv, 0, "ssh", "-S", socket_path, host_name, tmp_path, NULL);
 	if (run(argv) != 0)
 		err(1, "mkdir failed");
 

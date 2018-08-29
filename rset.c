@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 
 #include <err.h>
+#include <fcntl.h>
 #include <libgen.h>
 #include <regex.h>
 #include <signal.h>
@@ -57,14 +58,13 @@ int main(int argc, char *argv[])
 	int ch;
 	int i, j;
 	int rv;
-	int labels_matched = 0;
+	int fd;
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	int status;
 	char *selected_label;
 	char *host_pattern;
 	char *http_srv_argv[9], *inputstring;
-	char *routes_file = ROUTES_FILE;
 	char routes_realpath[PATH_MAX], rset_realpath[PATH_MAX];
 	regmatch_t regmatch;
 	regex_t reg;
@@ -72,14 +72,21 @@ int main(int argc, char *argv[])
 	struct sigaction act;
 	Options toplevel_options;
 
+	int labels_matched = 0;
+	char *routes_file = ROUTES_FILE;
+	char *ssh_config = NULL;
+
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "lnvf:")) != -1)
+	while ((ch = getopt(argc, argv, "lnvF:f:")) != -1)
 		switch (ch) {
 		case 'l':
 			list_opt += 1;
 			break;
 		case 'n':
 			dryrun_opt = 1;
+			break;
+		case 'F':
+			ssh_config = argv[optind-1];
 			break;
 		case 'f':
 			routes_file = argv[optind-1];
@@ -100,6 +107,11 @@ int main(int argc, char *argv[])
 	if (chdir(routes_realpath) == -1)
 		err(1, "chdir %s", routes_realpath);
 	routes_file = basename(routes_file);
+
+	/* try opening the routes file */
+	if ((fd = open(routes_file, O_RDONLY)) == -1)
+		err(1, "unable to open %s", routes_file);
+	(void) close(fd);
 
 	if (!dryrun_opt) {
 		/* Auto-upgrade utilities and verify path */
@@ -178,7 +190,7 @@ int main(int argc, char *argv[])
 			else {
 				hl_range(host_name, HL_HOST, 0, 0);
 				printf("\n");
-				socket_path = start_connection(host_name, http_port);
+				socket_path = start_connection(host_name, http_port, ssh_config);
 				if (socket_path == NULL)
 					continue;
 			}
@@ -233,6 +245,7 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-lln] [-f routes_file] host_pattern [label]\n");
+	fprintf(stderr, "usage: rset [-lln] [-F ssh_config] [-f routes_file] "
+	    "host_pattern [label]\n");
 	exit(1);
 }
