@@ -169,8 +169,6 @@ read_option(char *text, Options *op) {
 		strlcpy(op->execute_with, v, sizeof(op->execute_with));
 	else if (strcmp(k, "interpreter") == 0)
 		strlcpy(op->interpreter, v, sizeof(op->interpreter));
-	else if (strcmp(k, "install_url") == 0)
-		strlcpy(op->install_url, v, sizeof(op->install_url));
 	else {
 		fprintf(stderr, "rset: unknown option '%s=%s'\n", k, v);
 		exit(1);

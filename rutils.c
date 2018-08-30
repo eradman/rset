@@ -107,8 +107,6 @@ format_options(Options *op) {
 		pos += snprintf(buf+pos, sizeof(buf)-pos, "interpreter=%s,", op->interpreter);
 	if (*op->execute_with)
 		pos += snprintf(buf+pos, sizeof(buf)-pos, "execute_with=%s,", op->execute_with);
-	if (*op->install_url)
-		pos += snprintf(buf+pos, sizeof(buf)-pos, "install_url=%s,", op->install_url);
 	buf[pos-1] = '\0';
 
 	return buf;

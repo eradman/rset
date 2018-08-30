@@ -24,7 +24,6 @@
 typedef struct {
 	char execute_with[64];
 	char interpreter[64];
-	char install_url[1024];
 } Options;
 
 typedef struct Label Label;

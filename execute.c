@@ -140,12 +140,12 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 
 	/* construct command to execute on remote host  */
 
-	apply_default(op.install_url, host_label->options.install_url, INSTALL_URL);
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' INSTALL_URL='%s' exec %s\"",
-	    op.execute_with, http_port, host_label->name, op.install_url, op.interpreter);
+	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' INSTALL_URL='"
+	    INSTALL_URL "' exec %s\"",
+	    op.execute_with, http_port, host_label->name, op.interpreter);
 
 	/* construct ssh command */
 

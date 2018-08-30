@@ -1,8 +1,9 @@
 = Next Release: 0.6
 
  - Specify ('-ll') more than once to display options for each label
- - Drop 'username' option; use ssh_config(5) instead
  - New '-F' option for specifying an ssh_config file
+ - Drop 'username' option; use ssh_config(5) instead
+ - Drop 'install_url' option; override INSTALL_URL within scripts instead
 
 = Release History
 

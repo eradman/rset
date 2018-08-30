@@ -1,13 +1,8 @@
-# routes are hostnames and a list of rules
 
 execute_with=doas
 
 t420s:
 	common/openbsd.pln
 	t420s.pln
-
-# options
-
-install_url=http://172.16.1.1/
 
 # vim:noexpandtab:syntax=sh:ts=4
