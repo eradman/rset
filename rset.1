@@ -24,8 +24,8 @@
 .Op Fl lln
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar route_file
-.Ar host_regex
-.Op Ar label
+.Ar host_pattern
+.Op Ar label_pattern
 .Sh DESCRIPTION
 .Nm
 evaluates script fragments written in Progressive Label Notation
@@ -34,9 +34,9 @@ executing each one in tern using ssh connection multiplexing.
 .Nm
 requires one parameter specifying the regular expression matching hosts
 to configure.
-A
-.Ar label
-name may be specified in order to run scripts with a specific label name.
+A second regex may be specified
+to limit execution to  labels matching a specific pattern.
+By default all labels are evaluated.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
@@ -46,7 +46,7 @@ Specify more than once to list options associated with each label.
 .It Fl n
 Do not execute commands.
 Instead hostnames are highlighted to show what characters the
-.Ar host_regex
+.Ar host_pattern
 matched.
 .It Fl F
 Specify a
@@ -59,7 +59,7 @@ Specify a
 .Ar route_file .
 This file is composed of labels which correspond to
 hostnames or IP addresses which are matched against
-.Ar host_regex .
+.Ar host_pattern .
 The default is
 .Pa routes.pln .
 .El

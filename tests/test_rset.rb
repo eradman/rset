@@ -29,7 +29,7 @@ end
 
 $usage_text = \
         "release: 0.6\n" +
-        "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label]\n"
+        "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
 
 # Install or update utilities
 

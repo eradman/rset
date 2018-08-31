@@ -49,7 +49,7 @@ int dryrun_opt;
 
 /* globals used by signal handlers */
 char *socket_path;
-char *host_name;
+char *hostname;
 int http_port;
 
 int main(int argc, char *argv[])
@@ -62,12 +62,11 @@ int main(int argc, char *argv[])
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	int status;
-	char *selected_label;
-	char *host_pattern;
+	char *host_pattern, *label_pattern;
 	char *http_srv_argv[9], *inputstring;
 	char routes_realpath[PATH_MAX], rset_realpath[PATH_MAX];
 	regmatch_t regmatch;
-	regex_t reg;
+	regex_t host_reg, label_reg;
 	sigset_t set;
 	struct sigaction act;
 	Options toplevel_options;
@@ -98,7 +97,9 @@ int main(int argc, char *argv[])
 	if (argc > optind+2) usage();
 
 	host_pattern = argv[optind];
-	selected_label = argv[optind+1];
+	label_pattern = argv[optind+1];
+	if (!label_pattern)
+		label_pattern = "^";
 	(void) realpath(argv[0], rset_realpath);
 
 	/* all operations must be relative to the routes file */
@@ -168,37 +169,39 @@ int main(int argc, char *argv[])
 	yylex();
 	fclose(yyin);
 
-	if ((rv = regcomp(&reg, host_pattern, REG_EXTENDED)) != 0) {
-		regerror(rv, &reg, buf, sizeof(buf));
+	if ((rv = regcomp(&host_reg, host_pattern, REG_EXTENDED)) != 0) {
+		regerror(rv, &host_reg, buf, sizeof(buf));
 		errx(1, "bad expression: %s", buf);
 	}
 
+	if ((rv = regcomp(&label_reg, label_pattern, REG_EXTENDED)) != 0) {
+		regerror(rv, &label_reg, buf, sizeof(buf));
+		errx(1, "bad expression: %s", buf);
+	}
+
+	/* parse all pln files from by each host */
 	for (i=0; route_labels[i]; i++) {
-		host_name = route_labels[i]->name;
-		rv = regexec(&reg, host_name, 1, &regmatch, 0);
+		memcpy(&toplevel_options, &current_options, sizeof(toplevel_options));
+		read_host_labels(route_labels[i]);
+		memcpy(&current_options, &toplevel_options, sizeof(current_options));
+	}
+	if (dryrun_opt) goto dry_run;
+
+	/* execute commands on remote hosts */
+	for (i=0; route_labels[i]; i++) {
+		hostname = route_labels[i]->name;
+		host_labels = route_labels[i]->labels;
+		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
 		if (rv == 0) {
-			memcpy(&toplevel_options, &current_options, sizeof(toplevel_options));
-
-			read_host_labels(route_labels[i]);
-			if (!host_labels[0])
+			hl_range(hostname, HL_HOST, 0, 0);
+			printf("\n");
+			socket_path = start_connection(hostname, http_port, sshconfig_file);
+			if (socket_path == NULL)
 				continue;
-
-			if (dryrun_opt) {
-				hl_range(host_name, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
-				printf("\n");
-			}
-			else {
-				hl_range(host_name, HL_HOST, 0, 0);
-				printf("\n");
-				socket_path = start_connection(host_name, http_port, sshconfig_file);
-				if (socket_path == NULL)
-					continue;
-			}
 			for (j=0; host_labels[j]; j++) {
-				if (selected_label)
-					if (strcmp(selected_label, host_labels[j]->name) != 0)
-						continue;
-				labels_matched++;
+				rv = regexec(&label_reg, host_labels[j]->name, 1, &regmatch, 0);
+				if (rv != 0)
+					continue;
 				if (list_opt > 1) {
 					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
 					hl_range(buf, HL_LABEL, 0, 0);
@@ -208,22 +211,43 @@ int main(int argc, char *argv[])
 					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
 					printf("\n");
 				}
-				if (dryrun_opt)
-					continue;
-				else
-					(void)ssh_command(host_name, socket_path, host_labels[j], http_port);
+				(void) ssh_command(hostname, socket_path, host_labels[j], http_port);
 			}
-			if (!dryrun_opt)
-				end_connection(socket_path, host_name, http_port);
+			end_connection(socket_path, hostname, http_port);
 			socket_path = NULL;
-
-			memcpy(&current_options, &toplevel_options, sizeof(current_options));
 		}
 	}
+	return 0;
 
-	if (selected_label && labels_matched == 0)
+dry_run:
+	for (i=0; route_labels[i]; i++) {
+		hostname = route_labels[i]->name;
+		host_labels = route_labels[i]->labels;
+		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
+		if (rv == 0) {
+			hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+			printf("\n");
+			for (j=0; host_labels[j]; j++) {
+				rv = regexec(&label_reg, host_labels[j]->name, 1, &regmatch, 0);
+				if (rv != 0)
+					continue;
+				labels_matched++;
+				if (list_opt > 1) {
+					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
+					hl_range(buf, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
+					printf("  %s\n", format_options(&host_labels[j]->options));
+				}
+				else if (list_opt) {
+					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+					printf("\n");
+				}
+				if (dryrun_opt)
+					continue;
+			}
+		}
+	}
+	if (labels_matched == 0)
 		errx(1, "no matching labels found");
-
 	return 0;
 }
 
@@ -231,11 +255,11 @@ int main(int argc, char *argv[])
 
 void
 handle_exit(int sig) {
-	if (socket_path && host_name && http_port) {
+	if (socket_path && hostname && http_port) {
 		printf("caught signal %d, terminating connection to '%s'\n", sig,
-			host_name);
+			hostname);
 		/* clean up socket and SSH connection; leaving staging dir */
-		execlp("ssh", "ssh", "-S", socket_path, "-O", "exit", host_name, NULL);
+		execlp("ssh", "ssh", "-S", socket_path, "-O", "exit", hostname, NULL);
 		err(1, "ssh -O exit");
 	}
 }
@@ -246,6 +270,6 @@ static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr, "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] "
-	    "host_pattern [label]\n");
+	    "host_pattern [label_pattern]\n");
 	exit(1);
 }

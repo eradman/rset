@@ -139,7 +139,6 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 	Options op;
 
 	/* construct command to execute on remote host  */
-
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 
@@ -148,11 +147,10 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 	    op.execute_with, http_port, host_label->name, op.interpreter);
 
 	/* construct ssh command */
-
 	argc = 0;
 	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
 
-	(void)append(argv, argc, host_name, cmd, NULL);
+	(void) append(argv, argc, host_name, cmd, NULL);
 	return pipe_cmd(argv, host_label->content, host_label->content_size);
 }
 
