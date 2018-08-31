@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
 	int labels_matched = 0;
 	char *routes_file = ROUTES_FILE;
-	char *ssh_config = NULL;
+	char *sshconfig_file = NULL;
 
 	opterr = 0;
 	while ((ch = getopt(argc, argv, "lnvF:f:")) != -1)
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 			dryrun_opt = 1;
 			break;
 		case 'F':
-			ssh_config = argv[optind-1];
+			sshconfig_file = argv[optind-1];
 			break;
 		case 'f':
 			routes_file = argv[optind-1];
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 			else {
 				hl_range(host_name, HL_HOST, 0, 0);
 				printf("\n");
-				socket_path = start_connection(host_name, http_port, ssh_config);
+				socket_path = start_connection(host_name, http_port, sshconfig_file);
 				if (socket_path == NULL)
 					continue;
 			}
@@ -245,7 +245,7 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-lln] [-F ssh_config] [-f routes_file] "
+	fprintf(stderr, "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] "
 	    "host_pattern [label]\n");
 	exit(1);
 }

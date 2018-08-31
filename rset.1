@@ -22,7 +22,7 @@
 .Sh SYNOPSIS
 .Nm rset
 .Op Fl lln
-.Op Fl F Ar ssh_config
+.Op Fl F Ar sshconfig_file
 .Op Fl f Ar route_file
 .Ar host_regex
 .Op Ar label
@@ -49,15 +49,11 @@ Instead hostnames are highlighted to show what characters the
 .Ar host_regex
 matched.
 .It Fl F
-Specify an
-.Xr ssh_config 5
-file to use.
-By default
+Specify a
+.Pa config
+file for
 .Xr ssh 1
-will read
-.Pa /etc/ssh/ssh_config
-and
-.Pa ~/.ssh/config .
+to use.
 .It Fl f
 Specify a
 .Ar route_file .
@@ -90,8 +86,8 @@ remote host, hence the capabilities of
 .Nm
 may easily be extend by accessing utilities at this location.
 .Sh OPTIONS
-.Pa Most options are not set in the command line, but are modified using key
-value-pairs.
+.Pa Most options are not set in the command line, but are modified using
+key-value pairs.
 .Ss \&interpreter=
 The interpreter to run a script fragment with.
 Defaults to
@@ -103,4 +99,5 @@ Command for elevating privileges, such as
 and
 .Xr sudo 8 .
 .Sh SEE ALSO
+.Xr ssh_config 5 ,
 .Xr re_format 7
