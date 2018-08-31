@@ -1,4 +1,6 @@
-= Next Release: 0.6
+= Release History
+
+== 0.6: August 30, 2018
 
  - Specify ('-ll') more than once to display options for each label
  - New '-F' option for specifying an ssh_config file
@@ -6,8 +8,6 @@
  - Drop 'install_url' option; override INSTALL_URL within scripts instead
  - Parse all files referenced in routes_file
  - Allow labels to be specified as a regex
-
-= Release History
 
 == 0.5: August 27, 2018
 
