@@ -31,6 +31,8 @@ $usage_text = \
         "release: 0.7\n" +
         "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
 
+puts "\e[32m---\e[39m"
+
 # Install or update utilities
 
 try "Install a missing file" do

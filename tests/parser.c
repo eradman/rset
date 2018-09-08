@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 			printf("%s, content_size: %d\n",
 			    route_labels[i]->name, route_labels[i]->content_size);
 			printf("%s, options: %s\n",
-			    route_labels[i]->name, route_labels[i]->export_paths);
+			    route_labels[i]->name, array_to_str(route_labels[i]->export_paths));
 		}
 		for (j=0; host_labels[j]; j++) {
 			printf("%s, content_size: %d\n",

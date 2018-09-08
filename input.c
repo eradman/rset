@@ -135,7 +135,8 @@ read_host_labels(Label *route_label) {
 }
 
 /*
- * str_to_array - map space-separated tokens to an array
+ * str_to_array - map space-separated tokens to an array using the input string
+ *                as the buffer
  */
 void
 str_to_array(char *argv[], char *inputstring, int siz) {
@@ -147,6 +148,25 @@ str_to_array(char *argv[], char *inputstring, int siz) {
 				ap++;
 	}
 	*ap = NULL;
+}
+
+/*
+ * array_to_str - represent an array as a string, returning a pointer to a
+ *                static buffer
+ */
+char *
+array_to_str(char *argv[]) {
+	int n = 0;
+	static char s[1024];
+	char *p = s;
+
+	while (argv && *argv) {
+		n += snprintf(p+n, sizeof(s)-n, "%s ", *argv);
+		argv++;
+	}
+	s[n-1] = '\0';
+
+	return s;
 }
 
 /*
@@ -170,7 +190,7 @@ read_label(char *line, Label *label) {
 	line[strlen(line)-1] = '\0';
 
 	strlcpy(label->name, strsep(&line, ":"), 512);
-	strlcpy(label->export_paths, ltrim(line, ' '), 1024);
+	str_to_array(label->export_paths, strdup(ltrim(line, ' ')), 64);
 	memcpy(&label->options, &current_options, sizeof(current_options));
 
 	label->content_size = 0;

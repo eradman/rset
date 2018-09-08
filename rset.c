@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 			if (list_opt > 1) {
 					snprintf(buf, sizeof(buf), "%-20s", hostname);
 					hl_range(buf, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
-					printf("  %s\n", route_labels[i]->export_paths);
+					printf("  %s\n", array_to_str(route_labels[i]->export_paths));
 			}
 			else {
 				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
@@ -237,7 +237,7 @@ dry_run:
 			if (list_opt > 1) {
 					snprintf(buf, sizeof(buf), "%-20s", hostname);
 					hl_range(buf, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
-					printf("  %s\n", route_labels[i]->export_paths);
+					printf("  %s\n", array_to_str(route_labels[i]->export_paths));
 			}
 			else {
 				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);

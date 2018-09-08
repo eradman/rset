@@ -52,6 +52,8 @@ $usage_text = \
         "usage: rinstall [-m mode] [-o owner]\n" +
         "                source target\n"
 
+puts "\e[32m---\e[39m"
+
 # Smoke test
 
 try "Run rinstall with no arguments" do

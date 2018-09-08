@@ -30,7 +30,7 @@ typedef struct Label Label;
 
 typedef struct Label {
 	char name[512];
-	char export_paths[1024];
+	char* export_paths[64];
 	char* content;
 	int content_size;
 	int content_allocation;
@@ -46,6 +46,7 @@ extern Label **host_labels;     /* child */
 void yylex();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
+char* array_to_str(char *argv[]);
 void str_to_array(char *argv[], char *input, int siz);
 
 static char* ltrim(char *s, int c);

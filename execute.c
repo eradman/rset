@@ -125,34 +125,10 @@ get_socket() {
 }
 
 /*
- *  SSH functions
- *
- *  ssh_command      - main function for executing a script on a remote host
  *  start_connection - start an SSH control master and copy _rutils
+ *  ssh_command      - main function for executing a script on a remote host
  *  end_connection   - stop an SSH control master and remove temporary files
  */
-int
-ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port) {
-	int argc;
-	char cmd[PATH_MAX];
-	char *argv[32];
-	Options op;
-
-	/* construct command to execute on remote host  */
-	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
-	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
-
-	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' INSTALL_URL='"
-	    INSTALL_URL "' exec %s\"",
-	    op.execute_with, http_port, host_label->name, op.interpreter);
-
-	/* construct ssh command */
-	argc = 0;
-	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
-
-	(void) append(argv, argc, host_name, cmd, NULL);
-	return pipe_cmd(argv, host_label->content, host_label->content_size);
-}
 
 char *
 start_connection(Label *route_label, int http_port, const char *ssh_config) {
@@ -202,11 +178,35 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 
 	snprintf(cmd, PATH_MAX, "tar -cf - %s -C " REPLICATED_DIRECTORY " ./ | "
 	   "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
-	    route_label->export_paths, socket_path, host_name, http_port);
+	    array_to_str(route_label->export_paths), socket_path, host_name,
+	    http_port);
 	if (system(cmd) != 0)
 		err(1, "transfer failed for " REPLICATED_DIRECTORY);
 
 	return socket_path;
+}
+
+int
+ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port) {
+	int argc;
+	char cmd[PATH_MAX];
+	char *argv[32];
+	Options op;
+
+	/* construct command to execute on remote host  */
+	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
+	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
+
+	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' INSTALL_URL='"
+	    INSTALL_URL "' exec %s\"",
+	    op.execute_with, http_port, host_label->name, op.interpreter);
+
+	/* construct ssh command */
+	argc = 0;
+	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
+
+	(void) append(argv, argc, host_name, cmd, NULL);
+	return pipe_cmd(argv, host_label->content, host_label->content_size);
 }
 
 void
