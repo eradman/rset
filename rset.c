@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 		errx(1, "bad expression: %s", buf);
 	}
 
-	/* parse all pln files from by each host */
+	/* parse pln files for each host */
 	for (i=0; route_labels[i]; i++) {
 		memcpy(&toplevel_options, &current_options, sizeof(toplevel_options));
 		read_host_labels(route_labels[i]);

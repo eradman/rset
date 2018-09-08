@@ -1,5 +1,4 @@
 CFLAGS = -I..
-LDFLAGS ?= -ll
 OBJS = getsocket copyfile parser pipe args
 RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o
 

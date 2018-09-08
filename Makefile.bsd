@@ -2,7 +2,6 @@ PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
 RELEASE = 0.7
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
-LDFLAGS ?=
 OBJS = rutils.o input.o execute.o rset.o compat.o
 
 all: versioncheck rset rinstall

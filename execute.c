@@ -139,8 +139,17 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 	char *socket_path;
 	char *argv[32];
 	char *host_name;
+	char **path;
 	struct stat sb;
 	Options op;
+
+	/* verify that export paths are accessible */
+	path = route_label->export_paths;
+	while (path && *path) {
+		if (stat(*path, &sb) == -1)
+			err(1, "%s: unable to stat '%s'", route_label->name, *path);
+		path++;
+	}
 
 	/* construct command to execute on remote host  */
 	host_name = route_label->name;
