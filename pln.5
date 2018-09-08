@@ -38,6 +38,10 @@ packages:
 
 interpreter=
 
+services: mail/
+	./rinstall mail/smtpd_relay.conf /etc/mail/smtpd.conf \\
+	    && rcctl restart smtpd
+
 /var/www/htdocs/pub:
 	mkdir -p $LABEL
 

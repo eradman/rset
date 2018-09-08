@@ -124,9 +124,15 @@ int main(int argc, char *argv[])
 	/* Select a port to communicate on */
 	http_port = get_socket();
 
+	if (pledge("stdio rpath proc exec", NULL) == -1)
+		err(1, "pledge");
+
 	/* start the web server */
 	http_server_pid = fork();
 	if (http_server_pid == 0) {
+		if (pledge("stdio rpath proc exec", "stdio rpath inet") == -1)
+			err(1, "pledge");
+
 		inputstring = malloc(PATH_MAX);
 		snprintf(inputstring, PATH_MAX, WEB_SERVER, http_port);
 		/* elide startup notices */
@@ -141,6 +147,9 @@ int main(int argc, char *argv[])
 	/* watchdog to ensure that the http server is shut down*/
 	rset_pid = fork();
 	if (rset_pid > 0) {
+		if (pledge("stdio proc", NULL) == -1)
+			err(1, "pledge");
+
 		setproctitle("watch on pid %d", rset_pid);
 		sigfillset(&set);
 		sigprocmask(SIG_BLOCK, &set, NULL);

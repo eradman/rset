@@ -7,3 +7,7 @@ size_t strlcpy(char *to, const char *from, int l);
 #if defined(_MACOS_PORT) || defined(_LINUX_PORT)
 void setproctitle(const char *fmt, ...);
 #endif
+
+#ifndef __OpenBSD__
+#define pledge(s, p) (0)
+#endif
