@@ -59,16 +59,11 @@ yylex() {
 		}
 
 		/* label */
-		else if (line[linelen-2] == ':') {
+		else if (strchr(line, ':')) {
 			host_labels[n_labels] = malloc(sizeof(Label));
 			host_labels[n_labels]->content = malloc(BUFSIZE);
 			host_labels[n_labels]->content_allocation = BUFSIZE;
-			host_labels[n_labels]->content_size = 0;
-			host_labels[n_labels]->labels = 0;
-			memcpy(&host_labels[n_labels]->options, &current_options,
-			    sizeof(current_options));
-			strlcpy(host_labels[n_labels]->name, line, PATH_MAX);
-			host_labels[n_labels]->name[linelen-2] = '\0';
+			read_label(line, host_labels[n_labels]);
 			n_labels++;
 			if (n_labels == LABELS_MAX) {
 				fprintf(stderr, "Error: maximum number of labels (%d) "
@@ -152,6 +147,34 @@ str_to_array(char *argv[], char *inputstring, int siz) {
 				ap++;
 	}
 	*ap = NULL;
+}
+
+/*
+ * ltrim - strim leading characters
+ */
+
+static char*
+ltrim(char *s, int c) {
+	int offset=0;
+
+	while (s[offset] == c && s[offset] != '\0')
+		offset++;
+	return s + offset;
+}
+
+/*
+ * read_label - populate label name, export_paths and options
+ */
+static void
+read_label(char *line, Label *label) {
+	line[strlen(line)-1] = '\0';
+
+	strlcpy(label->name, strsep(&line, ":"), 512);
+	strlcpy(label->export_paths, ltrim(line, ' '), 1024);
+	memcpy(&label->options, &current_options, sizeof(current_options));
+
+	label->content_size = 0;
+	label->labels = 0;
 }
 
 /*

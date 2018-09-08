@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 0.6
+RELEASE = 0.7
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
 LDFLAGS ?=
 OBJS = rutils.o input.o execute.o rset.o compat.o
@@ -15,9 +15,6 @@ env:
 	@echo "MANPREFIX  = ${MANPREFIX}"
 	@echo "PREFIX     = ${PREFIX}"
 	@echo "SRC        = ${SRC}"
-
-.l.c:
-	${LEX} -o $@ $<
 
 compat.c:
 	cat /dev/null ${EXTRA_SRC} > compat.c

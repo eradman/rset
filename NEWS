@@ -1,3 +1,10 @@
+= Next Release: 0.7
+
+ - Confer limited trust to remote hosts by requiring that each route label
+   specify the file paths to be shipped to each host
+ - rinstall(1) skips the HTTP fetch if the file is found in the staging
+   directory
+
 = Release History
 
 == 0.6: August 30, 2018

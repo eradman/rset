@@ -1,7 +1,7 @@
 
 execute_with=doas
 
-t420s:
+t420s: t420s/ common/
 	common/openbsd.pln
 	t420s.pln
 

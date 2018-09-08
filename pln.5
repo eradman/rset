@@ -41,7 +41,7 @@ interpreter=
 /var/www/htdocs/pub:
 	mkdir -p $LABEL
 
-# vim:noexpandtab:syntax=sh:ts=4
+# vim:ts=4:syntax=sh
 .Ed
 .Sh OPTIONS
 Each option may be set multiple times, and is effective for labels that follow.
@@ -51,6 +51,8 @@ without a value.
 .Sh LABELS
 Label names do not need to be unique and may contain any series of
 characters except for single and douple quotes.
+A series of pathnames for use by the application may be specified after the
+.Ql \&: .
 .Sh COMMENTS
 Comments begin with a hash
 .Pq Ql \&#

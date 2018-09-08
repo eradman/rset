@@ -48,7 +48,7 @@ def write_file(fn, contents)
 end
 
 $usage_text = \
-        "release: 0.6\n" +
+        "release: 0.7\n" +
         "usage: rinstall [-m mode] [-o owner]\n" +
         "                source target\n"
 
@@ -98,4 +98,15 @@ try "Try to fetch a file that does not exist" do
     eq err.split(/\n/)[-1], "Error fetching #{$install_url}/bogus.txt"
     eq out, ""
     eq File.exists?(dst), false
+end
+
+try "Install a file from the local staging directory" do
+    dst = $systmp + "my.txt"
+    write_file("test.txt", "123")
+    cmd = "INSTALL_URL='http://127.0.0.1/X/' ../rinstall -m 644 #{$systmp}/test.txt #{dst}"
+    out, err, status = Open3.capture3(cmd)
+    eq status.exitstatus, 0
+    eq err, ""
+    eq out, ""
+    eq File.exists?(dst), true
 end

@@ -28,7 +28,7 @@ def eq(a, b)
 end
 
 $usage_text = \
-        "release: 0.6\n" +
+        "release: 0.7\n" +
         "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
 
 # Install or update utilities

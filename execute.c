@@ -155,14 +155,19 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 }
 
 char *
-start_connection(char *host_name, int http_port, const char *ssh_config) {
+start_connection(Label *route_label, int http_port, const char *ssh_config) {
 	int argc;
 	char cmd[PATH_MAX];
 	char tmp_path[64];
 	char port_forwarding[64];
 	char *socket_path;
 	char *argv[32];
+	char *host_name;
 	struct stat sb;
+	Options op;
+
+	/* construct command to execute on remote host  */
+	host_name = route_label->name;
 
 	socket_path = malloc(128);
 	snprintf(socket_path, 128, LOCAL_SOCKET_PATH, host_name);
@@ -195,9 +200,9 @@ start_connection(char *host_name, int http_port, const char *ssh_config) {
 	if (run(argv) != 0)
 		err(1, "mkdir failed");
 
-	snprintf(cmd, PATH_MAX, "tar -cf - -C " REPLICATED_DIRECTORY " ./ | "
+	snprintf(cmd, PATH_MAX, "tar -cf - %s -C " REPLICATED_DIRECTORY " ./ | "
 	   "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
-	    socket_path, host_name, http_port);
+	    route_label->export_paths, socket_path, host_name, http_port);
 	if (system(cmd) != 0)
 		err(1, "transfer failed for " REPLICATED_DIRECTORY);
 

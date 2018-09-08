@@ -41,29 +41,38 @@ xdirname(const char *path) {
 }
 
 /*
- * install_if_new - install a file and parent directory if it does not already exist
+ * create_dir - ensure a directory exists
+ * install_if_new - ensure a file is up to date
  */
+int
+create_dir(const char *dir) {
+	mode_t dir_mode;
+	struct stat dst_sb;
+
+	if (stat(dir, &dst_sb) == -1) {
+		printf("rset: initialized directory '%s'\n", dir);
+		dir_mode = 0750;
+		(void) mkdir(dir, dir_mode);
+		return 1;
+	}
+	return 0;
+}
+
 void
 install_if_new(const char *src, const char *dst) {
 	int pid;
 	int status;
-	mode_t dir_mode;
 	struct stat src_sb;
 	struct stat dst_sb;
 
 	if (stat(src, &src_sb) == -1)
 		err(1, "%s", src);
 
-	if (stat(dst, &dst_sb) == -1) {
-		printf("rset: initialized directory '%s'\n", xdirname(dst));
-		dir_mode = 0750;
-		(void) mkdir(xdirname(dst), dir_mode);
-	}
-	else {
-		if (src_sb.st_mtime > dst_sb.st_mtime)
+	if (create_dir(xdirname(dst)) == 0) {
+		if ((stat(dst, &dst_sb) == -1) || (src_sb.st_mtime > dst_sb.st_mtime))
 			printf("rset: updating '%s'\n", dst);
 		else
-			return;
+			return; /* directory exists and no update required */
 	}
 
 	pid = fork();
@@ -95,7 +104,7 @@ hl_range(const char *s, const char *color, unsigned so, unsigned eo) {
 }
 
 /*
- * format_options - provide a concise representation of options
+ * format_options - print a concise representation of options
  */
 
 char *
@@ -104,10 +113,12 @@ format_options(Options *op) {
 	int pos = 0;
 
 	if (*op->interpreter)
-		pos += snprintf(buf+pos, sizeof(buf)-pos, "interpreter=%s,", op->interpreter);
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "interpreter=%s,",
+		    op->interpreter);
 	if (*op->execute_with)
-		pos += snprintf(buf+pos, sizeof(buf)-pos, "execute_with=%s,", op->execute_with);
-	buf[pos-1] = '\0';
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "execute_with=%s,",
+		    op->execute_with);
+	buf[pos - (pos > 0 ? 1 : 0)] = '\0';
 
 	return buf;
 }

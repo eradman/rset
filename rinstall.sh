@@ -1,6 +1,6 @@
 #!/bin/sh
 # A helper utility for rset(1)
-# Install files from a remote URL
+# Install files from the local staging area or a remote URL
 
 ret=1
 
@@ -23,24 +23,29 @@ while [ $# -gt 2 ]; do
 done
 [ $# -eq 2 ] || usage
 
-name=$(basename $1)
+name=$1
 target=$2
 
-case `uname` in
-	Linux)
-		fetch_cmd="wget -q -O $name $INSTALL_URL/$1"
-		;;
-	Darwin)
-		fetch_cmd="curl -f -s -o $name $INSTALL_URL/$1"
-		;;
-	*)
-		fetch_cmd="ftp -n $INSTALL_URL/$1 -o $name"
-		;;
-esac
-$fetch_cmd || {
-	>&2 echo "Error fetching $INSTALL_URL/$1"
-	exit 3
-}
+if [ ! -f $1 ]; then
+	name=$(basename $1)
+	case `uname` in
+		Linux)
+			fetch_cmd="wget -q -O $name $INSTALL_URL/$1"
+			;;
+		Darwin)
+			fetch_cmd="curl -f -s -o $name $INSTALL_URL/$1"
+			;;
+		*)
+			fetch_cmd="ftp -n $INSTALL_URL/$1 -o $name"
+			;;
+	esac
+
+	$fetch_cmd || {
+		>&2 echo "Error fetching $INSTALL_URL/$1"
+		exit 3
+	}
+fi
+
 [ -e $target ] && diff -U 2 $target $name || {
 	mv $name $target
 	[ -n "$OWNER" ] && chown $OWNER $target

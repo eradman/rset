@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
 		/* Auto-upgrade utilities and verify path */
 		snprintf(buf, sizeof(buf), "%s/rinstall", xdirname(rset_realpath));
 		install_if_new(buf, REPLICATED_DIRECTORY "/rinstall");
+		create_dir(PUBLIC_DIRECTORY);
 	}
 
 	/* Select a port to communicate on */
@@ -127,7 +128,7 @@ int main(int argc, char *argv[])
 	http_server_pid = fork();
 	if (http_server_pid == 0) {
 		inputstring = malloc(PATH_MAX);
-		snprintf(inputstring, PATH_MAX, WEB_SERVER, xdirname(routes_file), http_port);
+		snprintf(inputstring, PATH_MAX, WEB_SERVER, http_port);
 		/* elide startup notices */
 		close(STDOUT_FILENO);
 		/* Convert http server command line into a vector */
@@ -193,9 +194,17 @@ int main(int argc, char *argv[])
 		host_labels = route_labels[i]->labels;
 		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
 		if (rv == 0) {
-			hl_range(hostname, HL_HOST, 0, 0);
-			printf("\n");
-			socket_path = start_connection(hostname, http_port, sshconfig_file);
+			if (list_opt > 1) {
+					snprintf(buf, sizeof(buf), "%-20s", hostname);
+					hl_range(buf, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+					printf("  %s\n", route_labels[i]->export_paths);
+			}
+			else {
+				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+				printf("\n");
+			}
+			socket_path = start_connection(route_labels[i], http_port,
+			    sshconfig_file);
 			if (socket_path == NULL)
 				continue;
 			for (j=0; host_labels[j]; j++) {
@@ -225,8 +234,15 @@ dry_run:
 		host_labels = route_labels[i]->labels;
 		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
 		if (rv == 0) {
-			hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
-			printf("\n");
+			if (list_opt > 1) {
+					snprintf(buf, sizeof(buf), "%-20s", hostname);
+					hl_range(buf, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+					printf("  %s\n", route_labels[i]->export_paths);
+			}
+			else {
+				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+				printf("\n");
+			}
 			for (j=0; host_labels[j]; j++) {
 				rv = regexec(&label_reg, host_labels[j]->name, 1, &regmatch, 0);
 				if (rv != 0)

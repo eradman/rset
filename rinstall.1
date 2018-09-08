@@ -23,13 +23,14 @@
 .Nm rinstall
 .Op Fl o Ar owner:group
 .Op Fl m Ar mode
-.Ar src
+.Ar source
 .Ar target
 .Sh DESCRIPTION
 .Nm
 is shipped to remote machines by
 .Xr rset 1
-to provide a standard method of installing files made available over HTTP.
+to provide a standard method of installing files made available over HTTP, or
+from the current working directory if it already exists.
 .Pp
 If the
 .Ar target
@@ -54,7 +55,7 @@ This argument is passed to
 .El
 .Sh ENVIRONMENT
 The
-.Ar src
+.Ar source
 argument is a relative path that is appended to
 the environment variable
 .Ev INSTALL_URL .

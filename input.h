@@ -29,7 +29,8 @@ typedef struct {
 typedef struct Label Label;
 
 typedef struct Label {
-	char name[PATH_MAX];
+	char name[512];
+	char export_paths[1024];
 	char* content;
 	int content_size;
 	int content_allocation;
@@ -48,6 +49,7 @@ Label** alloc_labels();
 void str_to_array(char *argv[], char *input, int siz);
 
 static char* ltrim(char *s, int c);
+static void read_label(char *line, Label *label);
 static void read_option(char *text, Options *op);
 
 #endif /* _RSET_INPUT_H_ */
