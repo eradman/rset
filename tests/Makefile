@@ -10,7 +10,8 @@ rset.o: ${RSET_LIBS}
 .c: rset.o
 	${CC} ${CFLAGS} $< rset.o ${LDFLAGS} -o $@
 
-test: ../rinstall ${OBJS}
+test: ${OBJS}
+	@ruby test_rsub.rb
 	@ruby test_rinstall.rb
 	@ruby test_rset.rb
 

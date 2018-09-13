@@ -5,6 +5,7 @@
  - rinstall(1) skips the HTTP fetch if the file is found in the staging
    directory
  - Refactor to to take advantage of pledge(2)
+ - Add new utility script rsub(1)
 
 = Release History
 

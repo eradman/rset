@@ -1,0 +1,61 @@
+.\"
+.\" Copyright (c) 2018 Eric Radman <ericshane@eradman.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd September 13 2018
+.Dt RSUB 1
+.Os
+.Sh NAME
+.Nm rsub
+.Nd subsitute lines in a file or append if not found
+.Sh SYNOPSIS
+.Nm rsub
+.Op Fl A
+.Ar file
+.Ar pattern
+.Ar text
+.Sh DESCRIPTION
+.Nm
+is shipped to remote machines by
+.Xr rset 1
+to provide a standard method of modifying configuration parameters within a
+file.
+The
+.Ar pattern
+argument is a regular expression which is replaced by
+.Ar text .
+.Pp
+The arguments are as follows:
+.Bl -tag -width Ds
+.It Fl A
+Append line if the pattern is not found
+.El
+.Sh EXIT STATUS
+The
+.Nm
+utility exits with one of the following values:
+.Pp
+.Bl -tag -width Ds -offset indent -compact
+.It Li 0
+File was updated
+.It Li 1
+No changes were made, or an error occurred
+.It Li 2
+Incorrect parameters
+.It Li 3
+File not found
+.El
+.Sh SEE ALSO
+.Xr awk 1 ,
+.Xr rinstall 1

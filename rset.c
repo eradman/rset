@@ -118,6 +118,8 @@ int main(int argc, char *argv[])
 		/* Auto-upgrade utilities and verify path */
 		snprintf(buf, sizeof(buf), "%s/rinstall", xdirname(rset_realpath));
 		install_if_new(buf, REPLICATED_DIRECTORY "/rinstall");
+		snprintf(buf, sizeof(buf), "%s/rsub", xdirname(rset_realpath));
+		install_if_new(buf, REPLICATED_DIRECTORY "/rsub");
 		create_dir(PUBLIC_DIRECTORY);
 	}
 
@@ -263,7 +265,7 @@ dry_run:
 					printf("  %s\n", format_options(&host_labels[j]->options));
 				}
 				else if (list_opt) {
-					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+					hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
 					printf("\n");
 				}
 				if (dryrun_opt)

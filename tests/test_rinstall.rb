@@ -48,7 +48,7 @@ def write_file(fn, contents)
 end
 
 $usage_text = \
-        "release: 0.7\n" +
+        "release: 0.0\n" +
         "usage: rinstall [-m mode] [-o owner]\n" +
         "                source target\n"
 
@@ -59,7 +59,7 @@ puts "\e[32m---\e[39m"
 try "Run rinstall with no arguments" do
     cmd = "../rinstall"
     out, err, status = Open3.capture3(cmd)
-    eq err, $usage_text
+    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"), $usage_text
     eq status.success?, false
 end
 

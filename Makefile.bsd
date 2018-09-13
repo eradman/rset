@@ -4,7 +4,7 @@ RELEASE = 0.7
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
 OBJS = rutils.o input.o execute.o rset.o compat.o
 
-all: versioncheck rset rinstall
+all: versioncheck rset rinstall rsub
 
 env:
 	@echo "CC         = ${CC}"
@@ -24,8 +24,8 @@ compat.c:
 rset: ${OBJS}
 	${CC} ${CFLAGS} ${CPPFLAGS} -o $@ ${OBJS} ${LDFLAGS}
 
-rinstall: rinstall.sh
-	sed -e 's/$${release}/${RELEASE}/' rinstall.sh > $@
+.sh:
+	sed -e 's/$${release}/${RELEASE}/' $< > $@
 	@chmod +x $@
 
 install: rset
@@ -33,6 +33,7 @@ install: rset
 	install rinstall ${DESTDIR}${PREFIX}/bin
 	install -m 644 rset.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rinstall.1 ${DESTDIR}${MANPREFIX}/man1
+	install -m 644 rsub.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 pln.5 ${DESTDIR}${MANPREFIX}/man5
 
 uninstall:
@@ -40,13 +41,14 @@ uninstall:
 	rm ${DESTDIR}${PREFIX}/bin/rinstall
 	rm ${DESTDIR}${MANPREFIX}/man1/rset.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rinstall.1
+	rm ${DESTDIR}${MANPREFIX}/man1/rsub.1
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5
 
 test: rset rinstall
 	make -C tests
 
 clean:
-	rm -f compat.c *.o *.core rset rinstall
+	rm -f compat.c *.o *.core rset rinstall rsub
 	make -C tests clean
 
 distclean:

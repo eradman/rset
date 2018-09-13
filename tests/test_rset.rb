@@ -28,7 +28,7 @@ def eq(a, b)
 end
 
 $usage_text = \
-        "release: 0.7\n" +
+        "release: 0.0\n" +
         "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
 
 puts "\e[32m---\e[39m"
@@ -73,7 +73,7 @@ end
 try "Run rset with no arguments" do
     cmd = "../rset"
     out, err, status = Open3.capture3(cmd)
-    eq err, $usage_text
+    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"), $usage_text
     eq status.success?, false
 end
 
