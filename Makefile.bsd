@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 0.7
+RELEASE = 0.8
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
 OBJS = rutils.o input.o execute.o rset.o compat.o
 

@@ -23,20 +23,20 @@ while [ $# -gt 2 ]; do
 done
 [ $# -eq 2 ] || usage
 
-name=$1
+source=$1
 target=$2
 
 if [ ! -f $1 ]; then
-	name=$(basename $1)
+	source=$(mktemp $1.XXXXXX)
 	case `uname` in
 		Linux)
-			fetch_cmd="wget -q -O $name $INSTALL_URL/$1"
+			fetch_cmd="wget -q -O $source $INSTALL_URL/$1"
 			;;
 		Darwin)
-			fetch_cmd="curl -f -s -o $name $INSTALL_URL/$1"
+			fetch_cmd="curl -f -s -o $source $INSTALL_URL/$1"
 			;;
 		*)
-			fetch_cmd="ftp -n $INSTALL_URL/$1 -o $name"
+			fetch_cmd="ftp -o $source -n $INSTALL_URL/$1"
 			;;
 	esac
 
@@ -46,8 +46,8 @@ if [ ! -f $1 ]; then
 	}
 fi
 
-[ -e $target ] && diff -U 2 $target $name || {
-	mv $name $target
+[ -e $target ] && diff -U 2 $target $source || {
+	mv $source $target
 	[ -n "$OWNER" ] && chown $OWNER $target
 	[ -n "$MODE" ] && chmod $MODE $target
 	ret=0

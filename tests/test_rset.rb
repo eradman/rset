@@ -8,8 +8,8 @@ $tests = 0
 $test_description = 0
 
 # Setup
-$systmp = `mktemp -d /tmp/XXXXXX`.chomp
-at_exit { `rm -r #{$systmp}` }
+$systmp = Dir.mktmpdir
+at_exit { FileUtils.remove_dir $systmp }
 
 def try(descr)
     start = Time.now
@@ -27,16 +27,12 @@ def eq(a, b)
     raise "\"#{$test_description}\"\n#{_a}\e[39m#{_b}\e[39m" unless b === a
 end
 
-$usage_text = \
-        "release: 0.0\n" +
-        "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
-
 puts "\e[32m---\e[39m"
 
 # Install or update utilities
 
 try "Install a missing file" do
-    dst = $systmp + "/_rutils/whereami"
+    dst = "#{$systmp}/_rutils/whereami"
     cmd = "./copyfile input/whereami.sh #{dst}"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
@@ -47,7 +43,7 @@ try "Install a missing file" do
 end
 
 try "Update an existing file" do
-    dst = $systmp + "/_rutils/whereami"
+    dst = "#{$systmp}/_rutils/whereami"
     cmd = "./copyfile input/whereami.sh #{dst}"
     FileUtils.touch dst, :mtime => 0
     out, err, status = Open3.capture3(cmd)
@@ -73,7 +69,9 @@ end
 try "Run rset with no arguments" do
     cmd = "../rset"
     out, err, status = Open3.capture3(cmd)
-    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"), $usage_text
+    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"),
+        "release: 0.0\n" +
+        "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
     eq status.success?, false
 end
 

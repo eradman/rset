@@ -2,15 +2,14 @@
 
 require 'open3'
 require 'tempfile'
-require 'webrick'
 
 # Test Utilities
 $tests = 0
 $test_description = 0
 
 # Setup
-$systmp = `mktemp -d /tmp/XXXXXX`.chomp
-at_exit { `rm -r #{$systmp}` }
+$systmp = Dir.mktmpdir
+at_exit { FileUtils.remove_dir $systmp }
 
 def try(descr)
     start = Time.now
@@ -28,10 +27,6 @@ def eq(a, b)
     raise "\"#{$test_description}\"\n#{_a}\e[39m#{_b}\e[39m" unless b === a
 end
 
-$usage_text = \
-        "release: 0.0\n" +
-        "usage: rsub [-A] file pattern text\n"
-
 puts "\e[32m---\e[39m"
 
 # Smoke test
@@ -39,37 +34,20 @@ puts "\e[32m---\e[39m"
 try "Run rsub with no arguments" do
     cmd = "../rsub"
     out, err, status = Open3.capture3(cmd)
-    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"), $usage_text
+    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"),
+        "release: 0.0\n" +
+        "usage: rsub [-A] file pattern text\n"
     eq status.success?, false
 end
 
 # Functional tests
 
-try "Replace a line" do
-    dst = $systmp + "/1/test.txt"
-    Dir.mkdir "#{$systmp}/1"
-    f = File.new(dst, "w")
-    f.write "a = 2\nb = 3\n"
-    f.close
-    cmd = "../rsub #{dst} 'a = [0-9]' 'a = 5'"
-    out, err, status = Open3.capture3(cmd)
-    eq err, ""
-    eq out.gsub(/[-+]{3}(.*)\n/, ""),
-        "@@ -1,2 +1,2 @@\n" \
-        "-a = 2\n" \
-        "+a = 5\n" \
-        " b = 3\n"
-    eq status.success?, true
-end
-
 try "Replace a line, optionally append" do
-    dst = $systmp + "/2/test.txt"
-    Dir.mkdir "#{$systmp}/2"
-    f = File.new(dst, "w")
-    f.write "a=2\nb=3\n"
-    f.close
-    cmd = "../rsub -A #{dst} 'a=[0-9]' 'a=5'"
-    out, err, status = Open3.capture3(cmd)
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    File.open(dst, 'w') { |f| f.write("a=2\nb=3\n") }
+    cmd = "#{Dir.pwd}/../rsub -A #{dst} 'a=[0-9]' 'a=5'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out.gsub(/[-+]{3}(.*)\n/, ""),
         "@@ -1,2 +1,2 @@\n" \
@@ -80,13 +58,11 @@ try "Replace a line, optionally append" do
 end
 
 try "Append a line" do
-    dst = $systmp + "/3/test.txt"
-    Dir.mkdir "#{$systmp}/3"
-    f = File.new(dst, "w")
-    f.write "a=2\nb=3\n"
-    f.close
-    cmd = "../rsub -A #{dst} 'c=[0-9]' 'c=5'"
-    out, err, status = Open3.capture3(cmd)
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    File.open(dst, 'w') { |f| f.write("a=2\nb=3\n") }
+    cmd = "#{Dir.pwd}/../rsub -A #{dst} 'c=[0-9]' 'c=5'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out.gsub(/[-+]{3}(.*)\n/, ""),
         "@@ -1,2 +1,3 @@\n" \
@@ -96,12 +72,22 @@ try "Append a line" do
     eq status.success?, true
 end
 
+try "No change" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    File.open(dst, 'w') { |f| f.write("a=2\nb=3\n") }
+    cmd = "#{Dir.pwd}/../rsub #{dst} 'a=[0-9]' 'a=2'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, ""
+    eq out, ""
+    eq status.exitstatus, 1
+end
+
 try "Unable to open file" do
     dst = "/bogus/test.txt"
-    cmd = "../rsub -A #{dst} 'c=[0-9]' 'c=5'"
-    out, err, status = Open3.capture3(cmd)
+    cmd = "#{Dir.pwd}/../rsub -A #{dst} 'c=[0-9]' 'c=5'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, "rsub: file not found: /bogus/test.txt\n"
     eq out, ""
     eq status.exitstatus, 3
 end
-

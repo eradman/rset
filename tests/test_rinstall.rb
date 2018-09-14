@@ -9,19 +9,21 @@ $tests = 0
 $test_description = 0
 
 # Setup
-$systmp = `mktemp -d /tmp/XXXXXX`.chomp
+$systmp = Dir.mktmpdir
+$wwwtmp = Dir.mktmpdir
 http_port = `./getsocket`.chomp
-$install_url = "http://127.0.0.1:#{http_port}"
+$install_url = "http://localhost:#{http_port}"
 $wwwserver = fork do
     WEBrick::HTTPServer.new(
         :BindAddress => "localhost",
         :Port => http_port,
-        :DocumentRoot => $systmp,
+        :DocumentRoot => $wwwtmp,
         :Logger => WEBrick::Log.new("/dev/null"),
         :AccessLog => []
     ).start
 end
-at_exit { `rm -r #{$systmp}`; Process.kill(15, $wwwserver); }
+at_exit { FileUtils.remove_dir $systmp; FileUtils.remove_dir $wwwtmp; Process.kill(15, $wwwserver); }
+
 # wait for web server to initialize
 sleep 0.1
 
@@ -41,17 +43,6 @@ def eq(a, b)
     raise "\"#{$test_description}\"\n#{_a}\e[39m#{_b}\e[39m" unless b === a
 end
 
-def write_file(fn, contents)
-    f = File.new("#{$systmp}/" + fn, "w")
-    f.write contents
-    f.close
-end
-
-$usage_text = \
-        "release: 0.0\n" +
-        "usage: rinstall [-m mode] [-o owner]\n" +
-        "                source target\n"
-
 puts "\e[32m---\e[39m"
 
 # Smoke test
@@ -59,43 +50,34 @@ puts "\e[32m---\e[39m"
 try "Run rinstall with no arguments" do
     cmd = "../rinstall"
     out, err, status = Open3.capture3(cmd)
-    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"), $usage_text
+    eq err.gsub(/release: (\d\.\d)/, "release: 0.0"),
+        "release: 0.0\n" +
+        "usage: rinstall [-m mode] [-o owner]\n" +
+        "                source target\n"
     eq status.success?, false
 end
 
 # Functional tests
 
-try "Install a file from a remote URL" do
-    dst = $systmp + "/dst/test2.txt"
-    Dir.mkdir "#{$systmp}/dst"
-    write_file("test.txt", "123")
-    cmd = "INSTALL_URL=#{$install_url} ../rinstall -m 644 test.txt #{dst}"
-    out, err, status = Open3.capture3(cmd)
+try "Install a file from a remote URL to the staging area" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    src = "#{$wwwtmp}/#{fn}"
+    File.open(src, 'w') { |f| f.write("123") }
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 #{fn} #{fn}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out, ""
-    eq status.success?, true
+    #eq status.success?, true
     eq "123", File.read(dst)
     eq File.stat(dst).mode.to_s(8), '100644'
 end
 
-try "Install a file from a remote URL to the staging area" do
-    dst = $systmp + "/test3.txt"
-    Dir.mkdir "#{$systmp}/src"
-    write_file("src/test.txt", "678")
-    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 664 src/test.txt #{dst}"
-    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
-    eq err, ""
-    eq out, ""
-    eq status.success?, true
-    eq File.stat(dst).mode.to_s(8), '100664'
-    eq "678", File.read(dst)
-end
-
 try "Try to fetch a file that does not exist" do
-    dst = $systmp + "/dst/my.txt"
-    write_file("test.txt", "123")
-    cmd = "INSTALL_URL=#{$install_url} ../rinstall -m 644 bogus.txt #{dst}"
-    out, err, status = Open3.capture3(cmd)
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall bogus.txt #{fn}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq status.exitstatus, 3
     eq err.split(/\n/)[-1], "Error fetching #{$install_url}/bogus.txt"
     eq out, ""
@@ -103,12 +85,48 @@ try "Try to fetch a file that does not exist" do
 end
 
 try "Install a file from the local staging directory" do
-    dst = $systmp + "my.txt"
-    write_file("test.txt", "123")
-    cmd = "INSTALL_URL='http://127.0.0.1/X/' ../rinstall -m 644 #{$systmp}/test.txt #{dst}"
-    out, err, status = Open3.capture3(cmd)
-    eq status.exitstatus, 0
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    src = "#{$wwwtmp}/#{fn}"
+    File.open(src, 'w') { |f| f.write("456") }
+    cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{fn}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out, ""
+    eq status.exitstatus, 0
     eq File.exists?(dst), true
+end
+
+try "No need to update a file" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{$tests}/#{fn}"
+    src = "#{$wwwtmp}/#{fn}"
+    Dir.mkdir "#{$systmp}/#{$tests}"
+    File.open(src, 'w') { |f| f.write("000\n123\n") }
+    File.open(dst, 'w') { |f| f.chmod(0642); f.write("000\n123\n") }
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 660 #{fn} #{dst}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, ""
+    eq out, ""
+    eq File.stat(dst).mode.to_s(8), '100642'
+    eq status.exitstatus, 1
+end
+
+try "Update a file" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{$tests}/#{fn}"
+    src = "#{$wwwtmp}/#{fn}"
+    Dir.mkdir "#{$systmp}/#{$tests}"
+    File.open(src, 'w') { |f| f.write("000\n123\n") }
+    File.open(dst, 'w') { |f| f.write("000\n111\n") }
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 660 #{fn} #{dst}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, ""
+    eq out.gsub(/[-+]{3}(.*)\n/, ""),
+        "@@ -1,2 +1,2 @@\n" \
+        " 000\n" \
+        "-111\n" \
+        "+123\n"
+    eq File.stat(dst).mode.to_s(8), '100660'
+    eq status.success?, true
 end
