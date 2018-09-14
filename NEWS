@@ -1,4 +1,6 @@
-= Next Release: 0.7
+= Release History
+
+== 0.7: September 13, 2018
 
  - Confer limited trust to remote hosts by requiring that each route label
    specify the file paths to be shipped to each host
@@ -6,8 +8,6 @@
    directory
  - Refactor to to take advantage of pledge(2)
  - Add new utility script rsub(1)
-
-= Release History
 
 == 0.6: August 30, 2018
 
