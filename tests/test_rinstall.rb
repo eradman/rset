@@ -27,7 +27,11 @@ at_exit { FileUtils.remove_dir $systmp; FileUtils.remove_dir $wwwtmp; Process.ki
 # wait for web server to initialize
 sleep 0.1
 
-def try(descr)
+def try(descr, skip=false)
+    if skip then
+        puts "0.000: #{descr} [skipped]"
+        return
+    end
     start = Time.now
     $tests += 1
     $test_description = descr
@@ -65,6 +69,21 @@ try "Install a file from a remote URL to the staging area" do
     src = "#{$wwwtmp}/#{fn}"
     File.open(src, 'w') { |f| f.write("123") }
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 #{fn} #{fn}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, ""
+    eq out, ""
+    #eq status.success?, true
+    eq "123", File.read(dst)
+    eq File.stat(dst).mode.to_s(8), '100644'
+end
+
+is_busybox = ENV['SHELL']=='/bin/ash'
+try "Install a file from a remote URL containing special characters", is_busybox do
+    fn = "test ~!@()_+ #{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    src = "#{$wwwtmp}/#{fn}"
+    File.open(src, 'w') { |f| f.write("123") }
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 '#{fn}' '#{fn}'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out, ""

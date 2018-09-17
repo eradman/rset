@@ -23,19 +23,20 @@ done
 [ $# -eq 3 ] || usage
 
 target=$1
-source=$(mktemp $(basename $1).XXXXXX)
+source=$(mktemp XXXXXXXX)
 
-[ -f $target ] || {
+test -f "$target" || {
 	>&2 echo "rsub: file not found: $target"
 	exit 3
 }
 
 awk -v n=$APPEND -v a="$2" -v b="$3" \
 	"{ n+=sub(a, b)}; {print}; END {if (n==0) print b}" \
-	$target > $source
+	"$target" > $source
 
-[ -e $target ] && diff -U 2 $target $source || {
-	mv $source $target
+test -e "$target" && diff -U 2 "$target" $source || {
+	cp $source "$target"
+	rm -f $source
 	ret=0
 }
 exit $ret

@@ -57,6 +57,21 @@ try "Replace a line, optionally append" do
     eq status.success?, true
 end
 
+try "Handle input containing special characters" do
+    fn = "test ~!@()_+ #{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    File.open(dst, 'w') { |f| f.write("a = 2\nb = 3\n") }
+    cmd = "#{Dir.pwd}/../rsub '#{dst}' 'a = [0-9]' 'a = 5'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, ""
+    eq out.gsub(/[-+]{3}(.*)\n/, ""),
+        "@@ -1,2 +1,2 @@\n" \
+        "-a = 2\n" \
+        "+a = 5\n" \
+        " b = 3\n"
+    eq status.success?, true
+end
+
 try "Append a line" do
     fn = "test_#{$tests}.txt"
     dst = "#{$systmp}/#{fn}"
