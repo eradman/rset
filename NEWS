@@ -1,7 +1,8 @@
 = Next Release: 0.8
 
- - rsub/rinstall uses mktemp to avoid collisions
- - rsub/rinstall handle spaces and most other special characters
+ - bundled _rutils scripts uses mktemp to avoid collisions
+ - bundled _rutils scrips handle spaces and most other special characters
+ - rsub(1) also handles block replacements
 
 = Release History
 

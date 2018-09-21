@@ -13,34 +13,51 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 13, 2018
+.Dd September 18, 2018
 .Dt RSUB 1
 .Os
 .Sh NAME
 .Nm rsub
-.Nd subsitute lines in a file or append if not found
+.Nd substitute lines in a file or append if not found
 .Sh SYNOPSIS
 .Nm rsub
 .Op Fl A
-.Ar file
-.Ar pattern
-.Ar text
+.Fl r Ar line_regex
+.Fl l Ar line_text
+.Ar target
+.Nm rsub
+.Ar target
+.Ar < block_content
 .Sh DESCRIPTION
 .Nm
 is shipped to remote machines by
 .Xr rset 1
 to provide a standard method of modifying configuration parameters within a
 file.
-The
-.Ar pattern
-argument is a regular expression which is replaced by
-.Ar text .
+Two modes of operation are supported: line substitution and block replacement.
 .Pp
-The arguments are as follows:
+.Ar line replacements are defined by the flags
+.Fl r
+and
+.Fl l ,
+while the content for a text block is provided on STDIN.
+.Pp
+The arguments for line subsitution are as follows:
 .Bl -tag -width Ds
 .It Fl A
-Append line if the pattern is not found
+Append line if the pattern is not found.
+.It Fl r
+A regular expression matching the line to replace.
+.It Fl l
+The replacement text for a matching line.
+Newlines are not permitted as part of the replacement string.
 .El
+.Sh ENVIRONMENT
+When updating a block of text,
+.Ev RSUB_START
+and
+.Ev RSUB_END
+define the beginning and ending markers.
 .Sh EXIT STATUS
 The
 .Nm
@@ -48,7 +65,7 @@ utility exits with one of the following values:
 .Pp
 .Bl -tag -width Ds -offset indent -compact
 .It Li 0
-File was updated
+Target file was updated
 .It Li 1
 No changes were made, or an error occurred
 .It Li 2

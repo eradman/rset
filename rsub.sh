@@ -6,21 +6,24 @@ ret=1
 
 usage() {
 	>&2 echo "release: ${release}"
-	>&2 echo "usage: rsub [-A] file pattern text"
+	>&2 echo "usage: rsub [-A] -r line_regex -l line_text target"
+	>&2 echo "usage: rsub target < block_content"
 	exit 1
 }
 
 trap '' HUP
-APPEND=1
+append=1
 
-while [ $# -gt 3 ]; do
+while [ $# -gt 1 ]; do
 	case "$1" in
-		-A) APPEND=0 ;;
+		-A) append=0 ;;
+		-r) shift; line_regex=$1 ;;
+		-l) shift; line_text=$1 ;;
 		 *) usage ;;
 	esac
 	shift
 done
-[ $# -eq 3 ] || usage
+[ $# -eq 1 ] || usage
 
 target=$1
 source=$(mktemp XXXXXXXX)
@@ -30,9 +33,24 @@ test -f "$target" || {
 	exit 3
 }
 
-awk -v n=$APPEND -v a="$2" -v b="$3" \
-	"{ n+=sub(a, b)}; {print}; END {if (n==0) print b}" \
-	"$target" > $source
+if test -z "$line_regex$line_text"; then
+	start="${RSUB_START:-# start managed block}"
+	end="${RSUB_END:-# end managed block}"
+	cat <<-EOF > ${source}_b
+	${start}
+	`cat`
+	${end}
+	EOF
+	awk -v m="$start" -v n="$end" -v block=${source}_b '
+		$0 == m, $0 == n { if (!x) system("cat " block) ; x=1; next; }; 1
+		END { if (!x) system("cat " block) }
+		' "$target" > $source
+	rm ${source}_b
+else
+	awk -v n=$append -v a="$line_regex" -v b="$line_text" \
+		'{ n+=sub(a, b)}; {print}; END {if (n==0) print b}' \
+		"$target" > $source
+fi
 
 test -e "$target" && diff -U 2 "$target" $source || {
 	cp $source "$target"
