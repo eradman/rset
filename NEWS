@@ -1,11 +1,11 @@
-= Next Release: 0.8
+= Release History
+
+== 0.8: September 24, 2018
 
  - bundled _rutils scripts uses mktemp to avoid collisions
  - bundled _rutils scrips handle spaces and most other special characters
  - rsub(1) also handles block replacements
  - raise error if path export list is specified outside of a routes file
-
-= Release History
 
 == 0.7: September 13, 2018
 
@@ -13,7 +13,7 @@
    specify the file paths to be shipped to each host
  - rinstall(1) skips the HTTP fetch if the file is found in the staging
    directory
- - Refactor to to take advantage of pledge(2)
+ - Refactor to take advantage of pledge(2)
  - Add new utility script rsub(1)
 
 == 0.6: August 30, 2018
