@@ -109,12 +109,48 @@ try "Format and run a command line" do
     eq out, File.read('expected/args.out')
 end
 
+# Error Handling
+
+try "Report an unknown syntax" do
+    fn = "#{$systmp}/routes.pln"
+    File.open(fn, 'w') { |f| f.write("php\n") }
+    out, err, status = nil
+    cmd = "#{Dir.pwd}/../rset -ln 't[42'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, "rset: unknown symbol at line 1: 'php'\n"
+    eq status.success?, false
+    eq out, ""
+end
+
+try "Report a bad regex" do
+    fn = "#{$systmp}/routes.pln"
+    File.open(fn, 'w') { |f| f.write("") }
+    out, err, status = nil
+    cmd = "#{Dir.pwd}/../rset -ln 't[42'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err[0..20], "rset: bad expression:"
+    eq status.success?, false
+    eq out, ""
+end
+
+try "Report an unknown option" do
+    fn = "#{$systmp}/routes.pln"
+    File.open(fn, 'w') { |f| f.write("username=radman\n") }
+    out, err, status = nil
+    cmd = "#{Dir.pwd}/../rset -ln 't[42'"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, "rset: unknown option 'username=radman'\n"
+    eq status.success?, false
+    eq out, ""
+end
+
 # Dry Run
 
 try "Show matching routes and hosts" do
+    fn = "#{$systmp}/routes.pln"
     out, err, status = nil
+    cmd = "#{Dir.pwd}/../rset -lln t420"
     Dir.chdir("input") do
-        cmd = "../../rset -lln t420"
         out, err, status = Open3.capture3(cmd)
     end
     eq err, ""
@@ -122,15 +158,3 @@ try "Show matching routes and hosts" do
     eq out, File.read('expected/dry_run.out')
 end
 
-# Error Handling
-
-try "Report a bad regex" do
-    out, err, status = nil
-    Dir.chdir("input") do
-        cmd = "../../rset -ln 't[42'"
-        out, err, status = Open3.capture3(cmd)
-    end
-    eq err[0..20], "rset: bad expression:"
-    eq status.success?, false
-    eq out, ""
-end
