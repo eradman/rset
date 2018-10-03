@@ -38,7 +38,7 @@ packages:
 
 interpreter=
 
-services: mail/
+services:
 	./rinstall mail/smtpd_relay.conf /etc/mail/smtpd.conf \\
 	    && rcctl restart smtpd
 
