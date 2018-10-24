@@ -1,15 +1,16 @@
 = Next Release: 0.9
 
- - 
+ - Use unveil(2) to sandbox the HTTP server
+ - Raise error early if httpd binary is not found in search path
 
 = Release History
 
 == 0.8: September 24, 2018
 
- - bundled _rutils scripts uses mktemp to avoid collisions
- - bundled _rutils scrips handle spaces and most other special characters
+ - Bundled _rutils scripts uses mktemp to avoid collisions
+ - Bundled _rutils scrips handle spaces and most other special characters
  - rsub(1) also handles block replacements
- - raise error if path export list is specified outside of a routes file
+ - Raise error if path export list is specified outside of a routes file
 
 == 0.7: September 13, 2018
 

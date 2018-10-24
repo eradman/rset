@@ -54,7 +54,7 @@ try "Update an existing file" do
     eq File.stat(File.dirname(dst)).mode.to_s(8), '40750'
 end
 
-# Execute and pipe to STDIN
+# Execution functions
 
 try "Try a simple pipe" do
     cmd = "./pipe input/whereami.sh"
@@ -62,6 +62,14 @@ try "Try a simple pipe" do
     eq err, ""
     eq status.success?, true
     eq out, File.read('input/whereami.sh')
+end
+
+try "Locate an executable in the current path" do
+    cmd = "./which sh"
+    out, err, status = Open3.capture3(cmd)
+    eq err, ""
+    eq status.success?, true
+    eq out, "/bin/sh\n"
 end
 
 # Smoke test
@@ -114,7 +122,6 @@ end
 try "Report an unknown syntax" do
     fn = "#{$systmp}/routes.pln"
     File.open(fn, 'w') { |f| f.write("php\n") }
-    out, err, status = nil
     cmd = "#{Dir.pwd}/../rset -ln 't[42'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, "rset: unknown symbol at line 1: 'php'\n"
@@ -125,7 +132,6 @@ end
 try "Report a bad regex" do
     fn = "#{$systmp}/routes.pln"
     File.open(fn, 'w') { |f| f.write("") }
-    out, err, status = nil
     cmd = "#{Dir.pwd}/../rset -ln 't[42'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err[0..20], "rset: bad expression:"
@@ -136,10 +142,17 @@ end
 try "Report an unknown option" do
     fn = "#{$systmp}/routes.pln"
     File.open(fn, 'w') { |f| f.write("username=radman\n") }
-    out, err, status = nil
     cmd = "#{Dir.pwd}/../rset -ln 't[42'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, "rset: unknown option 'username=radman'\n"
+    eq status.success?, false
+    eq out, ""
+end
+
+try "Ensure http server can be found" do
+    cmd = "#{Dir.pwd}/../rset -ln ."
+    out, err, status = Open3.capture3({"PATH"=>""}, cmd, :chdir=>$systmp)
+    eq err, "rset: darkhttpd not found\n"
     eq status.success?, false
     eq out, ""
 end

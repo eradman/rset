@@ -18,11 +18,14 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/sysctl.h>
 #include <sys/wait.h>
 
 #include <err.h>
+#include <errno.h>
 #include <limits.h>
 #include <netdb.h>
+#include <paths.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,6 +125,46 @@ get_socket() {
 	close(sock);
 
 	return port;
+}
+
+/*
+ * findprog - from which(1)
+ */
+
+char *
+findprog(char *prog, char *path)
+{
+	int len;
+	char *filename;
+	char *p, *pathcpy;
+	struct stat sbuf;
+
+	if (path == NULL)
+		return NULL;
+
+	if ((path = strdup(path)) == NULL)
+		err(1, "strdup");
+	pathcpy = path;
+	filename = malloc(PATH_MAX);
+
+	while ((p = strsep(&pathcpy, ":")) != NULL) {
+		if (*p == '\0')
+			p = ".";
+
+		len = strlen(p);
+		while (len > 0 && p[len-1] == '/')
+			p[--len] = '\0';  /* strip trailing '/' */
+
+		(void) snprintf(filename, PATH_MAX, "%s/%s", p, prog);
+		if ((stat(filename, &sbuf) == 0) && S_ISREG(sbuf.st_mode) &&
+		    access(filename, X_OK) == 0) {
+			(void) free(path);
+			return filename;
+		}
+	}
+	(void) free(path);
+	(void) free(filename);
+	return NULL;
 }
 
 /*

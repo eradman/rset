@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 	int status;
 	char *host_pattern, *label_pattern;
 	char *http_srv_argv[9], *inputstring;
+	char *httpd_bin;
 	char routes_realpath[PATH_MAX], rset_realpath[PATH_MAX];
 	regmatch_t regmatch;
 	regex_t host_reg, label_reg;
@@ -126,24 +127,36 @@ int main(int argc, char *argv[])
 	/* Select a port to communicate on */
 	http_port = get_socket();
 
-	if (pledge("stdio rpath proc exec", NULL) == -1)
+	if (pledge("stdio rpath proc exec unveil", NULL) == -1)
 		err(1, "pledge");
+
+	/* Convert http server command line into a vector */
+	inputstring = malloc(PATH_MAX);
+	snprintf(inputstring, PATH_MAX, WEB_SERVER, http_port);
+	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
+	httpd_bin = findprog(http_srv_argv[0], getenv("PATH"));
+	if (!httpd_bin) {
+		fprintf(stderr, "rset: %s not found\n", http_srv_argv[0]);
+		exit(1);
+	}
 
 	/* start the web server */
 	http_server_pid = fork();
 	if (http_server_pid == 0) {
-		if (pledge("stdio rpath proc exec", "stdio rpath inet") == -1)
+		if (pledge("stdio rpath proc exec unveil", "stdio rpath inet") == -1)
 			err(1, "pledge");
 
-		inputstring = malloc(PATH_MAX);
-		snprintf(inputstring, PATH_MAX, WEB_SERVER, http_port);
 		/* elide startup notices */
 		close(STDOUT_FILENO);
-		/* Convert http server command line into a vector */
-		str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
-		execvp(http_srv_argv[0], http_srv_argv);
+
+		unveil(xdirname(PUBLIC_DIRECTORY), "r");
+		unveil(xdirname(httpd_bin), "x");
+		unveil("/usr/lib", "r");
+		unveil("/usr/libexec", "r");
+
+		execv(httpd_bin, http_srv_argv);
 		fprintf(stderr, "Fatal: unable to start web server\n");
-		err(1, "%s", http_srv_argv[0]);
+		err(1, "%s", httpd_bin);
 	}
 
 	/* watchdog to ensure that the http server is shut down*/

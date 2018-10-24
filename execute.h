@@ -22,9 +22,11 @@ int append(char *argv[], int argc, char *arg, ...);
 int run(char *const argv[]);
 int pipe_cmd(char *const argv[], char *input, size_t len);
 int get_socket();
+char *findprog(char *, char *);
 
 char *start_connection(Label *route_label, int http_port, const char *ssh_config);
 int ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port);
 void end_connection(char *socket_path, char *host_name, int http_port);
 
 static void apply_default(char *option, const char *user_option, const char *default_option);
+

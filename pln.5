@@ -42,9 +42,6 @@ services:
 	./rinstall mail/smtpd_relay.conf /etc/mail/smtpd.conf \\
 	    && rcctl restart smtpd
 
-/var/www/htdocs/pub:
-	mkdir -p $LABEL
-
 # vim:ts=4:syntax=sh
 .Ed
 .Sh OPTIONS

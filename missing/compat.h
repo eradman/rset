@@ -10,4 +10,5 @@ void setproctitle(const char *fmt, ...);
 
 #ifndef __OpenBSD__
 #define pledge(s, p) (0)
+#define unveil(s, p) (0)
 #endif
