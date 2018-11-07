@@ -11,6 +11,8 @@ $test_description = 0
 $systmp = Dir.mktmpdir
 at_exit { FileUtils.remove_dir $systmp }
 
+ENV['PATH'] = "#{Dir.pwd}/../:#{ENV['PATH']}"
+
 def try(descr)
     start = Time.now
     $tests += 1
@@ -151,8 +153,8 @@ end
 
 try "Ensure http server can be found" do
     cmd = "#{Dir.pwd}/../rset -ln ."
-    out, err, status = Open3.capture3({"PATH"=>""}, cmd, :chdir=>$systmp)
-    eq err, "rset: darkhttpd not found\n"
+    out, err, status = Open3.capture3({"PATH"=>"#{Dir.pwd}/../"}, cmd, :chdir=>$systmp)
+    eq err, "rset: darkhttpd not found in PATH\n"
     eq status.success?, false
     eq out, ""
 end

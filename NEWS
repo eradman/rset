@@ -3,6 +3,7 @@
  - Use unveil(2) to sandbox the HTTP server
  - Raise error early if httpd binary is not found in search path
  - rinstall(1) properly displays a notification when updating a binary file
+ - Locate _rutils scripts using the PATH environment variable
 
 = Release History
 

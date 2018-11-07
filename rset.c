@@ -33,8 +33,9 @@
 
 /* forwards */
 
-static void usage();
 static void handle_exit(int sig);
+static void usage();
+static void not_found(char *name);
 
 /* globals used by input.l */
 
@@ -64,8 +65,8 @@ int main(int argc, char *argv[])
 	int status;
 	char *host_pattern, *label_pattern;
 	char *http_srv_argv[9], *inputstring;
-	char *httpd_bin;
-	char routes_realpath[PATH_MAX], rset_realpath[PATH_MAX];
+	char *rinstall_bin, *rsub_bin, *httpd_bin;
+	char routes_realpath[PATH_MAX];
 	regmatch_t regmatch;
 	regex_t host_reg, label_reg;
 	sigset_t set;
@@ -101,7 +102,10 @@ int main(int argc, char *argv[])
 	label_pattern = argv[optind+1];
 	if (!label_pattern)
 		label_pattern = "^";
-	(void) realpath(argv[0], rset_realpath);
+	if ((rinstall_bin = findprog("rinstall", getenv("PATH"))) == 0)
+		not_found("rinstall");
+	if ((rsub_bin = findprog("rsub", getenv("PATH"))) == 0)
+		not_found("rsub");
 
 	/* all operations must be relative to the routes file */
 	if (realpath(xdirname(routes_file), routes_realpath) == NULL)
@@ -117,10 +121,8 @@ int main(int argc, char *argv[])
 
 	if (!dryrun_opt) {
 		/* Auto-upgrade utilities and verify path */
-		snprintf(buf, sizeof(buf), "%s/rinstall", xdirname(rset_realpath));
-		install_if_new(buf, REPLICATED_DIRECTORY "/rinstall");
-		snprintf(buf, sizeof(buf), "%s/rsub", xdirname(rset_realpath));
-		install_if_new(buf, REPLICATED_DIRECTORY "/rsub");
+		install_if_new(rinstall_bin, REPLICATED_DIRECTORY "/rinstall");
+		install_if_new(rsub_bin, REPLICATED_DIRECTORY "/rsub");
 		create_dir(PUBLIC_DIRECTORY);
 	}
 
@@ -134,11 +136,8 @@ int main(int argc, char *argv[])
 	inputstring = malloc(PATH_MAX);
 	snprintf(inputstring, PATH_MAX, WEB_SERVER, http_port);
 	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
-	httpd_bin = findprog(http_srv_argv[0], getenv("PATH"));
-	if (!httpd_bin) {
-		fprintf(stderr, "rset: %s not found\n", http_srv_argv[0]);
-		exit(1);
-	}
+	if ((httpd_bin = findprog(http_srv_argv[0], getenv("PATH"))) == 0)
+		not_found(http_srv_argv[0]);
 
 	/* start the web server */
 	http_server_pid = fork();
@@ -311,5 +310,11 @@ usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr, "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] "
 	    "host_pattern [label_pattern]\n");
+	exit(1);
+}
+
+static void
+not_found(char *name) {
+	fprintf(stderr, "rset: %s not found in PATH\n", name);
 	exit(1);
 }
