@@ -3,6 +3,7 @@
 # Install files from the local staging area or a remote URL
 
 ret=1
+: ${INSTALL_URL:=http://localhost:9000}
 
 usage() {
 	>&2 echo "release: ${release}"
@@ -27,21 +28,22 @@ source=$1
 target=$2
 
 if test ! -f "$1"; then
-	source=$(mktemp XXXXXXXX)
+	umask 044
+	source="$1.$(mktemp XXXXXX)"
 	case `uname` in
 		OpenBSD)
-			ftp -o $source -n "$INSTALL_URL/$1"
+			ftp -o "$source" -n "$INSTALL_URL/$1"
 			;;
 		FreeBSD)
-			fetch -q -o $source "$INSTALL_URL/$1"
+			fetch -q -o "$source" "$INSTALL_URL/$1"
 			;;
 		Linux)
-			wget -q -O $source "$INSTALL_URL/$1"
+			wget -q -O "$source" "$INSTALL_URL/$1"
 			;;
 		Darwin|*)
 			which -s wget \
-				&& wget -q -O $source "$INSTALL_URL/$1" \
-				|| curl -f -s -o $source "$INSTALL_URL/$1"
+				&& wget -q -O "$source" "$INSTALL_URL/$1" \
+				|| curl -f -s -o "$source" "$INSTALL_URL/$1"
 			;;
 	esac
 
@@ -49,13 +51,13 @@ if test ! -f "$1"; then
 		>&2 echo "Error fetching $INSTALL_URL/$1"
 		exit 3
 	}
+	umask 022
 fi
 
-test -e "$target" && diff -U 2 $target $source || {
-	cp $source "$target"
+test -e "$target" && diff -U 2 "$target" "$source" || {
+	cp "$source" "$target"
 	[ -n "$OWNER" ] && chown $OWNER "$target"
 	[ -n "$MODE" ] && chmod $MODE "$target"
-	rm -f $source
 	ret=0
 }
 exit $ret

@@ -3,6 +3,7 @@
 require 'open3'
 require 'tempfile'
 require 'webrick'
+require 'digest/md5'
 
 # Test Utilities
 $tests = 0
@@ -70,11 +71,27 @@ try "Install a file from a remote URL to the staging area" do
     File.open(src, 'w') { |f| f.write("123") }
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 #{fn} #{fn}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
-    eq err, ""
     eq out, ""
-    #eq status.success?, true
+    eq err, ""
+    eq status.success?, true
     eq "123", File.read(dst)
     eq File.stat(dst).mode.to_s(8), '100644'
+end
+
+try "Install a binary file from a remote URL to the staging area" do
+    src = "#{$wwwtmp}/sh_#{$tests}"
+    dst = "#{$systmp}/ps_#{$tests}"
+    FileUtils.cp("/bin/sh", "#{src}"); FileUtils.chmod 0644, src
+    FileUtils.cp("/bin/ps", "#{dst}"); FileUtils.chmod 0644, dst
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall sh_#{$tests} #{dst}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, ""
+    eq out.sub(/(Binary files|Files) /, "").sub(/\..+ differ/, ".XXXXXX"),
+        "#{$systmp}/ps_#{$tests} and sh_#{$tests}.XXXXXX\n"
+    eq status.exitstatus, 0
+    # 'ps' was replaced with 'sh'
+    eq Digest::MD5.hexdigest(File.read("/bin/sh")),
+       Digest::MD5.hexdigest(File.read(dst))
 end
 
 is_busybox = ENV['SHELL']=='/bin/ash'
@@ -87,7 +104,7 @@ try "Install a file from a remote URL containing special characters", is_busybox
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out, ""
-    #eq status.success?, true
+    eq status.success?, true
     eq "123", File.read(dst)
     eq File.stat(dst).mode.to_s(8), '100644'
 end
