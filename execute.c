@@ -131,16 +131,15 @@ get_socket() {
  */
 
 char *
-findprog(char *prog, char *path)
+findprog(char *prog)
 {
 	int len;
+	char *path;
 	char *filename;
 	char *p, *pathcpy;
 	struct stat sbuf;
 
-	if (path == NULL)
-		return NULL;
-
+	path = getenv("PATH");
 	if ((path = strdup(path)) == NULL)
 		err(1, "strdup");
 	pathcpy = path;

@@ -56,6 +56,7 @@ yylex() {
 			}
 			memcpy(lp->content+lp->content_size, line+1, linelen-1);
 			lp->content_size += linelen-1;
+			lp->content[lp->content_size] = '\0';
 		}
 
 		/* label */

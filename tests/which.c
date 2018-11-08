@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
 	if (argc != 2) usage();
 	prog = argv[1];
-	found = findprog(prog, getenv("PATH"));
+	found = findprog(prog);
 	printf("%s\n", found);
 
 	return 0;

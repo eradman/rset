@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 0.9
+RELEASE = 1.0
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
 OBJS = rutils.o input.o execute.o rset.o compat.o
 
@@ -29,6 +29,9 @@ rset: ${OBJS}
 	@chmod +x $@
 
 install: rset
+	@mkdir -p ${DESTDIR}${PREFIX}/bin
+	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
+	@mkdir -p ${DESTDIR}${MANPREFIX}/man5
 	install rset ${DESTDIR}${PREFIX}/bin
 	install rinstall ${DESTDIR}${PREFIX}/bin
 	install rsub ${DESTDIR}${PREFIX}/bin

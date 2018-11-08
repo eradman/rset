@@ -22,7 +22,7 @@ int append(char *argv[], int argc, char *arg, ...);
 int run(char *const argv[]);
 int pipe_cmd(char *const argv[], char *input, size_t len);
 int get_socket();
-char *findprog(char *, char *);
+char *findprog(char *prog);
 
 char *start_connection(Label *route_label, int http_port, const char *ssh_config);
 int ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port);

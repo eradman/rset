@@ -102,9 +102,9 @@ int main(int argc, char *argv[])
 	label_pattern = argv[optind+1];
 	if (!label_pattern)
 		label_pattern = "^";
-	if ((rinstall_bin = findprog("rinstall", getenv("PATH"))) == 0)
+	if ((rinstall_bin = findprog("rinstall")) == 0)
 		not_found("rinstall");
-	if ((rsub_bin = findprog("rsub", getenv("PATH"))) == 0)
+	if ((rsub_bin = findprog("rsub")) == 0)
 		not_found("rsub");
 
 	/* all operations must be relative to the routes file */
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 	inputstring = malloc(PATH_MAX);
 	snprintf(inputstring, PATH_MAX, WEB_SERVER, http_port);
 	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
-	if ((httpd_bin = findprog(http_srv_argv[0], getenv("PATH"))) == 0)
+	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
 
 	/* start the web server */
