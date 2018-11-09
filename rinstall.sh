@@ -27,9 +27,17 @@ done
 source=$1
 target=$2
 
+case $(dirname "$target") in
+	/*) ;;
+	*)
+		>&2 echo "Error: $target is not an absolute path"
+		exit 1
+		;;
+esac
+
 if test ! -f "$1"; then
 	umask 044
-	source="$1.$(mktemp XXXXXX)"
+	source="$1.$(mktemp rinstall_XXXXXX)"
 	case `uname` in
 		OpenBSD)
 			ftp -o "$source" -n "$INSTALL_URL/$1"

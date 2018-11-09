@@ -69,7 +69,7 @@ try "Install a file from a remote URL to the staging area" do
     dst = "#{$systmp}/#{fn}"
     src = "#{$wwwtmp}/#{fn}"
     File.open(src, 'w') { |f| f.write("123") }
-    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 #{fn} #{fn}"
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 #{fn} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq out, ""
     eq err, ""
@@ -100,7 +100,7 @@ try "Install a file from a remote URL containing special characters", is_busybox
     dst = "#{$systmp}/#{fn}"
     src = "#{$wwwtmp}/#{fn}"
     File.open(src, 'w') { |f| f.write("123") }
-    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 '#{fn}' '#{fn}'"
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 '#{fn}' '#{dst}'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out, ""
@@ -112,7 +112,7 @@ end
 try "Try to fetch a file that does not exist" do
     fn = "test_#{$tests}.txt"
     dst = "#{$systmp}/#{fn}"
-    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall bogus.txt #{fn}"
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall bogus.txt #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq status.exitstatus, 3
     eq err.split(/\n/)[-1], "Error fetching #{$install_url}/bogus.txt"
@@ -125,7 +125,7 @@ try "Install a file from the local staging directory" do
     dst = "#{$systmp}/#{fn}"
     src = "#{$wwwtmp}/#{fn}"
     File.open(src, 'w') { |f| f.write("456") }
-    cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{fn}"
+    cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out, ""
@@ -165,4 +165,15 @@ try "Update a file" do
         "+123\n"
     eq File.stat(dst).mode.to_s(8), '100660'
     eq status.success?, true
+end
+
+try "Ensure that a relative target cannot be used" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall bogus.txt #{fn}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq status.exitstatus, 1
+    eq err, "Error: #{fn} is not an absolute path\n"
+    eq out, ""
+    eq File.exists?(dst), false
 end

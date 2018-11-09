@@ -3,6 +3,7 @@
  - Support Alpine Linux
  - Forcibly remove temporary staging directory
  - Set remote environment variable ROUTE_LABEL
+ - Bundled _rutils scripts insist on absolute targets
 
 = Release History
 

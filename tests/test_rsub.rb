@@ -162,3 +162,14 @@ try "Update a block" do
     RESULT
     eq status.success?, true
 end
+
+try "Ensure that a relative target cannot be used" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    File.open(dst, 'w') { |f| f.write("a=2\nb=3\n") }
+    cmd = "#{Dir.pwd}/../rsub -A -r 'a=[0-9]' -l 'a=5' #{fn}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, "Error: #{fn} is not an absolute path\n"
+    eq out, ""
+    eq status.exitstatus, 1
+end

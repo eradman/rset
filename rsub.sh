@@ -25,8 +25,16 @@ while [ $# -gt 1 ]; do
 done
 [ $# -eq 1 ] || usage
 
+source=$(mktemp rsub_XXXXXXXX)
 target=$1
-source=$(mktemp XXXXXXXX)
+
+case $(dirname "$target") in
+	/*) ;;
+	*)
+		>&2 echo "Error: $target is not an absolute path"
+		exit 1
+		;;
+esac
 
 test -f "$target" || {
 	>&2 echo "rsub: file not found: $target"
