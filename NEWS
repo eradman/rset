@@ -1,6 +1,8 @@
 = Next Release: 1.0
 
  - Support Alpine Linux
+ - Forcibly remove temporary staging directory
+ - Set remote environment variable ROUTE_LABEL
 
 = Release History
 

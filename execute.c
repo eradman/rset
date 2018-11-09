@@ -247,9 +247,10 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' INSTALL_URL='"
-	    INSTALL_URL "' exec %s\"",
-	    op.execute_with, http_port, host_label->name, op.interpreter);
+	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' "
+	    "ROUTE_LABEL='%s' INSTALL_URL='" INSTALL_URL "' exec %s\"",
+	    op.execute_with, http_port, host_label->name, host_name,
+	    op.interpreter);
 
 	/* construct ssh command */
 	argc = 0;
@@ -265,9 +266,9 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 	char *argv[32];
 
 	snprintf(tmp_path, sizeof(tmp_path), REMOTE_TMP_PATH, http_port);
-	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-r", tmp_path , NULL);
+	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", tmp_path , NULL);
 	if (run(argv) != 0)
-		err(1, "remote tmp dir");
+		warn("remote tmp dir");
 
 	append(argv, 0, "ssh", "-q", "-S", socket_path, "-O", "exit", host_name, NULL);
 	if (run(argv) != 0)
