@@ -4,6 +4,7 @@
  - Forcibly remove temporary staging directory
  - Set remote environment variable ROUTE_LABEL
  - Bundled _rutils scripts insist on absolute targets
+ - rinstall(1) will refuse to install an empty file
 
 = Release History
 

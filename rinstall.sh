@@ -62,6 +62,11 @@ if test ! -f "$1"; then
 	umask 022
 fi
 
+test -s "$source" || {
+	>&2 echo "Error: $1 is empty"
+	exit 1
+}
+
 test -e "$target" && diff -U 2 "$target" "$source" || {
 	cp "$source" "$target"
 	[ -n "$OWNER" ] && chown $OWNER "$target"

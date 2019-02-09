@@ -177,3 +177,17 @@ try "Ensure that a relative target cannot be used" do
     eq out, ""
     eq File.exists?(dst), false
 end
+
+try "Refuse to install an empty file" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{$tests}/#{fn}"
+    src = "#{$wwwtmp}/#{fn}"
+    Dir.mkdir "#{$systmp}/#{$tests}"
+    File.open(src, 'w') { |f| f.write("") }
+    File.open(dst, 'w') { |f| f.chmod(0642); f.write("000\n123\n") }
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 660 #{fn} #{dst}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq err, "Error: #{fn} is empty\n"
+    eq out, ""
+    eq status.exitstatus, 1
+end
