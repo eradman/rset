@@ -31,7 +31,7 @@ target=$1
 case $(dirname "$target") in
 	/*) ;;
 	*)
-		>&2 echo "Error: $target is not an absolute path"
+		>&2 echo "rsub: $target is not an absolute path"
 		exit 1
 		;;
 esac

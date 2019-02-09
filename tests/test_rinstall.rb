@@ -115,7 +115,7 @@ try "Try to fetch a file that does not exist" do
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall bogus.txt #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq status.exitstatus, 3
-    eq err.split(/\n/)[-1], "Error fetching #{$install_url}/bogus.txt"
+    eq err.split(/\n/)[-1], "rinstall: unable to fetch #{$install_url}/bogus.txt"
     eq out, ""
     eq File.exists?(dst), false
 end
@@ -173,7 +173,7 @@ try "Ensure that a relative target cannot be used" do
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall bogus.txt #{fn}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq status.exitstatus, 1
-    eq err, "Error: #{fn} is not an absolute path\n"
+    eq err, "rinstall: #{fn} is not an absolute path\n"
     eq out, ""
     eq File.exists?(dst), false
 end
@@ -187,7 +187,7 @@ try "Refuse to install an empty file" do
     File.open(dst, 'w') { |f| f.chmod(0642); f.write("000\n123\n") }
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 660 #{fn} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
-    eq err, "Error: #{fn} is empty\n"
+    eq err, "rinstall: #{fn} is empty\n"
     eq out, ""
     eq status.exitstatus, 1
 end

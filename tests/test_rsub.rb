@@ -169,7 +169,7 @@ try "Ensure that a relative target cannot be used" do
     File.open(dst, 'w') { |f| f.write("a=2\nb=3\n") }
     cmd = "#{Dir.pwd}/../rsub -A -r 'a=[0-9]' -l 'a=5' #{fn}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
-    eq err, "Error: #{fn} is not an absolute path\n"
+    eq err, "rsub: #{fn} is not an absolute path\n"
     eq out, ""
     eq status.exitstatus, 1
 end

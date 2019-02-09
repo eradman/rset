@@ -30,7 +30,7 @@ target=$2
 case $(dirname "$target") in
 	/*) ;;
 	*)
-		>&2 echo "Error: $target is not an absolute path"
+		>&2 echo "rinstall: $target is not an absolute path"
 		exit 1
 		;;
 esac
@@ -56,14 +56,14 @@ if test ! -f "$1"; then
 	esac
 
 	test $? -eq 0 || {
-		>&2 echo "Error fetching $INSTALL_URL/$1"
+		>&2 echo "rinstall: unable to fetch $INSTALL_URL/$1"
 		exit 3
 	}
 	umask 022
 fi
 
 test -s "$source" || {
-	>&2 echo "Error: $1 is empty"
+	>&2 echo "rinstall: $1 is empty"
 	exit 1
 }
 

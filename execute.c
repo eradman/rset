@@ -201,7 +201,7 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
 	if (stat(socket_path, &sb) != -1) {
-		fprintf(stderr, "Error: socket for '%s' already exists, run\n"
+		fprintf(stderr, "rset: socket for '%s' already exists, run\n"
 		    "  fstat %s\n"
 		    "and remove the file if no process is listed.\n",
 		    host_name, socket_path);

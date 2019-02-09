@@ -67,7 +67,7 @@ yylex() {
 			read_label(line, host_labels[n_labels]);
 			n_labels++;
 			if (n_labels == LABELS_MAX) {
-				fprintf(stderr, "Error: maximum number of labels (%d) "
+				fprintf(stderr, "rset: maximum number of labels (%d) "
 				    "exceeded\n", n_labels);
 				exit(1);
 			}
