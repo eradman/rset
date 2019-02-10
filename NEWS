@@ -1,12 +1,12 @@
-= Next Release: 1.0
+= Release History
+
+== 1.0: February 9, 2019
 
  - Support Alpine Linux
  - Forcibly remove temporary staging directory
  - Set remote environment variable ROUTE_LABEL
  - Bundled _rutils scripts insist on absolute targets
- - rinstall(1) will refuse to install an empty file
-
-= Release History
+ - rinstall(1) will not install an empty file
 
 == 0.9: November 7, 2018
 
@@ -17,7 +17,7 @@
 
 == 0.8: September 24, 2018
 
- - Bundled _rutils scripts uses mktemp to avoid collisions
+ - Bundled _rutils scripts uses mktemp(1) to avoid collisions
  - Bundled _rutils scrips handle spaces and most other special characters
  - rsub(1) also handles block replacements
  - Raise error if path export list is specified outside of a routes file
@@ -34,7 +34,7 @@
 == 0.6: August 30, 2018
 
  - Specify ('-ll') more than once to display options for each label
- - New '-F' option for specifying an ssh_config file
+ - New '-F' option for specifying an ssh_config(5) file
  - Drop 'username' option; use ssh_config(5) instead
  - Drop 'install_url' option; override INSTALL_URL within scripts instead
  - Parse all files referenced in routes_file
