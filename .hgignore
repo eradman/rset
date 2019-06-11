@@ -1,6 +1,0 @@
-config.h
-Makefile
-compat.c
-
-syntax: glob
-*.o
