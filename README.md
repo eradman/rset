@@ -35,12 +35,5 @@ News
 A release history as well as features in the upcoming release are covered in the
 [NEWS] file.
 
-License
--------
-
-Source is under and ISC-style license. See the [LICENSE] file for more detailed
-information on the license used for compatibility libraries.
-
 [darkhttpd]: https://unix4lyfe.org/darkhttpd/
 [NEWS]: https://raw.githubusercontent.com/eradman/ephemeralpg/master/NEWS
-[LICENSE]: https://raw.githubusercontent.com/eradman/ephemeralpg/master/LICENSE
