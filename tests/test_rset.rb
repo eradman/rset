@@ -68,7 +68,7 @@ end
 
 try "Locate an executable in the current path" do
     cmd = "./which sh"
-    out, err, status = Open3.capture3(cmd)
+    out, err, status = Open3.capture3({"PATH"=>"/bin:/usr/bin"}, cmd)
     eq err, ""
     eq status.success?, true
     eq out, "/bin/sh\n"

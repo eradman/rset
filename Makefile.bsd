@@ -3,8 +3,9 @@ MANPREFIX ?= ${PREFIX}/man
 RELEASE = 1.1
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
 OBJS = rutils.o input.o execute.o rset.o compat.o
+PROGS = rset rinstall rsub
 
-all: versioncheck rset rinstall rsub
+all: versioncheck ${PROGS}
 
 env:
 	@echo "CC         = ${CC}"
@@ -28,7 +29,7 @@ rset: ${OBJS}
 	sed -e 's/$${release}/${RELEASE}/' $< > $@
 	@chmod +x $@
 
-install: rset
+install: ${PROGS}
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man5
@@ -49,11 +50,11 @@ uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man1/rsub.1
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5
 
-test: rset rinstall
+test: ${PROGS}
 	make -C tests
 
 clean:
-	rm -f compat.c *.o *.core rset rinstall rsub
+	rm -f compat.c *.o *.core ${PROGS}
 	make -C tests clean
 
 distclean:
