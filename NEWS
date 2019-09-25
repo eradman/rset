@@ -1,9 +1,9 @@
-= Next Release: 1.1
+= Release History
+
+== 1.1: September 25, 2019
 
  - Move hosting from bitbucket.org to github.com
  - Rename tags from rset-X.Y to X.Y
-
-= Release History
 
 == 1.0: February 9, 2019
 
