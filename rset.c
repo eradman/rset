@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 	host_pattern = argv[optind];
 	label_pattern = argv[optind+1];
 	if (!label_pattern)
-		label_pattern = "^";
+		label_pattern = DEFAULT_LABEL_PATTERN;
 	if ((rinstall_bin = findprog("rinstall")) == 0)
 		not_found("rinstall");
 	if ((rsub_bin = findprog("rsub")) == 0)

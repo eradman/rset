@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 7, 2018
+.Dd September 27, 2019
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -34,9 +34,10 @@ executing each one in tern using ssh connection multiplexing.
 .Nm
 requires one parameter specifying the regular expression matching hosts
 to configure.
-A second regex may be specified
-to limit execution to  labels matching a specific pattern.
-By default all labels are evaluated.
+.Pp
+A second regex may be specified to limit execution to labels matching a
+specific pattern.
+By default only labels beginning with [0-9a-z] are evaluated.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds

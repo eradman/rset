@@ -12,6 +12,7 @@
 #define ROUTES_FILE "routes.pln"
 #define REPLICATED_DIRECTORY "_rutils"
 #define PUBLIC_DIRECTORY "_sources"
+#define DEFAULT_LABEL_PATTERN "^[0-9a-z]"
 
 /* option defaults */
 #define EXECUTE_WITH ""
