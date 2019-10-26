@@ -1,6 +1,7 @@
 #!/bin/sh
 # A helper utility for rset(1)
-# Subsitute lines in a file or append if not found
+# Substitute lines in a file or append if not found
+# 2018 Eric Radman <ericshane@eradman.com>
 
 ret=1
 

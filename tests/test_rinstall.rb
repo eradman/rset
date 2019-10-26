@@ -12,7 +12,7 @@ $test_description = 0
 # Setup
 $systmp = Dir.mktmpdir
 $wwwtmp = Dir.mktmpdir
-http_port = `./getsocket`.chomp
+http_port = %x{ ./getsocket }.chomp
 $install_url = "http://localhost:#{http_port}"
 $wwwserver = fork do
     WEBrick::HTTPServer.new(
