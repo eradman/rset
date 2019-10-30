@@ -1,6 +1,7 @@
 = Next Release: 1.2
 
  - By default only labels beginning with [0-9a-z] are evaluated
+ - New labelgrep(1) command for searching a collection of pln(5) files
 
 = Release History
 

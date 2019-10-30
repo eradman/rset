@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 7, 2018
+.Dd October 31, 2018
 .Dt PLN 5
 .Os
 .Sh NAME
@@ -32,9 +32,9 @@ pairs and text fragments designated by tab indentation
 interpreter=/bin/sh -x
 
 packages:
-	pkg_add -I nginx ruby
-	ln -sf /usr/local/bin/ruby25 /usr/local/bin/ruby
-	ln -sf /usr/local/bin/irb25 /usr/local/bin/irb
+	pkg_add -I nginx ruby%2.6
+	ln -sf /usr/local/bin/ruby26 /usr/local/bin/ruby
+	ln -sf /usr/local/bin/irb26 /usr/local/bin/irb
 
 interpreter=
 
@@ -58,3 +58,5 @@ A series of pathnames for use by the application may be specified after the
 Comments begin with a hash
 .Pq Ql \&#
 character, and can only be used the beginning of a line.
+.Sh SEE ALSO
+.Xr labelgrep 1
