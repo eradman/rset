@@ -18,12 +18,12 @@
 .Os
 .Sh NAME
 .Nm labelgrep
-.Nd progressive label query
+.Nd progressive label file searcher
 .Sh SYNOPSIS
 .Nm labelgrep
 .Ar pattern
-.Ar file.pln
-.Op Ar ...
+.Ar file
+.Op Ar file ...
 .Sh DESCRIPTION
 A pattern searcher for the
 .Xr pln 5
@@ -31,9 +31,9 @@ format.
 Displays the source file, label name, and highlights the contents matching a
 regular expression.
 .Pp
-Comments are ignored.
-.Nm
-does not attempt to validate the format of each file.
+Lines beginning with
+.Ql \&#
+are ignored.
 .Sh EXAMPLES
 Find all of the instances where a service is restarted
 .Pp
@@ -45,3 +45,6 @@ Show all routes that include the wordpress configuration
 .Sh SEE ALSO
 .Xr rset 1 ,
 .Xr re_format 7
+.Sh CAVEATS
+.Nm
+does not attempt to validate the format of each file.

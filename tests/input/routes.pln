@@ -1,8 +1,8 @@
 
 execute_with=doas
 
-t420s: t420s/ common/
+t430s: t430s/ common/
 	common/openbsd.pln
-	t420s.pln
+	t430s.pln
 
 # vim:noexpandtab:syntax=sh:ts=4

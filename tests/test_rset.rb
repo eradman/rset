@@ -88,10 +88,10 @@ end
 # Parsing Progressive Label Notation (.pln)
 
 try "Try parsing a label file" do
-    cmd = "./parser H input/t420s.pln"
+    cmd = "./parser H input/t430s.pln"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
-    eq out, File.read('expected/t420s.out')
+    eq out, File.read('expected/t430s.out')
     eq status.success?, true
 end
 
@@ -164,7 +164,7 @@ end
 try "Show matching routes and hosts" do
     fn = "#{$systmp}/routes.pln"
     out, err, status = nil
-    cmd = "#{Dir.pwd}/../rset -lln t420"
+    cmd = "#{Dir.pwd}/../rset -lln t430"
     Dir.chdir("input") do
         out, err, status = Open3.capture3(cmd)
     end
