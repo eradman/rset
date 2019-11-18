@@ -1,0 +1,14 @@
+*.o
+Makefile
+compat.c
+labelgrep
+rinstall
+rset
+rsub
+tests/args
+tests/copyfile
+tests/getsocket
+tests/parser
+tests/pipe
+tests/which
+
