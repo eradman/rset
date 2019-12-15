@@ -182,7 +182,6 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 	char *host_name;
 	char **path;
 	struct stat sb;
-	Options op;
 
 	/* verify that export paths are accessible */
 	path = route_label->export_paths;
@@ -279,7 +278,7 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 
 /* internal utility functions */
 
-static void
+void
 apply_default(char *option, const char *user_option, const char *default_option) {
 	if (strlen(user_option) > 0)
 		memcpy(option, user_option, strlen(user_option)+1);

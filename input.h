@@ -26,8 +26,6 @@ typedef struct {
 	char interpreter[64];
 } Options;
 
-typedef struct Label Label;
-
 typedef struct Label {
 	char name[512];
 	char* export_paths[64];
@@ -49,8 +47,8 @@ Label** alloc_labels();
 char* array_to_str(char *argv[]);
 void str_to_array(char *argv[], char *input, int siz);
 
-static char* ltrim(char *s, int c);
-static void read_label(char *line, Label *label);
-static void read_option(char *text, Options *op);
+char* ltrim(char *s, int c);
+void read_label(char *line, Label *label);
+void read_option(char *text, Options *op);
 
 #endif /* _RSET_INPUT_H_ */

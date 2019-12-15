@@ -185,7 +185,7 @@ array_to_str(char *argv[]) {
  * ltrim - strim leading characters
  */
 
-static char*
+char*
 ltrim(char *s, int c) {
 	int offset=0;
 
@@ -197,7 +197,7 @@ ltrim(char *s, int c) {
 /*
  * read_label - populate label name, export_paths and options
  */
-static void
+void
 read_label(char *line, Label *label) {
 	line[strlen(line)-1] = '\0';
 
@@ -212,7 +212,7 @@ read_label(char *line, Label *label) {
 /*
  * read_option - set one of the available options
  */
-static void
+void
 read_option(char *text, Options *op) {
 	char *k, *v;
 

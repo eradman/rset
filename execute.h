@@ -28,5 +28,5 @@ char *start_connection(Label *route_label, int http_port, const char *ssh_config
 int ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port);
 void end_connection(char *socket_path, char *host_name, int http_port);
 
-static void apply_default(char *option, const char *user_option, const char *default_option);
+void apply_default(char *option, const char *user_option, const char *default_option);
 
