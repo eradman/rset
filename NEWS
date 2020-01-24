@@ -1,6 +1,6 @@
 = Next Release: 1.3
 
- -
+ - rinstall(1) prints the name of the target if it does not already exist
 
 = Release History
 
