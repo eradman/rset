@@ -71,7 +71,7 @@ try "Install a file from a remote URL to the staging area" do
     File.open(src, 'w') { |f| f.write("123") }
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 #{fn} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
-    eq out, ""
+    eq out.chomp, "rinstall: created #{dst}"
     eq err, ""
     eq status.success?, true
     eq "123", File.read(dst)
@@ -103,8 +103,8 @@ try "Install a file from a remote URL containing special characters", (is_busybo
     File.open(src, 'w') { |f| f.write("123") }
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 '#{fn}' '#{dst}'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq out.chomp, "rinstall: created #{dst}"
     eq err, ""
-    eq out, ""
     eq status.success?, true
     eq "123", File.read(dst)
     eq File.stat(dst).mode.to_s(8), '100644'
@@ -128,8 +128,8 @@ try "Install a file from the local staging directory" do
     File.open(src, 'w') { |f| f.write("456") }
     cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq out.chomp, "rinstall: created #{dst}"
     eq err, ""
-    eq out, ""
     eq status.exitstatus, 0
     eq File.exists?(dst), true
 end
