@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 	while ((ch = getopt(argc, argv, "lnvF:f:")) != -1)
 		switch (ch) {
 		case 'l':
-			list_opt += 1;
+			list_opt = 1;
 			break;
 		case 'n':
 			dryrun_opt = 1;
@@ -217,13 +217,13 @@ int main(int argc, char *argv[])
 		host_labels = route_labels[i]->labels;
 		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
 		if (rv == 0) {
-			if (list_opt > 1) {
+			if (list_opt) {
 					snprintf(buf, sizeof(buf), "%-20s", hostname);
-					hl_range(buf, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+					hl_range(buf, HL_HOST, 0, 0);
 					printf("  %s\n", array_to_str(route_labels[i]->export_paths));
 			}
 			else {
-				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+				hl_range(hostname, HL_HOST, 0, 0);
 				printf("\n");
 			}
 			socket_path = start_connection(route_labels[i], http_port,
@@ -234,12 +234,12 @@ int main(int argc, char *argv[])
 				rv = regexec(&label_reg, host_labels[j]->name, 1, &regmatch, 0);
 				if (rv != 0)
 					continue;
-				if (list_opt > 1) {
+				if (list_opt) {
 					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
 					hl_range(buf, HL_LABEL, 0, 0);
 					printf("  %s\n", format_options(&host_labels[j]->options));
 				}
-				else if (list_opt) {
+				else {
 					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
 					printf("\n");
 				}
@@ -257,7 +257,7 @@ dry_run:
 		host_labels = route_labels[i]->labels;
 		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
 		if (rv == 0) {
-			if (list_opt > 1) {
+			if (list_opt) {
 					snprintf(buf, sizeof(buf), "%-20s", hostname);
 					hl_range(buf, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
 					printf("  %s\n", array_to_str(route_labels[i]->export_paths));
@@ -271,12 +271,12 @@ dry_run:
 				if (rv != 0)
 					continue;
 				labels_matched++;
-				if (list_opt > 1) {
+				if (list_opt) {
 					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
 					hl_range(buf, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
 					printf("  %s\n", format_options(&host_labels[j]->options));
 				}
-				else if (list_opt) {
+				else {
 					hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
 					printf("\n");
 				}
@@ -308,7 +308,7 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] "
+	fprintf(stderr, "usage: rset [-ln] [-F sshconfig_file] [-f routes_file] "
 	    "host_pattern [label_pattern]\n");
 	exit(1);
 }

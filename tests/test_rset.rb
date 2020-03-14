@@ -81,7 +81,7 @@ try "Run rset with no arguments" do
     out, err, status = Open3.capture3(cmd)
     eq err.gsub(/release: (\d\.\d)/, "release: 0.0"),
         "release: 0.0\n" +
-        "usage: rset [-lln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
+        "usage: rset [-ln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
     eq status.success?, false
 end
 
@@ -164,7 +164,7 @@ end
 try "Show matching routes and hosts" do
     fn = "#{$systmp}/routes.pln"
     out, err, status = nil
-    cmd = "#{Dir.pwd}/../rset -lln t430"
+    cmd = "#{Dir.pwd}/../rset -ln t430"
     Dir.chdir("input") do
         out, err, status = Open3.capture3(cmd)
     end

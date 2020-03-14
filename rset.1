@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 1, 2019
+.Dd March 12, 2020
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -21,7 +21,7 @@
 .Nd configure systems using labeled scripts
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl lln
+.Op Fl ln
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar route_file
 .Ar host_pattern
@@ -42,11 +42,10 @@ By default only labels beginning with [0-9a-z] are evaluated.
 The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl l
-List the name of each label before execution.
-Specify more than once to list options associated with each label.
+List the options associated with each label.
 .It Fl n
 Do not execute commands.
-Instead hostnames are highlighted to show what characters the
+Hostnames are highlighted to show what characters the
 .Ar host_pattern
 matched.
 .It Fl F
