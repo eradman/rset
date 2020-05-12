@@ -40,6 +40,7 @@ static void not_found(char *name);
 /* globals used by input.l */
 
 FILE* yyin;
+char* yyfn;
 int n_labels;
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
@@ -187,6 +188,7 @@ int main(int argc, char *argv[])
 	n_labels = 0;
 	route_labels = alloc_labels();
 	host_labels = route_labels;
+	yyfn = routes_file;
 	yyin = fopen(routes_file, "r");
 	if (!yyin)
 		err(1, "%s", routes_file);

@@ -29,6 +29,7 @@
 /* globals */
 
 FILE* yyin;
+char* yyfn;
 Label **host_labels;
 Options current_options;
 int n_labels;
@@ -46,6 +47,13 @@ yylex() {
 
 		/* empty lines and comments */
 		if (line[0] == '\n' || line[0] == '#');
+
+		/* leading whitespace */
+		else if (line[0] == ' ') {
+			fprintf(stderr, "%s: invalid leading character on line %d: '%c'\n",
+			    yyfn, n, line[0]);
+			exit(1);
+		}
 
 		/* tab-intended content */
 		else if (line[0] == '\t') {
@@ -67,8 +75,8 @@ yylex() {
 			read_label(line, host_labels[n_labels]);
 			n_labels++;
 			if (n_labels == LABELS_MAX) {
-				fprintf(stderr, "rset: maximum number of labels (%d) "
-				    "exceeded\n", n_labels);
+				fprintf(stderr, "%s: maximum number of labels (%d) "
+				    "exceeded\n", yyfn, n_labels );
 				exit(1);
 			}
 		}
@@ -79,10 +87,11 @@ yylex() {
 			read_option(line, &current_options);
 		}
 
-		/* uknown */
+		/* unknown */
 		else {
 			line[linelen-1] = '\0';
-			fprintf(stderr, "rset: unknown symbol at line %d: '%s'\n", n, line);
+			fprintf(stderr, "%s: unknown symbol at line %d: '%s'\n",
+			    yyfn, n, line);
 			exit(1);
 		}
 	}
@@ -126,6 +135,7 @@ read_host_labels(Label *route_label) {
 		/* inherit option state from the routes file */
 		memcpy(&current_options, &route_label->options,
 		    sizeof(current_options));
+		yyfn = line; /* for error message */
 		yyin = fopen(line, "r");
 		if (!yyin)
 			err(1, "%s", line);
@@ -136,9 +146,10 @@ read_host_labels(Label *route_label) {
 		/* unsupported options */
 		for (j=0; host_labels[j]; j++) {
 			if (*host_labels[j]->export_paths != NULL) {
-				fprintf(stderr, "rset: label validation error: '%s: %s'\n"
+				fprintf(stderr, "%s: label validation error: '%s: %s'\n"
 				    "      path export lists are only supported route files\n",
-				    host_labels[j]->name, array_to_str(host_labels[j]->export_paths));
+				    yyfn, host_labels[j]->name,
+				    array_to_str(host_labels[j]->export_paths));
 				exit(1);
 			}
 		}
@@ -225,7 +236,7 @@ read_option(char *text, Options *op) {
 	else if (strcmp(k, "interpreter") == 0)
 		strlcpy(op->interpreter, v, sizeof(op->interpreter));
 	else {
-		fprintf(stderr, "rset: unknown option '%s=%s'\n", k, v);
+		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
 		exit(1);
 	}
 }

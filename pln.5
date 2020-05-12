@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 1, 2019
+.Dd May 11, 2020
 .Dt PLN 5
 .Os
 .Sh NAME
@@ -32,9 +32,9 @@ pairs and text fragments designated by tab indentation
 interpreter=/bin/sh -x
 
 packages:
-	pkg_add -I nginx ruby%2.6
-	ln -sf /usr/local/bin/ruby26 /usr/local/bin/ruby
-	ln -sf /usr/local/bin/irb26 /usr/local/bin/irb
+	pkg_add -I nginx ruby%2.7
+	ln -sf /usr/local/bin/ruby27 /usr/local/bin/ruby
+	ln -sf /usr/local/bin/irb27 /usr/local/bin/irb
 
 interpreter=
 

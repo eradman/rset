@@ -126,7 +126,7 @@ try "Report an unknown syntax" do
     File.open(fn, 'w') { |f| f.write("php\n") }
     cmd = "#{Dir.pwd}/../rset -ln 't[42'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
-    eq err, "rset: unknown symbol at line 1: 'php'\n"
+    eq err, "routes.pln: unknown symbol at line 1: 'php'\n"
     eq status.success?, false
     eq out, ""
 end
@@ -146,7 +146,7 @@ try "Report an unknown option" do
     File.open(fn, 'w') { |f| f.write("username=radman\n") }
     cmd = "#{Dir.pwd}/../rset -ln 't[42'"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
-    eq err, "rset: unknown option 'username=radman'\n"
+    eq err, "routes.pln: unknown option 'username=radman'\n"
     eq status.success?, false
     eq out, ""
 end

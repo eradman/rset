@@ -1,9 +1,14 @@
-= Next Release: 1.3
+= Next Release: 1.4
 
- - rinstall(1) prints the name of the target if it does not already exist
- - Always list hostnames and labels, '-n' shows the compoents the regex matches
+ - Print filename and line number for pln(5) parse errors and
+ - No longer permit leading spaces in pln(5) files
 
 = Release History
+
+== 1.3: March 26, 2020
+
+ - rinstall(1) prints the name of the target if it does not already exist
+ - Always list hostnames and labels, '-n' shows the components the regex matches
 
 == 1.2: November 1, 2019
 
