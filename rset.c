@@ -48,6 +48,7 @@ Options current_options;
 
 int list_opt;
 int dryrun_opt;
+int tty_opt;
 
 /* globals used by signal handlers */
 char *socket_path;
@@ -79,13 +80,16 @@ int main(int argc, char *argv[])
 	char *sshconfig_file = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "lnvF:f:")) != -1)
+	while ((ch = getopt(argc, argv, "lntF:f:")) != -1)
 		switch (ch) {
 		case 'l':
 			list_opt = 1;
 			break;
 		case 'n':
 			dryrun_opt = 1;
+			break;
+		case 't':
+			tty_opt = 1;
 			break;
 		case 'F':
 			sshconfig_file = argv[optind-1];
@@ -245,7 +249,11 @@ int main(int argc, char *argv[])
 					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
 					printf("\n");
 				}
-				(void) ssh_command(hostname, socket_path, host_labels[j], http_port);
+				if (tty_opt)
+					(void) ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
+				else
+					(void) ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+
 			}
 			end_connection(socket_path, hostname, http_port);
 			socket_path = NULL;
@@ -310,7 +318,7 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-ln] [-F sshconfig_file] [-f routes_file] "
+	fprintf(stderr, "usage: rset [-lnt] [-F sshconfig_file] [-f routes_file] "
 	    "host_pattern [label_pattern]\n");
 	exit(1);
 }

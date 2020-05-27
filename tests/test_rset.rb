@@ -81,7 +81,7 @@ try "Run rset with no arguments" do
     out, err, status = Open3.capture3(cmd)
     eq err.gsub(/release: (\d\.\d)/, "release: 0.0"),
         "release: 0.0\n" +
-        "usage: rset [-ln] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
+        "usage: rset [-lnt] [-F sshconfig_file] [-f routes_file] host_pattern [label_pattern]\n"
     eq status.success?, false
 end
 

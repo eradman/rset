@@ -2,6 +2,7 @@
 
  - Print filename and line number for pln(5) parse errors and
  - No longer permit leading spaces in pln(5) files
+ - New '-t' option allows TTY access
 
 = Release History
 

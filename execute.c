@@ -167,7 +167,8 @@ findprog(char *prog)
 
 /*
  *  start_connection - start an SSH control master and copy _rutils
- *  ssh_command      - main function for executing a script on a remote host
+ *  ssh_command_pipe - execute a script over a pipe to a remote interpreter
+ *  ssh_command_tty  - copy script to remote host before execution
  *  end_connection   - stop an SSH control master and remove temporary files
  */
 
@@ -236,7 +237,7 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 }
 
 int
-ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port) {
+ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port) {
 	int argc;
 	char cmd[PATH_MAX];
 	char *argv[32];
@@ -257,6 +258,40 @@ ssh_command(char *host_name, char *socket_path, Label *host_label, int http_port
 
 	(void) append(argv, argc, host_name, cmd, NULL);
 	return pipe_cmd(argv, host_label->content, host_label->content_size);
+}
+
+int
+ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port) {
+	int argc;
+	char cmd[PATH_MAX];
+	char *argv[32];
+	Options op;
+
+	/* copy the contents of the script */
+	snprintf(cmd, sizeof(cmd), "cat > " REMOTE_SCRIPT_PATH,
+	    http_port);
+	/* construct ssh command */
+	argc = 0;
+	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
+	(void) append(argv, argc, host_name, cmd, NULL);
+	pipe_cmd(argv, host_label->content, host_label->content_size);
+
+	/* construct command to execute on remote host  */
+	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
+	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
+
+	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' "
+	    "ROUTE_LABEL='%s' INSTALL_URL='" INSTALL_URL "' exec %s "
+	    REMOTE_SCRIPT_PATH "\"",
+	    op.execute_with, http_port, host_label->name, host_name,
+	    op.interpreter, http_port);
+
+	/* construct ssh command */
+	argc = 0;
+	argc = append(argv, argc, "ssh", "-t", "-S", socket_path, NULL);
+
+	(void) append(argv, argc, host_name, cmd, NULL);
+	return run(argv);
 }
 
 void
