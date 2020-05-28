@@ -74,6 +74,49 @@ try "Locate an executable in the current path" do
     eq out, "/bin/sh\n"
 end
 
+try "Start an ssh session" do
+    cmd = "./ssh_command E 10.0.0.99"
+    out, err, status = Open3.capture3({"PATH"=>"#{Dir.pwd}/stubs"}, cmd)
+    eq err, ""
+    eq status.success?, true
+    eq out, <<~RESULT
+        ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_staging_6000
+        ssh -q -S /tmp/test_rset_socket -O exit 10.0.0.99
+    RESULT
+end
+
+try "Execute commands over ssh using a pipe" do
+    cmd = "./ssh_command P 10.0.0.98"
+    out, err, status = Open3.capture3({"PATH"=>"#{Dir.pwd}/stubs"}, cmd)
+    eq err, ""
+    eq status.success?, true
+    eq out, <<~RESULT
+        ssh -T -S /tmp/test_rset_socket 10.0.0.98  sh -c "cd /tmp/rset_staging_6000; LABEL='networking' ROUTE_LABEL='10.0.0.98' INSTALL_URL='http://localhost:6000' exec /bin/sh"
+    RESULT
+end
+
+try "Execute commands over ssh using a tty" do
+    cmd = "./ssh_command T 10.0.0.99"
+    out, err, status = Open3.capture3({"PATH"=>"#{Dir.pwd}/stubs"}, cmd)
+    eq err, ""
+    eq status.success?, true
+    eq out, <<~RESULT
+        ssh -T -S /tmp/test_rset_socket 10.0.0.99 cat > /tmp/rset_staging_6000/_script
+        ssh -t -S /tmp/test_rset_socket 10.0.0.99  sh -c "cd /tmp/rset_staging_6000; LABEL='networking' ROUTE_LABEL='10.0.0.99' INSTALL_URL='http://localhost:6000' exec /bin/sh /tmp/rset_staging_6000/_script"
+    RESULT
+end
+
+try "End an ssh session" do
+    cmd = "./ssh_command E 10.0.0.99"
+    out, err, status = Open3.capture3({"PATH"=>"#{Dir.pwd}/stubs"}, cmd)
+    eq err, ""
+    eq status.success?, true
+    eq out, <<~RESULT
+         ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_staging_6000
+         ssh -q -S /tmp/test_rset_socket -O exit 10.0.0.99
+    RESULT
+end
+
 # Smoke test
 
 try "Run rset with no arguments" do

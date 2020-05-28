@@ -15,12 +15,10 @@ Label **host_labels;     /* child */
 
 void usage();
 
-/*
- * H = Process as a host file
- * R = Process as route file
- */
 void usage() {
-	fprintf(stderr, "usage: ./parser H|R filename\n");
+	fprintf(stderr, "usage: ./parser H|R filename\n"
+	    "  H = Process as a host file\n"
+	    "  R = Process as route file\n");
 	exit(1);
 }
 

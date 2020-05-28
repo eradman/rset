@@ -16,6 +16,10 @@
 
 #include "input.h"
 
+#ifndef SSH
+#define SSH "ssh"
+#endif
+
 /* forwards */
 
 int append(char *argv[], int argc, char *arg, ...);

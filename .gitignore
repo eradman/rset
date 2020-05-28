@@ -11,4 +11,4 @@ tests/getsocket
 tests/parser
 tests/pipe
 tests/which
-
+tests/ssh_command
