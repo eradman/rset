@@ -1,10 +1,10 @@
-= Next Release: 1.4
+= Release History
+
+== 1.4: May 29, 2020
 
  - Print filename and line number for pln(5) parse errors and
  - No longer permit leading spaces in pln(5) files
  - New '-t' option allows TTY access
-
-= Release History
 
 == 1.3: March 26, 2020
 
