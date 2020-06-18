@@ -17,7 +17,7 @@
 
 /* option defaults */
 #define EXECUTE_WITH ""
-#define INSTALL_URL "http://localhost:6000"
+#define INSTALL_URL "http://127.0.0.1:6000"
 #define INTERPRETER "/bin/sh"
 
 /* colors */

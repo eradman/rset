@@ -14,7 +14,7 @@ Source Installation - BSD, Mac OS, and Linux
 
     ./configure
 
-By default [darkhttpd] is required to for serving files from the `_sources`
+By default [darkhttpd] is required for serving files from the `_sources`
 directory. This and other compile-time options can be changed by editing
 `config.h`.
 
