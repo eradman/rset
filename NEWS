@@ -1,6 +1,7 @@
 = Next Release: 1.5
 
  - Fetch files from '_sources' on 127.0.0.1 to avoid IPv6 confusion
+ - Require the ssh-agent(1) to be running with at least one unlocked key
 
 = Release History
 

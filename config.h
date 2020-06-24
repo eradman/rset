@@ -15,6 +15,9 @@
 #define PUBLIC_DIRECTORY "_sources"
 #define DEFAULT_LABEL_PATTERN "^[0-9a-z]"
 
+/* security */
+#define REQUIRE_SSH_AGENT 1
+
 /* option defaults */
 #define EXECUTE_WITH ""
 #define INSTALL_URL "http://127.0.0.1:6000"

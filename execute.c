@@ -166,11 +166,22 @@ findprog(char *prog)
 }
 
 /*
+ *  verify_ssh_agent - ensure ssh-agent is loaded with at least one unlocked key
  *  start_connection - start an SSH control master and copy _rutils
  *  ssh_command_pipe - execute a script over a pipe to a remote interpreter
  *  ssh_command_tty  - copy script to remote host before execution
  *  end_connection   - stop an SSH control master and remove temporary files
  */
+
+int
+verify_ssh_agent() {
+	int argc;
+	char *argv[32];
+
+	argc = 0;
+	argc = append(argv, argc, "ssh-add", "-l", NULL);
+	return run(argv);
+}
 
 char *
 start_connection(Label *route_label, int http_port, const char *ssh_config) {

@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 1.4
+RELEASE = 1.5
 CPPFLAGS += -DRELEASE=\"${RELEASE}\"
 OBJS = rutils.o input.o execute.o rset.o compat.o
 PROGS = rset rinstall rsub labelgrep

@@ -16,10 +16,6 @@
 
 #include "input.h"
 
-#ifndef SSH
-#define SSH "ssh"
-#endif
-
 /* forwards */
 
 int append(char *argv[], int argc, char *arg, ...);
@@ -28,6 +24,7 @@ int pipe_cmd(char *const argv[], char *input, size_t len);
 int get_socket();
 char *findprog(char *prog);
 
+int verify_ssh_agent();
 char *start_connection(Label *route_label, int http_port, const char *ssh_config);
 int ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port);
 int ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port);
