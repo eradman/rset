@@ -73,33 +73,58 @@ run(char *const argv[]) {
 }
 
 /*
- * pipe_cmd - attach an input string to stdin and execute a utility
+ * run_quiet - run a command while buffering stdout
  */
 int
-pipe_cmd(char *const argv[], char *input, size_t len) {
+run_quiet(char *const argv[]) {
 	int status;
-	int fd[2];
+	int stdout_pipe[2];
 	pid_t pid;
 
-	pipe(fd);
+	pipe(stdout_pipe);
 	pid = fork();
 	if (pid == -1)
 		err(1, "fork");
 
 	if (pid == 0) {
-		close(fd[1]);
-		dup2(fd[0], STDIN_FILENO);
+		dup2(stdout_pipe[0], STDOUT_FILENO);
 		execvp(argv[0], argv);
 		err(1, "could not exec %s", argv[0]);
 	}
-	close(fd[0]);
-	if (write(fd[1], input, len) == -1)
-		err(1, "write to child");
-	close(fd[1]);
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "wait on pid %d", pid);
 
-	return status;
+	return WEXITSTATUS(status);
+}
+
+/*
+ * pipe_cmd - attach an input string to stdin and execute a utility
+ */
+int
+pipe_cmd(char *const argv[], char *input, size_t len) {
+	int status;
+	int stdin_pipe[2];
+	pid_t pid;
+
+	pipe(stdin_pipe);
+	pid = fork();
+	if (pid == -1)
+		err(1, "fork");
+
+	if (pid == 0) {
+		close(stdin_pipe[1]);
+		dup2(stdin_pipe[0], STDIN_FILENO);
+		execvp(argv[0], argv);
+		err(1, "could not exec %s", argv[0]);
+	}
+	close(stdin_pipe[0]);
+	if (write(stdin_pipe[1], input, len) == -1)
+		err(1, "write to child");
+	close(stdin_pipe[1]);
+	if (waitpid(pid, &status, 0) == -1)
+		err(1, "wait on pid %d", pid);
+
+	return WEXITSTATUS(status);
 }
 
 /*
@@ -175,12 +200,10 @@ findprog(char *prog)
 
 int
 verify_ssh_agent() {
-	int argc;
 	char *argv[32];
 
-	argc = 0;
-	argc = append(argv, argc, "ssh-add", "-l", NULL);
-	return run(argv);
+	append(argv, 0, "ssh-add", "-l", NULL);
+	return run_quiet(argv);
 }
 
 char *

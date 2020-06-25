@@ -15,9 +15,6 @@
 #define PUBLIC_DIRECTORY "_sources"
 #define DEFAULT_LABEL_PATTERN "^[0-9a-z]"
 
-/* security */
-#define REQUIRE_SSH_AGENT 1
-
 /* option defaults */
 #define EXECUTE_WITH ""
 #define INSTALL_URL "http://127.0.0.1:6000"
@@ -28,3 +25,6 @@
 #define HL_RESET   "\x1b[0m"
 #define HL_HOST    "\x1b[33m" /* yellow */
 #define HL_LABEL   "\x1b[36m" /* cyan */
+
+/* checks */
+#define REQUIRE_SSH_AGENT

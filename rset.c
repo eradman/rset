@@ -217,8 +217,15 @@ int main(int argc, char *argv[])
 	}
 	if (dryrun_opt) goto dry_run;
 
-	if ((REQUIRE_SSH_AGENT) && (verify_ssh_agent() != 0))
+#ifdef REQUIRE_SSH_AGENT
+	if (verify_ssh_agent() != 0) {
+		printf("Try running:\n");
+			if (!getenv("SSH_AUTH_SOCK"))
+				printf("  eval `ssh-agent`\n");
+			printf("  ssh-add\n");
 		exit(1);
+	}
+#endif
 
 	/* execute commands on remote hosts */
 	for (i=0; route_labels[i]; i++) {
