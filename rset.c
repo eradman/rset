@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 
 #include <err.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <libgen.h>
 #include <regex.h>
@@ -36,6 +37,7 @@
 static void handle_exit(int sig);
 static void usage();
 static void not_found(char *name);
+static void format_http_log(char *output, size_t len);
 
 /* globals used by input.l */
 
@@ -49,6 +51,7 @@ Options current_options;
 int list_opt;
 int dryrun_opt;
 int tty_opt;
+int verbose_opt;
 
 /* globals used by signal handlers */
 char *socket_path;
@@ -58,10 +61,14 @@ int http_port;
 int main(int argc, char *argv[])
 {
 	char buf[_POSIX2_LINE_MAX];
+	char httpd_log[32768];
 	int ch;
-	int i, j;
-	int rv;
 	int fd;
+	int flags;
+	int i, j;
+	int nr;
+	int rv;
+	int stdout_pipe[2];
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	int status;
@@ -80,7 +87,7 @@ int main(int argc, char *argv[])
 	char *sshconfig_file = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "lntF:f:")) != -1)
+	while ((ch = getopt(argc, argv, "lntvF:f:")) != -1)
 		switch (ch) {
 		case 'l':
 			list_opt = 1;
@@ -91,11 +98,15 @@ int main(int argc, char *argv[])
 		case 't':
 			tty_opt = 1;
 			break;
+		case 'v':
+			verbose_opt = 1;
+			break;
 		case 'F':
 			sshconfig_file = argv[optind-1];
 			break;
 		case 'f':
 			routes_file = argv[optind-1];
+			break;
 			break;
 		default:
 			usage();
@@ -145,13 +156,14 @@ int main(int argc, char *argv[])
 		not_found(http_srv_argv[0]);
 
 	/* start the web server */
+	pipe(stdout_pipe);
 	http_server_pid = fork();
 	if (http_server_pid == 0) {
+		/* close input side of pipe, and connect stdout */
+		dup2(stdout_pipe[1], STDOUT_FILENO);
+		close(stdout_pipe[1]);
 		if (pledge("stdio rpath proc exec unveil", "stdio rpath inet") == -1)
 			err(1, "pledge");
-
-		/* elide startup notices */
-		close(STDOUT_FILENO);
 
 		unveil(xdirname(PUBLIC_DIRECTORY), "r");
 		unveil(xdirname(httpd_bin), "x");
@@ -162,6 +174,11 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Fatal: unable to start web server\n");
 		err(1, "%s", httpd_bin);
 	}
+
+	/* close output side of pipe, and ensure readers don't block */
+	close(stdout_pipe[1]);
+	flags = fcntl(stdout_pipe[0], F_GETFL);
+	fcntl(stdout_pipe[0], F_SETFL, flags | O_NONBLOCK);
 
 	/* watchdog to ensure that the http server is shut down*/
 	rset_pid = fork();
@@ -264,6 +281,13 @@ int main(int argc, char *argv[])
 				else
 					(void) ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
 
+				/* read output of web server */
+				nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
+				if ((verbose_opt) && (nr > 0))
+					format_http_log(httpd_log, nr);
+				if ((nr == -1) && (errno != EAGAIN))
+					warn("read from httpd output");
+
 			}
 			end_connection(socket_path, hostname, http_port);
 			socket_path = NULL;
@@ -328,7 +352,7 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-lnt] [-F sshconfig_file] [-f routes_file] "
+	fprintf(stderr, "usage: rset [-lntv] [-F sshconfig_file] [-f routes_file] "
 	    "host_pattern [label_pattern]\n");
 	exit(1);
 }
@@ -337,4 +361,23 @@ static void
 not_found(char *name) {
 	fprintf(stderr, "rset: %s not found in PATH\n", name);
 	exit(1);
+}
+
+static void
+format_http_log(char *output, size_t len) {
+	char *eol, *output_start;
+	static int n_lines = 0;
+
+	output[len] = '\0';
+	output_start = output;
+
+	while (n_lines++ < WEB_SERVER_STARTUP) {
+		if ((eol = strchr(output_start, '\n')) != NULL) {
+			*eol = '\0';
+			output_start = eol+1;
+		}
+	}
+	printf(HL_HTTP_LOG "%s" HL_RESET, output_start);
+	if (output[len-1] != '\n')
+			printf(" ...\n");
 }

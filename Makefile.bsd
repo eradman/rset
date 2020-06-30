@@ -19,7 +19,7 @@ env:
 compat.c:
 	cat /dev/null ${EXTRA_SRC} > compat.c
 
-.c.o: compat.c
+.c.o: compat.c execute.h input.h rutils.h
 	${CC} ${CFLAGS} ${CPPFLAGS} -c $<
 
 rset: ${OBJS}

@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 15, 2020
+.Dd June 29, 2020
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -65,6 +65,8 @@ The default is
 .It Fl t
 Allow TTY input by copying the content of each label to the remote host instead
 of opening a pipe to the interpreter.
+.It Fl v
+Print the httpd log messages after each label is executed
 .El
 .Sh ENVIRONMENT
 Execution on the remote host sets the following environment variables:

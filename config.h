@@ -9,6 +9,7 @@
 #define LOCAL_SOCKET_PATH "/tmp/rset_control_%s"
 
 /* defaults */
+#define WEB_SERVER_STARTUP 1 /* lines to strip: copyright messages, etc. */
 #define INSTALL_PORT 6000
 #define ROUTES_FILE "routes.pln"
 #define REPLICATED_DIRECTORY "_rutils"
@@ -21,10 +22,11 @@
 #define INTERPRETER "/bin/sh"
 
 /* colors */
-#define HL_REVERSE "\x1b[7m"
-#define HL_RESET   "\x1b[0m"
-#define HL_HOST    "\x1b[33m" /* yellow */
-#define HL_LABEL   "\x1b[36m" /* cyan */
+#define HL_REVERSE  "\x1b[7m"
+#define HL_RESET    "\x1b[0m"
+#define HL_HOST     "\x1b[33m" /* yellow */
+#define HL_LABEL    "\x1b[36m" /* cyan */
+#define HL_HTTP_LOG "\x1b[40m" /* gray background */
 
 /* checks */
 #define REQUIRE_SSH_AGENT
