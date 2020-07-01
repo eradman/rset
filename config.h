@@ -26,7 +26,7 @@
 #define HL_RESET    "\x1b[0m"
 #define HL_HOST     "\x1b[33m" /* yellow */
 #define HL_LABEL    "\x1b[36m" /* cyan */
-#define HL_HTTP_LOG "\x1b[40m" /* gray background */
+#define HL_HTTP_LOG "\x1b[35m" /* magenta */
 
 /* checks */
 #define REQUIRE_SSH_AGENT

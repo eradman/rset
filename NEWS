@@ -1,10 +1,10 @@
-= Next Release: 1.5
+= Release History
+
+== 1.5: June 30, 2020
 
  - Fetch files from '_sources' on 127.0.0.1 to avoid IPv6 confusion
  - Require the ssh-agent(1) to be running with at least one unlocked key
  - New '-v' option prints HTTP log messages after each label is executed
-
-= Release History
 
 == 1.4: May 29, 2020
 
