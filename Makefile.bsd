@@ -1,29 +1,25 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 1.5
-CPPFLAGS += -DRELEASE=\"${RELEASE}\"
-OBJS = rutils.o input.o execute.o rset.o compat.o
+RELEASE = 1.6
+
+RSET_COMPONENTS = rutils input execute
+RSET_OBJS = ${RSET_COMPONENTS:=.o} compat.o rset.o
+RSET_INC = ${RSET_COMPONENTS:=.h} config.h missing/compat.h
 PROGS = rset rinstall rsub labelgrep
 
 all: versioncheck ${PROGS}
 
-env:
-	@echo "CC         = ${CC}"
-	@echo "DESTDIR    = ${DESTDIR}"
-	@echo "EXTRA_SRC  = ${EXTRA_SRC}"
-	@echo "LDFLAGS    = ${LDFLAGS}"
-	@echo "MANPREFIX  = ${MANPREFIX}"
-	@echo "PREFIX     = ${PREFIX}"
-	@echo "SRC        = ${SRC}"
-
-compat.c:
-	cat /dev/null ${EXTRA_SRC} > compat.c
-
-.c.o: compat.c execute.h input.h rutils.h
+.c.o: ${RSET_INC}
 	${CC} ${CFLAGS} ${CPPFLAGS} -c $<
 
-rset: ${OBJS}
-	${CC} ${CFLAGS} ${CPPFLAGS} -o $@ ${OBJS} ${LDFLAGS}
+compat.c: missing/*
+	cat /dev/null ${EXTRA_SRC} > compat.c
+
+rset.o: ${RSET_INC}
+	${CC} ${CFLAGS} ${CPPFLAGS} -DRELEASE=\"${RELEASE}\" -c rset.c
+
+rset: ${RSET_COMPONENTS:=.h} ${RSET_OBJS}
+	${CC} ${CFLAGS} ${CPPFLAGS} -o $@ ${RSET_OBJS} ${LDFLAGS}
 
 .sh:
 	sed -e 's/$${release}/${RELEASE}/' $< > $@

@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
 		case 'f':
 			routes_file = argv[optind-1];
 			break;
-			break;
 		default:
 			usage();
 	}
