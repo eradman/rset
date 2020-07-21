@@ -3,13 +3,13 @@
  */
 
 /* templates */
-#define WEB_SERVER "darkhttpd _sources --port %d --addr 127.0.0.1 --maxconn 4"
+#define WEB_SERVER "miniquark -p %d -d _sources"
 #define REMOTE_TMP_PATH "/tmp/rset_staging_%d"
 #define REMOTE_SCRIPT_PATH "/tmp/rset_staging_%d/_script"
 #define LOCAL_SOCKET_PATH "/tmp/rset_control_%s"
 
 /* defaults */
-#define WEB_SERVER_STARTUP 1 /* lines to strip: copyright messages, etc. */
+#define WEB_SERVER_STARTUP 0 /* lines to strip: copyright messages, etc. */
 #define INSTALL_PORT 6000
 #define ROUTES_FILE "routes.pln"
 #define REPLICATED_DIRECTORY "_rutils"

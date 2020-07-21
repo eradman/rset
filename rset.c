@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 		/* close input side of pipe, and connect stdout */
 		dup2(stdout_pipe[1], STDOUT_FILENO);
 		close(stdout_pipe[1]);
-		if (pledge("stdio rpath proc exec unveil", "stdio rpath inet") == -1)
+		if (pledge("stdio rpath proc exec unveil", "stdio rpath proc inet") == -1)
 			err(1, "pledge");
 
 		unveil(xdirname(PUBLIC_DIRECTORY), "r");

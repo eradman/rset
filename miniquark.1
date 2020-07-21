@@ -1,0 +1,49 @@
+.Dd July 18, 2020
+.Dt MINIQUARK 1
+.Os
+.Sh NAME
+.Nm miniquark
+.Nd a minimal web server for retrieving files
+.Sh SYNOPSIS
+.Nm
+.Fl p Ar port
+.Op Fl h Ar host
+.Op Fl d Ar dir
+.Sh DESCRIPTION
+.Nm
+is a web server supporting GET/HEAD requests and is easily launched as as
+unprivileged user to provide HTTP access a local directory.
+.Pp
+The options are as follows:
+.Bl -tag -width 8n
+.It Fl p Ar port
+The
+.Ar port
+to listen on for incoming connections.
+.It Fl d Ar dir
+Switch to the specified directory.
+.It Fl h Ar host
+Set the hostname or IP address to listen on.
+The deault is 127.0.0.1.
+.El
+.Pp
+If run with a user ID of 0,
+.Nm
+will chroot to the current directory.
+.Sh FEATURES
+The following request headers are recognized
+.Bl -tag -width 0n
+.It Range:
+Returns 206 Partial Content and the Content-Range header is set.
+.It If-Modified-Since:
+Returns 304 Not Modified or "200 OK" based on the file timestamp.
+.It User-Agent:
+Used for log messages.
+.El
+.Sh HISTORY
+.Nm
+was based on
+.Lk https://git.suckless.org/quark
+and bundled with
+.Xr rset 1
+in July 2020.

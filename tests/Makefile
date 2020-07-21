@@ -12,12 +12,14 @@ rset.o: ${RSET_LIBS}
 
 test: ${OBJS}
 	@ruby test_rsub.rb
+	@ruby test_miniquark.rb
 	@ruby test_rinstall.rb
 	@ruby test_labelgrep.rb
 	@ruby test_rset.rb
 
 lint:
 	@mandoc -Tlint ../rsub.1
+	@mandoc -Tlint ../miniquark.1
 	@mandoc -Tlint ../rinstall.1
 	@mandoc -Tlint ../labelgrep.1
 	@mandoc -Tlint ../rset.1

@@ -5,7 +5,12 @@ RELEASE = 1.6
 RSET_COMPONENTS = rutils input execute
 RSET_OBJS = ${RSET_COMPONENTS:=.o} compat.o rset.o
 RSET_INC = ${RSET_COMPONENTS:=.h} config.h missing/compat.h
-PROGS = rset rinstall rsub labelgrep
+
+QUARK_COMPONENTS = sock http
+QUARK_OBJS = ${QUARK_COMPONENTS:=.o} compat.o miniquark.o
+QUARK_INC = ${QUARK_COMPONENTS:=.h} missing/compat.h
+
+PROGS = rset miniquark rinstall rsub labelgrep
 
 all: versioncheck ${PROGS}
 
@@ -15,11 +20,17 @@ all: versioncheck ${PROGS}
 compat.c: missing/*
 	cat /dev/null ${EXTRA_SRC} > compat.c
 
-rset.o: ${RSET_INC}
+rset.o: ${RSET_INC} rset.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -DRELEASE=\"${RELEASE}\" -c rset.c
 
 rset: ${RSET_COMPONENTS:=.h} ${RSET_OBJS}
 	${CC} ${CFLAGS} ${CPPFLAGS} -o $@ ${RSET_OBJS} ${LDFLAGS}
+
+miniquark.o: ${QUARK_INC} miniquark.c
+	${CC} ${CFLAGS} ${CPPFLAGS} -DRELEASE=\"${RELEASE}\" -c miniquark.c
+
+miniquark: ${QUARK_COMPONENTS:=.h} ${QUARK_OBJS}
+	${CC} ${CFLAGS} ${CPPFLAGS} -o $@ ${QUARK_OBJS} ${LDFLAGS}
 
 .sh:
 	sed -e 's/$${release}/${RELEASE}/' $< > $@
@@ -34,10 +45,12 @@ install: ${PROGS}
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man5
 	install rset ${DESTDIR}${PREFIX}/bin
+	install miniquark ${DESTDIR}${PREFIX}/bin
 	install rinstall ${DESTDIR}${PREFIX}/bin
 	install rsub ${DESTDIR}${PREFIX}/bin
 	install labelgrep ${DESTDIR}${PREFIX}/bin
 	install -m 644 rset.1 ${DESTDIR}${MANPREFIX}/man1
+	install -m 644 miniquark.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rinstall.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rsub.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 pln.5 ${DESTDIR}${MANPREFIX}/man5
@@ -45,6 +58,7 @@ install: ${PROGS}
 
 uninstall:
 	rm ${DESTDIR}${PREFIX}/bin/rset
+	rm ${DESTDIR}${PREFIX}/bin/miniquark
 	rm ${DESTDIR}${PREFIX}/bin/rinstall
 	rm ${DESTDIR}${PREFIX}/bin/rsub
 	rm ${DESTDIR}${PREFIX}/bin/labelgrep
@@ -58,7 +72,7 @@ test: ${PROGS}
 	make -C tests
 
 gcc-lint: clean
-	@CPPFLAGS="-std=c89 -pedantic -Wall -Wpointer-arith -Wbad-function-cast" make
+	@CPPFLAGS="-std=c99 -pedantic -Wall -Wpointer-arith -Wbad-function-cast" make
 
 clean:
 	rm -f compat.c *.o *.core ${PROGS}

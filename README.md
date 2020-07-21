@@ -14,9 +14,7 @@ Source Installation - BSD, Mac OS, and Linux
 
     ./configure
 
-By default [darkhttpd] is required for serving files from the `_sources`
-directory. This and other compile-time options can be changed by editing
-`config.h`.
+Compile-time options can be changed by editing `config.h`.
 
 Build using
 
@@ -40,7 +38,6 @@ News
 A release history as well as features in the upcoming release are covered in the
 [NEWS] file.
 
-[darkhttpd]: https://unix4lyfe.org/darkhttpd/
 [NEWS]: https://raw.githubusercontent.com/eradman/rset/master/NEWS
 [rset(1)]: http://scriptedconfiguration.org/man/rset.1.html
 [pln(5)]: http://scriptedconfiguration.org/man/pln.5.html

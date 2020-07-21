@@ -2,6 +2,7 @@
 Makefile
 compat.c
 labelgrep
+miniquark
 rinstall
 rset
 rsub

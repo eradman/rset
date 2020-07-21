@@ -1,6 +1,6 @@
 = Next Release: 1.6
 
- - Updates to build
+ - Switch to build-in HTTP server: miniquark
 
 = Release History
 
