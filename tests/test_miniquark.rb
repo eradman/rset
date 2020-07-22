@@ -59,7 +59,14 @@ end
     mkdir www www/subdir
 
     cd www
-    dd if=/dev/urandom of=largefile bs=1M count=10 2>&1
+    case `uname` in
+      Darwin)
+        dd if=/dev/urandom of=largefile bs=1m count=10 2>&1
+        ;;
+      *)
+        dd if=/dev/urandom of=largefile bs=1M count=10 2>&1
+        ;;
+    esac
     echo ABCDEFGHIJKLMNOPQRSTUVWXYZ > smallfile
     touch noread.sh
     chmod 110 noread.sh

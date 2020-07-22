@@ -13,10 +13,10 @@ $test_description = 0
 $systmp = Dir.mktmpdir
 $wwwtmp = Dir.mktmpdir
 http_port = %x{ ./getsocket }.chomp
-$install_url = "http://localhost:#{http_port}"
+$install_url = "http://127.0.0.1:#{http_port}"
 $wwwserver = fork do
     WEBrick::HTTPServer.new(
-        :BindAddress => "localhost",
+        :BindAddress => "127.0.0.1",
         :Port => http_port,
         :DocumentRoot => $wwwtmp,
         :Logger => WEBrick::Log.new("/dev/null"),
@@ -79,18 +79,18 @@ try "Install a file from a remote URL to the staging area" do
 end
 
 try "Install a binary file from a remote URL to the staging area" do
-    src = "#{$wwwtmp}/sh_#{$tests}"
-    dst = "#{$systmp}/ps_#{$tests}"
-    FileUtils.cp("/bin/sh", "#{src}"); FileUtils.chmod 0644, src
-    FileUtils.cp("/bin/ps", "#{dst}"); FileUtils.chmod 0644, dst
-    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall sh_#{$tests} #{dst}"
+    src = "#{$wwwtmp}/getsocket_#{$tests}"
+    dst = "#{$systmp}/copyfile_#{$tests}"
+    FileUtils.cp("getsocket", src); FileUtils.chmod 0644, src
+    FileUtils.cp("copyfile", dst); FileUtils.chmod 0644, dst
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall getsocket_#{$tests} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out.sub(/(Binary files|Files) /, "").sub(/\..+ differ/, ".XXXXXX"),
-        "#{$systmp}/ps_#{$tests} and sh_#{$tests}.XXXXXX\n"
+        "#{$systmp}/copyfile_#{$tests} and getsocket_#{$tests}.XXXXXX\n"
     eq status.exitstatus, 0
-    # 'ps' was replaced with 'sh'
-    eq Digest::MD5.hexdigest(File.read("/bin/sh")),
+    # 'copyfile' was replaced with 'getsocket'
+    eq Digest::MD5.hexdigest(File.read("getsocket")),
        Digest::MD5.hexdigest(File.read(dst))
 end
 
