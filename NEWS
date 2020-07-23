@@ -1,8 +1,8 @@
-= Next Release: 1.6
-
- - Switch to build-in HTTP server: miniquark
-
 = Release History
+
+== 1.6: July 22, 2020
+
+ - Switch to build-in HTTP server: miniquark(1)
 
 == 1.5: June 30, 2020
 
