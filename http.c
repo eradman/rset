@@ -365,36 +365,77 @@ http_send_response(int fd, struct request *r)
 			return http_send_status(fd, S_BAD_REQUEST);
 		}
 		*(q++) = '\0';
-		if (p[0]) {
+		if (p[0] != '\0') {
+			/*
+			 * Range has format "first-last" or "first-",
+			 * i.e. return bytes 'first' to 'last' (or the
+			 * last byte if 'last' is not given),
+			 * inclusively, and byte-numbering beginning at 0
+			 */
 			lower = strtonum(p, 0, LLONG_MAX, &err);
-		}
-		if (!err && q[0]) {
-			upper = strtonum(q, 0, LLONG_MAX, &err);
-		}
-		if (err) {
-			return http_send_status(fd, S_BAD_REQUEST);
-		}
-
-		/* check range */
-		if (lower < 0 || upper < 0 || lower > upper) {
-			if (dprintf(fd,
-			            "HTTP/1.1 %d %s\r\n"
-			            "Date: %s\r\n"
-			            "Content-Range: bytes */%ld\r\n"
-			            "Connection: close\r\n"
-			            "\r\n",
-			            S_RANGE_NOT_SATISFIABLE,
-			            status_str[S_RANGE_NOT_SATISFIABLE],
-			            timestamp(time(NULL), t),
-			            (long)st.st_size) < 0) {
-				return S_REQUEST_TIMEOUT;
+			if (!err) {
+				if (q[0] != '\0') {
+					upper = strtonum(q, 0, LLONG_MAX,
+					                 &err);
+				} else {
+					upper = st.st_size - 1;
+				}
 			}
-			return S_RANGE_NOT_SATISFIABLE;
-		}
+			if (err) {
+				/* one of the strtonum()'s failed */
+				return http_send_status(fd, S_BAD_REQUEST);
+			}
 
-		/* adjust upper limit */
-		if (upper >= st.st_size)
-			upper = st.st_size-1;
+			/* check ranges */
+			if (lower > upper || lower >= st.st_size) {
+				goto not_satisfiable;
+			}
+
+			/* adjust upper limit to be at most the last byte */
+			upper = MIN(upper, st.st_size - 1);
+		} else {
+			/*
+			 * Range has format "-num", i.e. return the 'num'
+			 * last bytes
+			 */
+
+			/*
+			 * use upper as a temporary storage for 'num',
+			 * as we know 'upper' is st.st_size - 1
+			 */
+			upper = strtonum(q, 0, LLONG_MAX, &err);
+			if (err) {
+				return http_send_status(fd, S_BAD_REQUEST);
+			}
+
+			/* determine lower */
+			if (upper > st.st_size) {
+				/* more bytes requested than we have */
+				lower = 0;
+			} else {
+				lower = st.st_size - upper;
+			}
+
+			/* set upper to the correct value */
+			upper = st.st_size - 1;
+		}
+		goto satisfiable;
+not_satisfiable:
+		if (dprintf(fd,
+		            "HTTP/1.1 %d %s\r\n"
+		            "Date: %s\r\n"
+		            "Content-Range: bytes */%ld\r\n"
+		            "Connection: close\r\n"
+		            "\r\n",
+		            S_RANGE_NOT_SATISFIABLE,
+		            status_str[S_RANGE_NOT_SATISFIABLE],
+		            timestamp(time(NULL), t),
+		            (long)st.st_size) < 0) {
+			return S_REQUEST_TIMEOUT;
+		}
+		return S_RANGE_NOT_SATISFIABLE;
+satisfiable:
+		;
 	}
 
 	return resp_file(fd, RELPATH(realtarget), r, &st, lower, upper);

@@ -222,6 +222,48 @@ try "GET Range (partial content)" do
     }
 end
 
+try "GET Range (past end of file)" do
+    Socket.tcp("127.0.0.1", port) {|sock|
+        sock.print <<~REQUEST
+            GET /smallfile HTTP/1.1\r
+            Range: bytes=30-60\r
+            \r
+        REQUEST
+        sock.close_write
+        response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, '\1'+today+'\2')
+        eq response, <<~REPLY
+            HTTP/1.1 416 Range Not Satisfiable\r
+            Date: #{today}\r
+            Content-Range: bytes */27\r
+            Connection: close\r
+            \r
+        REPLY
+    }
+end
+
+try "GET Range (suffix)" do
+    Socket.tcp("127.0.0.1", port) {|sock|
+        sock.print <<~REQUEST
+            GET /smallfile HTTP/1.1\r
+            Range: bytes=-8\r
+            \r
+        REQUEST
+        sock.close_write
+        response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, '\1'+today+'\2')
+        eq response, <<~REPLY
+            HTTP/1.1 206 Partial Content\r
+            Date: #{today}\r
+            Connection: close\r
+            Last-Modified: #{today}\r
+            Content-Type: application/octet-stream\r
+            Content-Length: 8\r
+            Content-Range: bytes 19-26/27\r
+            \r
+            TUVWXYZ
+        REPLY
+    }
+end
+
 try "GET Range (bogus range)" do
     Socket.tcp("127.0.0.1", port) {|sock|
         sock.print <<~REQUEST
