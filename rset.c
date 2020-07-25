@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 
 	/* Convert http server command line into a vector */
 	inputstring = malloc(PATH_MAX);
-	snprintf(inputstring, PATH_MAX, WEB_SERVER, http_port);
+	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d _sources", http_port);
 	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
 	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
@@ -370,13 +370,13 @@ format_http_log(char *output, size_t len) {
 	output[len] = '\0';
 	output_start = output;
 
-	while (n_lines++ < WEB_SERVER_STARTUP) {
+	while (n_lines++ < 0) {  /* 1 to strip off startup message */
 		if ((eol = strchr(output_start, '\n')) != NULL) {
 			*eol = '\0';
 			output_start = eol+1;
 		}
 	}
-	printf(HL_HTTP_LOG "%s" HL_RESET, output_start);
+	printf("%s", output_start);
 	if (output[len-1] != '\n')
 			printf(" ...\n");
 }

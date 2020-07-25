@@ -3,13 +3,11 @@
  */
 
 /* templates */
-#define WEB_SERVER "miniquark -p %d -d _sources"
 #define REMOTE_TMP_PATH "/tmp/rset_staging_%d"
 #define REMOTE_SCRIPT_PATH "/tmp/rset_staging_%d/_script"
 #define LOCAL_SOCKET_PATH "/tmp/rset_control_%s"
 
 /* defaults */
-#define WEB_SERVER_STARTUP 0 /* lines to strip: copyright messages, etc. */
 #define INSTALL_PORT 6000
 #define ROUTES_FILE "routes.pln"
 #define REPLICATED_DIRECTORY "_rutils"
@@ -26,7 +24,6 @@
 #define HL_RESET    "\x1b[0m"
 #define HL_HOST     "\x1b[33m" /* yellow */
 #define HL_LABEL    "\x1b[36m" /* cyan */
-#define HL_HTTP_LOG "\x1b[35m" /* magenta */
 
 /* checks */
 #define REQUIRE_SSH_AGENT
