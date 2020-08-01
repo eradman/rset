@@ -43,7 +43,7 @@ if test ! -f "$1"; then
 		OpenBSD)
 			ftp -o "$source" -n "$INSTALL_URL/$1"
 			;;
-		FreeBSD)
+		FreeBSD|DragonFly)
 			fetch -q -o "$source" "$INSTALL_URL/$1"
 			;;
 		Linux)

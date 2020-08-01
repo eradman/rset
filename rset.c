@@ -127,7 +127,6 @@ int main(int argc, char *argv[])
 		err(1, "realpath %s", routes_file);
 	if (chdir(routes_realpath) == -1)
 		err(1, "chdir %s", routes_realpath);
-	routes_file = basename(routes_file);
 
 	/* try opening the routes file */
 	if ((fd = open(routes_file, O_RDONLY)) == -1)

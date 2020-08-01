@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <err.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
@@ -76,7 +77,7 @@ sock_get_inaddr_str(struct sockaddr_storage *in_sa, char *str, size_t len)
 	switch (in_sa->ss_family) {
 	case AF_INET:
 		if (!inet_ntop(AF_INET,
-		               &(((struct sockaddr_in *)in_sa)->sin_addr),
+		               &((struct sockaddr_in *)in_sa)->sin_addr,
 		               str, len)) {
 			warn("inet_ntop");
 			return 1;
@@ -84,7 +85,7 @@ sock_get_inaddr_str(struct sockaddr_storage *in_sa, char *str, size_t len)
 		break;
 	case AF_INET6:
 		if (!inet_ntop(AF_INET6,
-		               &(((struct sockaddr_in6 *)in_sa)->sin6_addr),
+		               &((struct sockaddr_in6 *)in_sa)->sin6_addr,
 		               str, len)) {
 			warn("inet_ntop");
 			return 1;
