@@ -14,9 +14,7 @@ case `uname` in
 	Linux)
 		wget -q -O $dst $src_url
 		;;
-	Darwin|*)
-		which -s wget \
-			&& wget -q -O $dst $src_url \
-			|| curl -f -s -o $dst $src_url
+	Darwin|SunOS|*)
+		curl -f -s -o $dst $src_url
 		;;
 esac

@@ -49,10 +49,8 @@ if test ! -f "$1"; then
 		Linux)
 			wget -q -O "$source" "$INSTALL_URL/$1"
 			;;
-		Darwin|*)
-			which -s wget \
-				&& wget -q -O "$source" "$INSTALL_URL/$1" \
-				|| curl -f -s -o "$source" "$INSTALL_URL/$1"
+		Darwin|SunOS|*)
+			curl -f -s -o "$source" "$INSTALL_URL/$1"
 			;;
 	esac
 
