@@ -40,7 +40,7 @@ if test ! -f "$1"; then
 	umask 044
 	source="$1.$(mktemp rinstall_XXXXXX)"
 	case `uname` in
-		OpenBSD)
+		OpenBSD|NetBSD)
 			ftp -o "$source" -n "$INSTALL_URL/$1"
 			;;
 		FreeBSD|DragonFly)

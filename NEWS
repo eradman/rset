@@ -1,7 +1,7 @@
 = Next Release: 1.7
 
  - Simplify config.h by removing options for configuring an external web server
- - Add support for DragonFly
+ - Add support for DragonFly and NetBSD
 
 = Release History
 

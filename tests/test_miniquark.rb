@@ -60,7 +60,7 @@ end
 
     cd www
     case `uname` in
-      Darwin)
+      Darwin|NetBSD)
         dd if=/dev/urandom of=largefile bs=1m count=10 2>&1
         ;;
       *)

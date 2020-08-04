@@ -95,7 +95,7 @@ try "Install a binary file from a remote URL to the staging area" do
 end
 
 is_busybox = ENV['SHELL']=='/bin/ash'
-is_macos = %x{ uname }.chomp =~ /Darwin|FreeBSD|DragonFly/
+is_macos = %x{ uname }.chomp =~ /Darwin|FreeBSD|DragonFly|NetBSD/
 try "Install a file from a remote URL containing special characters", (is_busybox | is_macos) do
     fn = "test ~!@()_+ #{$tests}.txt"
     dst = "#{$systmp}/#{fn}"
