@@ -5,10 +5,10 @@ dst=$2
 
 # Select the HTTP client rinstall(1) would use
 case `uname` in
-	OpenBSD)
+	OpenBSD|NetBSD)
 		ftp -o $dst -n $src_url
 		;;
-	FreeBSD)
+	FreeBSD|DragonFly)
 		fetch -q -o $dst $src_url
 		;;
 	Linux)
