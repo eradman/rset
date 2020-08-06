@@ -11,9 +11,9 @@
 #include "http.h"
 
 const char *req_field_str[] = {
-	[REQ_RANGE]   = "Range",
-	[REQ_MOD]     = "If-Modified-Since",
-	[REQ_AGENT]   = "User-Agent",
+	[REQ_RANGE]                 = "Range",
+	[REQ_IF_MODIFIED_SINCE]     = "If-Modified-Since",
+	[REQ_AGENT]                 = "User-Agent",
 };
 
 const char *req_method_str[] = {
@@ -68,11 +68,11 @@ http_send_status(int fd, enum status s)
 }
 
 static void
-decode(char src[PATH_MAX], char dest[PATH_MAX])
+decode(const char src[PATH_MAX], char dest[PATH_MAX])
 {
 	size_t i;
 	unsigned char n;
-	char *s;
+	const char *s;
 
 	for (s = src, i = 0; *s; s++, i++) {
 		if (*s == '%' && (sscanf(s + 1, "%2hhx", &n) == 1)) {
@@ -86,14 +86,14 @@ decode(char src[PATH_MAX], char dest[PATH_MAX])
 }
 
 int
-http_get_request(int fd, struct request *r)
+http_get_request(int fd, struct request *req)
 {
 	size_t hlen, i, mlen;
 	ssize_t off;
 	char h[HEADER_MAX], *p, *q;
 
 	/* empty all fields */
-	memset(r, 0, sizeof(*r));
+	memset(req, 0, sizeof(*req));
 
 	/*
 	 * receive header
@@ -130,7 +130,7 @@ http_get_request(int fd, struct request *r)
 	for (i = 0; i < NUM_REQ_METHODS; i++) {
 		mlen = strlen(req_method_str[i]);
 		if (!strncmp(req_method_str[i], h, mlen)) {
-			r->method = i;
+			req->method = i;
 			break;
 		}
 	}
@@ -154,8 +154,8 @@ http_get_request(int fd, struct request *r)
 	if (q - p + 1 > PATH_MAX) {
 		return http_send_status(fd, S_REQUEST_TOO_LARGE);
 	}
-	memcpy(r->target, p, q - p + 1);
-	decode(r->target, r->target);
+	memcpy(req->target, p, q - p + 1);
+	decode(req->target, req->target);
 
 	/* basis for next step */
 	p = q + 1;
@@ -219,7 +219,7 @@ http_get_request(int fd, struct request *r)
 		if (q - p + 1 > FIELD_MAX) {
 			return http_send_status(fd, S_REQUEST_TOO_LARGE);
 		}
-		memcpy(r->field[i], p, q - p + 1);
+		memcpy(req->field[i], p, q - p + 1);
 
 		/* go to next line */
 		p = q + (sizeof("\r\n") - 1);
@@ -282,7 +282,7 @@ squash:
 }
 
 enum status
-http_send_response(int fd, struct request *r)
+http_send_response(int fd, struct request *req)
 {
 	struct stat st;
 	struct tm tm;
@@ -293,7 +293,7 @@ http_send_response(int fd, struct request *r)
 	const char *err;
 
 	/* make a working copy of the target */
-	memcpy(realtarget, r->target, sizeof(realtarget));
+	memcpy(realtarget, req->target, sizeof(realtarget));
 
 	/* normalize target */
 	if (normabspath(realtarget)) {
@@ -327,9 +327,9 @@ http_send_response(int fd, struct request *r)
 		return http_send_status(fd, S_FORBIDDEN);
 
 	/* modified since */
-	if (r->field[REQ_MOD][0]) {
+	if (req->field[REQ_IF_MODIFIED_SINCE][0]) {
 		/* parse field */
-		if (!strptime(r->field[REQ_MOD], "%a, %d %b %Y %T GMT", &tm)) {
+		if (!strptime(req->field[REQ_IF_MODIFIED_SINCE], "%a, %d %b %Y %T GMT", &tm)) {
 			return http_send_status(fd, S_BAD_REQUEST);
 		}
 
@@ -351,9 +351,9 @@ http_send_response(int fd, struct request *r)
 	/* range */
 	lower = 0;
 	upper = st.st_size - 1;
-	if (r->field[REQ_RANGE][0]) {
+	if (req->field[REQ_RANGE][0]) {
 		/* parse field */
-		p = r->field[REQ_RANGE];
+		p = req->field[REQ_RANGE];
 		err = NULL;
 
 		if (strncmp(p, "bytes=", sizeof("bytes=") - 1)) {
@@ -438,12 +438,12 @@ satisfiable:
 		;
 	}
 
-	return resp_file(fd, RELPATH(realtarget), r, &st, lower, upper);
+	return resp_file(fd, RELPATH(realtarget), req, &st, lower, upper);
 }
 
 enum status
-resp_file(int fd, char *name, struct request *r, struct stat *st,
-          long lower, long upper)
+resp_file(int fd, const char *name, struct request *req,
+          const struct stat *st, long lower, long upper)
 {
 	FILE *fp;
 	enum status s;
@@ -453,7 +453,7 @@ resp_file(int fd, char *name, struct request *r, struct stat *st,
 	char read_buf[16384];
 	char *p, t1[TIMESTAMP_LEN], t2[TIMESTAMP_LEN];
 
-	r->bytes_sent = 0;
+	req->bytes_sent = 0;
 
 	/* open file */
 	if (!(fp = fopen(name, "r"))) {
@@ -468,7 +468,7 @@ resp_file(int fd, char *name, struct request *r, struct stat *st,
 	}
 
 	/* send header as late as possible */
-	range = r->field[REQ_RANGE][0];
+	range = req->field[REQ_RANGE][0];
 	s = range ? S_PARTIAL_CONTENT : S_OK;
 
 	if (dprintf(fd,
@@ -497,7 +497,7 @@ resp_file(int fd, char *name, struct request *r, struct stat *st,
 		goto cleanup;
 	}
 
-	if (r->method == M_GET) {
+	if (req->method == M_GET) {
 		/* write data until upper bound is hit */
 		remaining = upper - lower + 1;
 
@@ -516,7 +516,7 @@ resp_file(int fd, char *name, struct request *r, struct stat *st,
 					goto cleanup;
 				}
 				bread -= bwritten;
-				r->bytes_sent += bwritten;
+				req->bytes_sent += bwritten;
 				p += bwritten;
 			}
 		}

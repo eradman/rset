@@ -72,7 +72,7 @@ sock_set_timeout(int fd, int sec)
 }
 
 int
-sock_get_inaddr_str(struct sockaddr_storage *in_sa, char *str, size_t len)
+sock_get_inaddr_str(const struct sockaddr_storage *in_sa, char *str, size_t len)
 {
 	switch (in_sa->ss_family) {
 	case AF_INET:

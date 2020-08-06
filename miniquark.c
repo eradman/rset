@@ -109,7 +109,7 @@ main(int argc, char *argv[])
 	if (s.port == NULL) usage();
 
 	/* Open a new process group */
-	setpgid(0,0);
+	setpgid(0, 0);
 
 	handlesignals(sigcleanup);
 	printf("listening on: http://%s:%s/\n", s.host, s.port);
