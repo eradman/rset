@@ -36,9 +36,8 @@ News
 ----
 
 A release history as well as features in the upcoming release are covered in the
-[NEWS] file.
+[NEWS](NEWS) file.
 
-[NEWS]: https://raw.githubusercontent.com/eradman/rset/master/NEWS
 [rset(1)]: http://scriptedconfiguration.org/man/rset.1.html
 [pln(5)]: http://scriptedconfiguration.org/man/pln.5.html
 [rinstall(1)]: http://scriptedconfiguration.org/man/rinstall.1.html
