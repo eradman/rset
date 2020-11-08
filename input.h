@@ -36,8 +36,12 @@ typedef struct Label {
 	struct Label **labels;
 } Label;
 
+extern FILE* yyin;
+extern char* yyfn;
+extern int n_labels;
 extern Label **route_labels;    /* parent */
 extern Label **host_labels;     /* child */
+extern Options current_options;
 
 /* forwards */
 

@@ -2,6 +2,14 @@
 
 #include "rutils.h"
 
+/* globals */
+FILE* yyin;
+char* yyfn;
+int n_labels;
+Label **route_labels;    /* parent */
+Label **host_labels;     /* child */
+Options current_options;
+
 int main(int argc, char *argv[])
 {
 	if (argc != 3) {

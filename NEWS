@@ -1,6 +1,7 @@
 = Next Release: 1.8
 
  - Minor updatess to miniquark
+ - Fix build with gcc 10.2
 
 = Release History
 

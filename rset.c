@@ -31,6 +31,7 @@
 #include "config.h"
 #include "rutils.h"
 #include "execute.h"
+#include "input.h"
 
 /* forwards */
 
@@ -39,7 +40,7 @@ static void usage();
 static void not_found(char *name);
 static void format_http_log(char *output, size_t len);
 
-/* globals used by input.l */
+/* globals used by input.h */
 
 FILE* yyin;
 char* yyfn;
