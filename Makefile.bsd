@@ -14,7 +14,7 @@ PROGS = rset miniquark rinstall rsub labelgrep
 
 all: versioncheck ${PROGS}
 
-.c.o: ${RSET_INC}
+.c.o:
 	${CC} ${CFLAGS} ${CPPFLAGS} -c $<
 
 compat.c: missing/*
