@@ -206,13 +206,12 @@ verify_ssh_agent() {
 	return run_quiet(argv);
 }
 
-char *
-start_connection(Label *route_label, int http_port, const char *ssh_config) {
+int
+start_connection(char *socket_path, Label *route_label, int http_port, const char *ssh_config) {
 	int argc;
 	char cmd[PATH_MAX];
 	char tmp_path[64];
 	char port_forwarding[64];
-	char *socket_path;
 	char *argv[32];
 	char *host_name;
 	char **path;
@@ -229,9 +228,6 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 	/* construct command to execute on remote host  */
 	host_name = route_label->name;
 
-	socket_path = malloc(128);
-	snprintf(socket_path, 128, LOCAL_SOCKET_PATH, host_name);
-
 	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
 	if (stat(socket_path, &sb) != -1) {
@@ -239,8 +235,7 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 		    "  fstat %s\n"
 		    "and remove the file if no process is listed.\n",
 		    host_name, socket_path);
-		free(socket_path);
-		return NULL;
+		return -1;
 	}
 
 	argc = 0;
@@ -250,24 +245,24 @@ start_connection(Label *route_label, int http_port, const char *ssh_config) {
 		(void) append(argv, argc, "-F", ssh_config, host_name, NULL);
 	else
 		(void) append(argv, argc, host_name, NULL);
-	if (run(argv) == 255) {
-		free(socket_path);
-		return NULL;
-	}
+	if (run(argv) == 255)
+		return -1;
 
 	snprintf(tmp_path, sizeof(tmp_path), "mkdir " REMOTE_TMP_PATH, http_port);
 	append(argv, 0, "ssh", "-S", socket_path, host_name, tmp_path, NULL);
 	if (run(argv) != 0)
-		err(1, "mkdir failed");
+		return -1;
 
 	snprintf(cmd, PATH_MAX, "tar -cf - %s -C " REPLICATED_DIRECTORY " ./ | "
 	   "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
 	    array_to_str(route_label->export_paths), socket_path, host_name,
 	    http_port);
-	if (system(cmd) != 0)
-		err(1, "transfer failed for " REPLICATED_DIRECTORY);
+	if (system(cmd) != 0) {
+		warn("transfer failed for " REPLICATED_DIRECTORY);
+		return -1;
+	}
 
-	return socket_path;
+	return 0;
 }
 
 int

@@ -258,10 +258,15 @@ int main(int argc, char *argv[])
 				hl_range(hostname, HL_HOST, 0, 0);
 				printf("\n");
 			}
-			socket_path = start_connection(route_labels[i], http_port,
-			    sshconfig_file);
-			if (socket_path == NULL)
+
+			socket_path = malloc(128);
+			snprintf(socket_path, 128, LOCAL_SOCKET_PATH, route_labels[i]->name);
+
+			if (start_connection(socket_path, route_labels[i], http_port, sshconfig_file) == -1) {
+				end_connection(socket_path, hostname, http_port);
+				socket_path = NULL;
 				continue;
+			}
 			for (j=0; host_labels[j]; j++) {
 				rv = regexec(&label_reg, host_labels[j]->name, 1, &regmatch, 0);
 				if (rv != 0)
@@ -288,8 +293,10 @@ int main(int argc, char *argv[])
 					warn("read from httpd output");
 
 			}
-			end_connection(socket_path, hostname, http_port);
-			socket_path = NULL;
+			if (socket_path) {
+				end_connection(socket_path, hostname, http_port);
+				socket_path = NULL;
+			}
 		}
 	}
 	return 0;

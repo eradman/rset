@@ -1,7 +1,8 @@
 = Next Release: 1.8
 
- - Minor updatess to miniquark
+ - Minor updates to miniquark
  - Fix build with gcc 10.2
+ - Clean up socket and ssh session if /tmp is full on remote host
 
 = Release History
 
