@@ -75,13 +75,14 @@ try "Locate an executable in the current path" do
 end
 
 try "Start an ssh session" do
-    cmd = "./ssh_command E 10.0.0.99"
+    cmd = "./ssh_command S 10.0.0.99"
     out, err, status = Open3.capture3({"PATH"=>"#{Dir.pwd}/stubs"}, cmd)
     eq err, ""
     eq status.success?, true
     eq out, <<~RESULT
-        ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_staging_6000
-        ssh -q -S /tmp/test_rset_socket -O exit 10.0.0.99
+        ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M networking
+        ssh -S /tmp/test_rset_socket networking mkdir /tmp/rset_staging_6000
+        ssh -q -S /tmp/test_rset_socket networking tar -xf - -C /tmp/rset_staging_6000
     RESULT
 end
 
@@ -107,6 +108,7 @@ try "Execute commands over ssh using a tty" do
 end
 
 try "End an ssh session" do
+    FileUtils.touch "/tmp/test_rset_socket"
     cmd = "./ssh_command E 10.0.0.99"
     out, err, status = Open3.capture3({"PATH"=>"#{Dir.pwd}/stubs"}, cmd)
     eq err, ""
@@ -115,6 +117,7 @@ try "End an ssh session" do
          ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_staging_6000
          ssh -q -S /tmp/test_rset_socket -O exit 10.0.0.99
     RESULT
+    File.unlink "/tmp/test_rset_socket"
 end
 
 # Smoke test

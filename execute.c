@@ -328,6 +328,9 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 	char tmp_path[64];
 	char *argv[32];
 
+	if(access(socket_path, F_OK) == -1)
+		return;
+
 	snprintf(tmp_path, sizeof(tmp_path), REMOTE_TMP_PATH, http_port);
 	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", tmp_path , NULL);
 	if (run(argv) != 0)
@@ -335,9 +338,7 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 
 	append(argv, 0, "ssh", "-q", "-S", socket_path, "-O", "exit", host_name, NULL);
 	if (run(argv) != 0)
-		err(1, "exec ssh -O exit");
-
-	free(socket_path);
+		warn("exec ssh -O exit");
 }
 
 /* internal utility functions */
