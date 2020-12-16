@@ -21,14 +21,18 @@
 #ifndef _RSET_INPUT_H_
 #define _RSET_INPUT_H_
 
+#define PLN_LABEL_SIZE 128
+#define PLN_OPTION_SIZE 64
+#define PLN_MAX_PATHS 64
+
 typedef struct {
-	char execute_with[64];
-	char interpreter[64];
+	char execute_with[PLN_OPTION_SIZE];
+	char interpreter[PLN_OPTION_SIZE];
 } Options;
 
 typedef struct Label {
-	char name[512];
-	char* export_paths[64];
+	char name[PLN_LABEL_SIZE];
+	char* export_paths[PLN_MAX_PATHS];
 	char* content;
 	int content_size;
 	int content_allocation;

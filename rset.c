@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 	regmatch_t regmatch;
 	regex_t host_reg, label_reg;
 	sigset_t set;
+	size_t len;
 	struct sigaction act;
 	Options toplevel_options;
 
@@ -259,8 +260,9 @@ int main(int argc, char *argv[])
 				printf("\n");
 			}
 
-			socket_path = malloc(128);
-			snprintf(socket_path, 128, LOCAL_SOCKET_PATH, route_labels[i]->name);
+			len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
+			socket_path = malloc(len);
+			snprintf(socket_path, len, LOCAL_SOCKET_PATH, route_labels[i]->name);
 
 			if (start_connection(socket_path, route_labels[i], http_port, sshconfig_file) == -1) {
 				end_connection(socket_path, hostname, http_port);

@@ -214,8 +214,8 @@ void
 read_label(char *line, Label *label) {
 	line[strlen(line)-1] = '\0';
 
-	strlcpy(label->name, strsep(&line, ":"), 512);
-	str_to_array(label->export_paths, strdup(ltrim(line, ' ')), 64);
+	strlcpy(label->name, strsep(&line, ":"), PLN_LABEL_SIZE);
+	str_to_array(label->export_paths, strdup(ltrim(line, ' ')), PLN_MAX_PATHS);
 	memcpy(&label->options, &current_options, sizeof(current_options));
 
 	label->content_size = 0;
@@ -234,9 +234,9 @@ read_option(char *text, Options *op) {
 	v = text;
 
 	if (strcmp(k, "execute_with") == 0)
-		strlcpy(op->execute_with, v, sizeof(op->execute_with));
+		strlcpy(op->execute_with, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "interpreter") == 0)
-		strlcpy(op->interpreter, v, sizeof(op->interpreter));
+		strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
 	else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
 		exit(1);
