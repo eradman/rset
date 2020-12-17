@@ -1,10 +1,10 @@
-= Next Release: 1.8
+= Release History
+
+== 1.8: December 16, 2020
 
  - Minor updates to miniquark
  - Fix build with gcc 10.2
  - Clean up socket and ssh session if /tmp is full on remote host
-
-= Release History
 
 == 1.7: August 4, 2020
 
