@@ -66,30 +66,31 @@ int main(int argc, char *argv[])
 	int ch;
 	int fd;
 	int flags;
-	int i, j;
+	int i, j, k;
 	int nr;
 	int rv;
 	int stdout_pipe[2];
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	int status;
-	char *host_pattern, *label_pattern;
+	char *hostnames[ARG_MAX];
 	char *http_srv_argv[9], *inputstring;
 	char *rinstall_bin, *rsub_bin, *httpd_bin;
 	char routes_realpath[PATH_MAX];
 	regmatch_t regmatch;
-	regex_t host_reg, label_reg;
+	regex_t label_reg;
 	sigset_t set;
 	size_t len;
 	struct sigaction act;
 	Options toplevel_options;
 
 	int labels_matched = 0;
+	char *label_pattern = DEFAULT_LABEL_PATTERN;
 	char *routes_file = ROUTES_FILE;
 	char *sshconfig_file = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "lntvF:f:")) != -1)
+	while ((ch = getopt(argc, argv, "lntvF:f:x:")) != -1)
 		switch (ch) {
 		case 'l':
 			list_opt = 1;
@@ -109,16 +110,18 @@ int main(int argc, char *argv[])
 		case 'f':
 			routes_file = argv[optind-1];
 			break;
+		case 'x':
+			label_pattern = argv[optind-1];
+			break;
 		default:
 			usage();
 	}
 	if (optind >= argc) usage();
-	if (argc > optind+2) usage();
 
-	host_pattern = argv[optind];
-	label_pattern = argv[optind+1];
-	if (!label_pattern)
-		label_pattern = DEFAULT_LABEL_PATTERN;
+	for (i=0; i < argc - optind; i++)
+		hostnames[i] = argv[optind+i];
+	hostnames[i] = NULL;
+
 	if ((rinstall_bin = findprog("rinstall")) == 0)
 		not_found("rinstall");
 	if ((rsub_bin = findprog("rsub")) == 0)
@@ -150,7 +153,7 @@ int main(int argc, char *argv[])
 
 	/* Convert http server command line into a vector */
 	inputstring = malloc(PATH_MAX);
-	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d _sources", http_port);
+	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d " PUBLIC_DIRECTORY, http_port);
 	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
 	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
@@ -216,11 +219,6 @@ int main(int argc, char *argv[])
 	yylex();
 	fclose(yyin);
 
-	if ((rv = regcomp(&host_reg, host_pattern, REG_EXTENDED)) != 0) {
-		regerror(rv, &host_reg, buf, sizeof(buf));
-		errx(1, "bad expression: %s", buf);
-	}
-
 	if ((rv = regcomp(&label_reg, label_pattern, REG_EXTENDED)) != 0) {
 		regerror(rv, &label_reg, buf, sizeof(buf));
 		errx(1, "bad expression: %s", buf);
@@ -248,7 +246,13 @@ int main(int argc, char *argv[])
 	for (i=0; route_labels[i]; i++) {
 		hostname = route_labels[i]->name;
 		host_labels = route_labels[i]->labels;
-		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
+
+		rv = 1;
+		for (k=0; hostnames[k]; k++) {
+			rv = strcmp(hostnames[k], hostname);
+			if (rv == 0) break;
+		}
+
 		if (rv == 0) {
 			if (list_opt) {
 					snprintf(buf, sizeof(buf), "%-20s", hostname);
@@ -309,15 +313,21 @@ dry_run:
 	for (i=0; route_labels[i]; i++) {
 		hostname = route_labels[i]->name;
 		host_labels = route_labels[i]->labels;
-		rv = regexec(&host_reg, hostname, 1, &regmatch, 0);
+
+		rv = 1;
+		for (k=0; hostnames[k]; k++) {
+			rv = strcmp(hostnames[k], hostname);
+			if (rv == 0) break;
+		}
+
 		if (rv == 0) {
 			if (list_opt) {
 					snprintf(buf, sizeof(buf), "%-20s", hostname);
-					hl_range(buf, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+					hl_range(buf, HL_HOST, 0, strlen(hostname));
 					printf("  %s\n", array_to_str(route_labels[i]->export_paths));
 			}
 			else {
-				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
+				hl_range(hostname, HL_HOST, 0, strlen(hostname));
 				printf("\n");
 			}
 			for (j=0; host_labels[j]; j++) {
@@ -363,7 +373,7 @@ static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr, "usage: rset [-lntv] [-F sshconfig_file] [-f routes_file] "
-	    "host_pattern [label_pattern]\n");
+	    "[-x label_pattern] hostname ...\n");
 	exit(1);
 }
 

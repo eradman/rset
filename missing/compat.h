@@ -17,3 +17,7 @@ long long strtonum(const char *numstr, long long minval, long long maxval, const
 #if defined(_MACOS_PORT)
 #define st_mtim st_mtimespec
 #endif
+
+#if !defined(ARG_MAX)
+#define ARG_MAX (256 * 1024)
+#endif

@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 22, 2020
+.Dd December 23, 2020
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -23,21 +23,17 @@
 .Nm rset
 .Op Fl ln
 .Op Fl F Ar sshconfig_file
-.Op Fl f Ar route_file
-.Ar host_pattern
-.Op Ar label_pattern
+.Op Fl f Ar routes_file
+.Op Fl x Ar label_pattern
+.Ar hostname ...
 .Sh DESCRIPTION
 .Nm
 evaluates script fragments written in Progressive Label Notation
 .Pq Xr pln 5 ,
 executing each one in tern using ssh connection multiplexing.
 .Nm
-requires one parameter specifying the regular expression matching hosts
-to configure.
-.Pp
-A second regex may be specified to limit execution to labels matching a
-specific pattern.
-By default only labels beginning with [0-9a-z] are evaluated.
+accepts one or more hostnames which match the labels in
+.Ar routes_file .
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
@@ -46,7 +42,7 @@ List the options associated with each label.
 .It Fl n
 Do not execute commands.
 Hostnames are highlighted to show what characters the
-.Ar host_pattern
+.Ar hostname
 matched.
 .It Fl F
 Specify a
@@ -56,10 +52,10 @@ file for
 to use.
 .It Fl f
 Specify a
-.Ar route_file .
+.Ar routes_file .
 This file is composed of labels which correspond to
 hostnames or IP addresses which are matched against
-.Ar host_pattern .
+.Ar hostname .
 The default is
 .Pa routes.pln .
 .It Fl t
@@ -67,6 +63,9 @@ Allow TTY input by copying the content of each label to the remote host instead
 of opening a pipe to the interpreter.
 .It Fl v
 Print the HTTP log messages after each label is executed
+.It Fl x
+Execute labels matching the specified regex.
+By default only labels beginning with [0-9a-z] are evaluated.
 .El
 .Sh ENVIRONMENT
 Execution on the remote host sets the following environment variables:
