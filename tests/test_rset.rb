@@ -212,3 +212,15 @@ try "Show matching routes and hosts" do
     eq status.success?, true
     eq out, File.read('expected/dry_run.out')
 end
+
+try "Raise error if no route match is found" do
+    fn = "#{$systmp}/routes.pln"
+    FileUtils.mkdir_p("#{$systmp}/_sources")
+    out, err, status = nil
+    cmd = "#{Dir.pwd}/../rset -n localhost.xyz"
+    Dir.chdir("input") do
+        out, err, status = Open3.capture3(cmd)
+    end
+    eq status.success?, false
+    eq err, "No match for 'localhost.xyz' in routes.pln\n"
+end

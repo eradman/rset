@@ -230,6 +230,20 @@ int main(int argc, char *argv[])
 		read_host_labels(route_labels[i]);
 		memcpy(&current_options, &toplevel_options, sizeof(current_options));
 	}
+
+	/* find arguments that don't match */
+	for (k=0; hostnames[k]; k++) {
+		rv = 1;
+		for (i=0; route_labels[i]; i++) {
+			rv = strcmp(hostnames[k], route_labels[i]->name);
+			if (rv == 0) break;
+		}
+		if (rv != 0) {
+			fprintf(stderr, "No match for '%s' in %s\n", hostnames[k], routes_file);
+			exit(1);
+		}
+	}
+
 	if (dryrun_opt) goto dry_run;
 
 #ifdef REQUIRE_SSH_AGENT
