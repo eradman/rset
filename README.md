@@ -32,6 +32,26 @@ Ruby 2.4 is required
 
     make test
 
+Examples
+--------
+
+List all labels matching a regex for host 'db1'
+
+    rset -n -x 'net|etc' db1
+
+Execute all labels matching a regex for hosts 'db[1-3]'
+
+    rset -x 'net|etc' db1 db2 db3
+
+Iterate over a list of hosts read from a file and execute labels that start with
+default pattern `[0-9a-z]`
+
+    xargs rset < hosts
+
+Show configuration files and labels that contain a reference a specific file
+
+    labelgrep httpd.conf *.pln
+
 News
 ----
 
