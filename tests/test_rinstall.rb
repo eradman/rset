@@ -65,11 +65,12 @@ end
 # Functional tests
 
 try "Install a file from a remote URL to the staging area" do
+    FileUtils.mkdir_p "#{$wwwtmp}/x/y"
     fn = "test_#{$tests}.txt"
     dst = "#{$systmp}/#{fn}"
-    src = "#{$wwwtmp}/#{fn}"
+    src = "#{$wwwtmp}/x/y/#{fn}"
     File.open(src, 'w') { |f| f.write("123") }
-    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 #{fn} #{dst}"
+    cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall -m 644 /x/y/#{fn} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq out.chomp, "rinstall: created #{dst}"
     eq err, ""
@@ -86,8 +87,8 @@ try "Install a binary file from a remote URL to the staging area" do
     cmd = "INSTALL_URL=#{$install_url} #{Dir.pwd}/../rinstall getsocket_#{$tests} #{dst}"
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
-    eq out.sub(/(Binary files|Files) /, "").sub(/\..+ differ/, ".XXXXXX"),
-        "#{$systmp}/copyfile_#{$tests} and getsocket_#{$tests}.XXXXXX\n"
+    eq out.sub(/(Binary files|Files) /, "").sub(/_[0-9a-zA-Z]{6} differ/, "_XXXXXX"),
+        "#{$systmp}/copyfile_#{$tests} and getsocket_#{$tests}_XXXXXX\n"
     eq status.exitstatus, 0
     # 'copyfile' was replaced with 'getsocket'
     eq Digest::MD5.hexdigest(File.read("getsocket")),
@@ -97,7 +98,7 @@ end
 is_busybox = ENV['SHELL']=='/bin/ash'
 is_macos = %x{ uname }.chomp =~ /Darwin|FreeBSD|DragonFly|NetBSD/
 try "Install a file from a remote URL containing special characters", (is_busybox | is_macos) do
-    fn = "test ~!@()_+ #{$tests}.txt"
+    fn = "test !@()_+ #{$tests}.txt"
     dst = "#{$systmp}/#{fn}"
     src = "#{$wwwtmp}/#{fn}"
     File.open(src, 'w') { |f| f.write("123") }

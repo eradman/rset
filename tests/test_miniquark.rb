@@ -68,6 +68,8 @@ end
         ;;
     esac
     echo ABCDEFGHIJKLMNOPQRSTUVWXYZ > smallfile
+    mkdir -p x/y
+    echo 0123456789 > x/y/digits
     touch noread.sh
     chmod 110 noread.sh
     touch empty.tar.gz
@@ -156,6 +158,24 @@ try "GET a small file" do
             Content-Length: 27\r
             \r
             ABCDEFGHIJKLMNOPQRSTUVWXYZ
+        REPLY
+    }
+end
+
+try "GET a small from a subdirectory" do
+    Socket.tcp("127.0.0.1", port) {|sock|
+        sock.print "GET /x/y/digits HTTP/1.0\r\n\r\n"
+        sock.close_write
+        response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, '\1'+today+'\2')
+        eq response, <<~REPLY
+            HTTP/1.1 200 OK\r
+            Date: #{today}\r
+            Connection: close\r
+            Last-Modified: #{today}\r
+            Content-Type: application/octet-stream\r
+            Content-Length: 11\r
+            \r
+            0123456789
         REPLY
     }
 end

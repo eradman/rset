@@ -38,7 +38,7 @@ esac
 
 if test ! -f "$1"; then
 	umask 044
-	source="$1.$(mktemp rinstall_XXXXXX)"
+	source="$(basename "$1" | tr -C '0-9a-zA-Z_' '_')$(mktemp XXXXXX)"
 	case `uname` in
 		OpenBSD|NetBSD)
 			ftp -o "$source" -n "$INSTALL_URL/$1"
