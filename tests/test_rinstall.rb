@@ -146,7 +146,7 @@ try "No need to update a file" do
     out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
     eq err, ""
     eq out, ""
-    eq File.stat(dst).mode.to_s(8), '100642'
+    eq File.stat(dst).mode.to_s(8), '100660'
     eq status.exitstatus, 1
 end
 

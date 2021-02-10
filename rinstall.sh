@@ -69,8 +69,10 @@ test -s "$source" || {
 test -e "$target" && diff -U 2 "$target" "$source" || {
 	test -e "$target" || echo "rinstall: created $target"
 	cp "$source" "$target"
-	[ -n "$OWNER" ] && chown $OWNER "$target"
-	[ -n "$MODE" ] && chmod $MODE "$target"
 	ret=0
 }
+
+[ -n "$OWNER" ] && chown $OWNER "$target"
+[ -n "$MODE" ] && chmod $MODE "$target"
+
 exit $ret

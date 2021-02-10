@@ -1,6 +1,7 @@
 = Next Release: 2.0
 
  - Handle HTTP install from files in subdirectories
+ - rinstall(1) always sets owner and mode if specified
 
 = Release History
 
