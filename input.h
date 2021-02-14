@@ -35,7 +35,6 @@ typedef struct Label {
 	char* export_paths[PLN_MAX_PATHS];
 	char* content;
 	int content_size;
-	int content_allocation;
 	Options options;
 	struct Label **labels;
 } Label;

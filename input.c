@@ -39,6 +39,7 @@ Label *lp;
 
 void
 yylex() {
+	int content_allocation = 0;
 	unsigned n = 0;
 	char *line = NULL;
 	size_t linesize = 0;
@@ -60,9 +61,9 @@ yylex() {
 		/* tab-intended content */
 		else if (line[0] == '\t') {
 			lp = host_labels[n_labels-1];
-			while ((linelen + lp->content_size) >= lp->content_allocation) {
-				lp->content_allocation += BUFSIZE;
-				lp->content = realloc(lp->content, lp->content_allocation);
+			while ((linelen + lp->content_size) >= content_allocation) {
+				content_allocation += BUFSIZE;
+				lp->content = realloc(lp->content, content_allocation);
 			}
 			memcpy(lp->content+lp->content_size, line+1, linelen-1);
 			lp->content_size += linelen-1;
@@ -73,7 +74,7 @@ yylex() {
 		else if (strchr(line, ':')) {
 			host_labels[n_labels] = malloc(sizeof(Label));
 			host_labels[n_labels]->content = malloc(BUFSIZE);
-			host_labels[n_labels]->content_allocation = BUFSIZE;
+			content_allocation = BUFSIZE;
 			read_label(line, host_labels[n_labels]);
 			n_labels++;
 			if (n_labels == LABELS_MAX) {
@@ -161,7 +162,7 @@ read_host_labels(Label *route_label) {
 
 /*
  * str_to_array - map space-separated tokens to an array using the input string
- *                as the buffer
+ *                as the buffer.  If no entries are found, *argv will be NULL
  */
 void
 str_to_array(char *argv[], char *inputstring, int siz) {
