@@ -80,7 +80,6 @@ main(int argc, char *argv[])
 {
 	char ch;
 	struct sockaddr_storage in_sa;
-	pid_t cpid, wpid, spid;
 	socklen_t in_sa_len;
 	int insock, status = 0, infd;
 
@@ -115,7 +114,7 @@ main(int argc, char *argv[])
 	printf("listening on: http://%s:%s/\n", s.host, s.port);
 	fflush(stdout);
 
-	switch (cpid = fork()) {
+	switch (fork()) {
 	case -1:
 		warn("fork");
 		break;
@@ -149,7 +148,7 @@ main(int argc, char *argv[])
 			}
 
 			/* fork and handle */
-			switch ((spid = fork())) {
+			switch (fork()) {
 			case 0:
 				serve(infd, &in_sa);
 				exit(0);
@@ -164,7 +163,7 @@ main(int argc, char *argv[])
 		}
 		exit(0);
 	default:
-		while ((wpid = wait(&status)) > 0)
+		while (wait(&status) > 0)
 			;
 	}
 
