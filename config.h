@@ -24,6 +24,7 @@
 #define HL_RESET    "\x1b[0m"
 #define HL_HOST     "\x1b[33m" /* yellow */
 #define HL_LABEL    "\x1b[36m" /* cyan */
+#define HL_ERROR    "\x1b[31m" /* red */
 
 /* checks */
 #define REQUIRE_SSH_AGENT

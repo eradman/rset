@@ -53,6 +53,7 @@ int list_opt;
 int dryrun_opt;
 int tty_opt;
 int verbose_opt;
+int stop_on_err_opt;
 
 /* globals used by signal handlers */
 char *socket_path;
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
 	char *sshconfig_file = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "lntvF:f:x:")) != -1)
+	while ((ch = getopt(argc, argv, "lntevF:f:x:")) != -1)
 		switch (ch) {
 		case 'l':
 			list_opt = 1;
@@ -100,6 +101,9 @@ int main(int argc, char *argv[])
 			break;
 		case 't':
 			tty_opt = 1;
+			break;
+		case 'e':
+			stop_on_err_opt = 1;
 			break;
 		case 'v':
 			verbose_opt = 1;
@@ -113,6 +117,7 @@ int main(int argc, char *argv[])
 		case 'x':
 			label_pattern = argv[optind-1];
 			break;
+
 		default:
 			usage();
 	}
@@ -301,10 +306,26 @@ int main(int argc, char *argv[])
 					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
 					printf("\n");
 				}
-				if (tty_opt)
-					(void) ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
-				else
-					(void) ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+
+				int exit_code;
+				if (tty_opt) {
+					exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
+				} else {
+					exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+				}
+				if (exit_code != 0) {
+					snprintf(buf, sizeof(buf), "Exited with code %d", exit_code);
+					hl_range(buf, HL_ERROR, 0, 0);
+					printf("\n");
+				}
+				if ((stop_on_err_opt) && exit_code != 0) {
+					if (socket_path) {
+						end_connection(socket_path, hostname, http_port);
+						free(socket_path);
+						socket_path = NULL;
+					}
+					return 1;
+				}
 
 				/* read output of web server */
 				nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
