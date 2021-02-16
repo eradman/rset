@@ -53,6 +53,7 @@ int list_opt;
 int dryrun_opt;
 int tty_opt;
 int verbose_opt;
+int stop_on_err_opt;
 
 /* globals used by signal handlers */
 char *socket_path;
@@ -64,6 +65,7 @@ int main(int argc, char *argv[])
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
 	int ch;
+	int exit_code;
 	int fd;
 	int flags;
 	int i, j, k;
@@ -82,7 +84,7 @@ int main(int argc, char *argv[])
 	sigset_t set;
 	size_t len;
 	struct sigaction act;
-	Options toplevel_options;
+	Options toplevel_options, op;
 
 	int labels_matched = 0;
 	char *label_pattern = DEFAULT_LABEL_PATTERN;
@@ -90,8 +92,11 @@ int main(int argc, char *argv[])
 	char *sshconfig_file = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "lntvF:f:x:")) != -1)
+	while ((ch = getopt(argc, argv, "elntvF:f:x:")) != -1)
 		switch (ch) {
+		case 'e':
+			stop_on_err_opt = 1;
+			break;
 		case 'l':
 			list_opt = 1;
 			break;
@@ -113,6 +118,7 @@ int main(int argc, char *argv[])
 		case 'x':
 			label_pattern = argv[optind-1];
 			break;
+
 		default:
 			usage();
 	}
@@ -301,10 +307,20 @@ int main(int argc, char *argv[])
 					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
 					printf("\n");
 				}
+
 				if (tty_opt)
-					(void) ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
+					exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
 				else
-					(void) ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+					exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+				
+				if ((stop_on_err_opt) && exit_code != 0) {
+					apply_default(op.interpreter, host_labels[j]->options.interpreter, INTERPRETER);
+					snprintf(buf, sizeof(buf), "%s exited with code %d", op.interpreter, exit_code);
+					hl_range(buf, HL_ERROR, 0, 0);
+					printf("\n");
+					
+					goto exit;
+				}
 
 				/* read output of web server */
 				nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
@@ -314,6 +330,8 @@ int main(int argc, char *argv[])
 					warn("read from httpd output");
 
 			}
+
+			exit:
 			if (socket_path) {
 				end_connection(socket_path, hostname, http_port);
 				free(socket_path);
@@ -321,7 +339,11 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	return 0;
+
+	if (stop_on_err_opt)
+		return exit_code;
+	else
+		return 0;
 
 dry_run:
 	for (i=0; route_labels[i]; i++) {
