@@ -65,7 +65,6 @@ int main(int argc, char *argv[])
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
 	int ch;
-	int exit_code;
 	int fd;
 	int flags;
 	int i, j, k;
@@ -86,6 +85,7 @@ int main(int argc, char *argv[])
 	struct sigaction act;
 	Options toplevel_options, op;
 
+	int exit_code = 0;
 	int labels_matched = 0;
 	char *label_pattern = DEFAULT_LABEL_PATTERN;
 	char *routes_file = ROUTES_FILE;
@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 					snprintf(buf, sizeof(buf), "%s exited with code %d", op.interpreter, exit_code);
 					hl_range(buf, HL_ERROR, 0, 0);
 					printf("\n");
-					
+
 					goto exit;
 				}
 
@@ -328,10 +328,9 @@ int main(int argc, char *argv[])
 					format_http_log(httpd_log, nr);
 				if ((nr == -1) && (errno != EAGAIN))
 					warn("read from httpd output");
-
 			}
 
-			exit:
+exit:
 			if (socket_path) {
 				end_connection(socket_path, hostname, http_port);
 				free(socket_path);
@@ -408,7 +407,7 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-lntv] [-F sshconfig_file] [-f routes_file] "
+	fprintf(stderr, "usage: rset [-elntv] [-F sshconfig_file] [-f routes_file] "
 	    "[-x label_pattern] hostname ...\n");
 	exit(1);
 }
