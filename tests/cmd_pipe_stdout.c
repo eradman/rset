@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "execute.h"
@@ -18,23 +19,22 @@ Options current_options;
 int main(int argc, char *argv[])
 {
 	int fd;
-	size_t len;
-	char *command, *buf;
+	int status;
+	char *buf;
 	char *cmd_argv[16];
 
 	if (argc != 2) {
-		fprintf(stderr, "usage: ./exec input_file\n");
+		fprintf(stderr, "usage: ./cmd_pipe_stdout command\n");
 		return 1;
 	}
 
-	cmd_argv[0] = "/bin/cat";
+	cmd_argv[0] = argv[1];
 	cmd_argv[1] = NULL;
+
 	buf = malloc(MAX_SCRIPT_SIZE);
-	fd = open(argv[1], 'r');
-	len = read(fd, buf, MAX_SCRIPT_SIZE);
-	close(fd);
+	status = cmd_pipe_stdout(cmd_argv, buf, MAX_SCRIPT_SIZE);
+	write(1, buf, strlen(buf));
+	free(buf);
 
-	pipe_cmd(cmd_argv, buf, len);
-
-	return 0;
+	return status;
 }

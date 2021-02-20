@@ -2,6 +2,7 @@
 
 require "open3"
 require "tempfile"
+require "socket"
 
 # Test Utilities
 $tests = 0
@@ -58,12 +59,20 @@ end
 
 # Execution functions
 
-try "Try a simple pipe" do
-    cmd = "./pipe input/whereami.sh"
+try "Try a pipe to a command" do
+    cmd = "./cmd_pipe_stdin input/whereami.sh"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
     eq status.success?, true
     eq out, File.read('input/whereami.sh')
+end
+
+try "Try capturing the output of a command" do
+    cmd = "./cmd_pipe_stdout /bin/hostname"
+    out, err, status = Open3.capture3(cmd)
+    eq err, ""
+    eq status.success?, true
+    eq out, "#{Socket.gethostname}\n"
 end
 
 try "Locate an executable in the current path" do

@@ -73,13 +73,19 @@ run(char *const argv[]) {
 }
 
 /*
- * run_quiet - run a command while buffering stdout
+ * cmd_pipe_stdout - run a command and capture stdout, return the exit code
  */
+
 int
-run_quiet(char *const argv[]) {
+cmd_pipe_stdout(char *const argv[], char *output, size_t len) {
+	int nr, nbytes;
 	int status;
 	int stdout_pipe[2];
+	char buf[80];
+	char *p;
 	pid_t pid;
+
+	nbytes = 0;
 
 	pipe(stdout_pipe);
 	pid = fork();
@@ -87,10 +93,30 @@ run_quiet(char *const argv[]) {
 		err(1, "fork");
 
 	if (pid == 0) {
-		dup2(stdout_pipe[0], STDOUT_FILENO);
+		/* child closes the output side */
+		close(stdout_pipe[0]);
+
+		dup2(stdout_pipe[1], STDOUT_FILENO);
 		execvp(argv[0], argv);
 		err(1, "could not exec %s", argv[0]);
 	}
+
+	/* parent closes the output side */
+	close(stdout_pipe[1]);
+
+	while ((nr = read(stdout_pipe[0], buf, sizeof(buf))) != -1 && nr != 0) {
+		p = output + nbytes;
+		if (nbytes + nr > len) {
+			fprintf(stderr, "%s: output too overflow (> %lu)\n", argv[0], len);
+			exit(1);
+		}
+		memcpy(p, buf, nr);
+		nbytes += nr;
+	}
+
+	p = output + nbytes;
+	*p = '\0';
+
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "wait on pid %d", pid);
 
@@ -98,10 +124,10 @@ run_quiet(char *const argv[]) {
 }
 
 /*
- * pipe_cmd - attach an input string to stdin and execute a utility
+ * cmd_pipe_stdin - attach an input string to stdin and execute a utility
  */
 int
-pipe_cmd(char *const argv[], char *input, size_t len) {
+cmd_pipe_stdin(char *const argv[], char *input, size_t len) {
 	int status;
 	int stdin_pipe[2];
 	pid_t pid;
@@ -200,10 +226,16 @@ findprog(char *prog)
 
 int
 verify_ssh_agent() {
+	int rv;
 	char *argv[32];
+	char *output;
 
+	output = malloc(4096);
 	append(argv, 0, "ssh-add", "-l", NULL);
-	return run_quiet(argv);
+	rv = cmd_pipe_stdout(argv, output, 4096);
+	free(output);
+
+	return rv;
 }
 
 int
@@ -286,7 +318,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
 
 	(void) append(argv, argc, host_name, cmd, NULL);
-	return pipe_cmd(argv, host_label->content, host_label->content_size);
+	return cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
 }
 
 int
@@ -303,7 +335,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	argc = 0;
 	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
 	(void) append(argv, argc, host_name, cmd, NULL);
-	pipe_cmd(argv, host_label->content, host_label->content_size);
+	cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
 
 	/* construct command to execute on remote host  */
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);

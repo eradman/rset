@@ -1,5 +1,5 @@
 CFLAGS = -I..
-OBJS = getsocket copyfile parser pipe args which ssh_command
+OBJS = args cmd_pipe_stdin cmd_pipe_stdout copyfile getsocket parser ssh_command which
 RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o
 
 all: rset.o test
