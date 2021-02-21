@@ -16,11 +16,15 @@
 
 #include "input.h"
 
+/* hard limits */
+
+#define BUFFER_SIZE 32768
+
 /* forwards */
 
 int append(char *argv[], int argc, char *arg, ...);
 int run(char *const argv[]);
-int cmd_pipe_stdout(char *const argv[], char *output, size_t len);
+char *cmd_pipe_stdout(char *const argv[], int *error_code);
 int cmd_pipe_stdin(char *const argv[], char *input, size_t len);
 int get_socket();
 char *findprog(char *prog);

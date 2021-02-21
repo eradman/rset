@@ -69,23 +69,27 @@ run(char *const argv[]) {
 	}
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "waitpid on %d", pid);
+
 	return WEXITSTATUS(status);
 }
 
 /*
- * cmd_pipe_stdout - run a command and capture stdout, return the exit code
+ * cmd_pipe_stdout - run a command, set exit_code and capture/return stdout
  */
 
-int
-cmd_pipe_stdout(char *const argv[], char *output, size_t len) {
+char *
+cmd_pipe_stdout(char *const argv[], int *error_code) {
 	int nr, nbytes;
 	int status;
 	int stdout_pipe[2];
 	char buf[80];
+	char *output;
 	char *p;
 	pid_t pid;
 
 	nbytes = 0;
+	output = malloc(BUFFER_SIZE);
+	*error_code = -1;
 
 	pipe(stdout_pipe);
 	pid = fork();
@@ -106,8 +110,8 @@ cmd_pipe_stdout(char *const argv[], char *output, size_t len) {
 
 	while ((nr = read(stdout_pipe[0], buf, sizeof(buf))) != -1 && nr != 0) {
 		p = output + nbytes;
-		if (nbytes + nr > len) {
-			fprintf(stderr, "%s: output too overflow (> %lu)\n", argv[0], len);
+		if (nbytes + nr > BUFFER_SIZE) {
+			fprintf(stderr, "%s: output too overflow (> %d)\n", argv[0], BUFFER_SIZE);
 			exit(1);
 		}
 		memcpy(p, buf, nr);
@@ -120,7 +124,8 @@ cmd_pipe_stdout(char *const argv[], char *output, size_t len) {
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "wait on pid %d", pid);
 
-	return WEXITSTATUS(status);
+	*error_code = WEXITSTATUS(status);
+	return output;
 }
 
 /*
@@ -226,16 +231,15 @@ findprog(char *prog)
 
 int
 verify_ssh_agent() {
-	int rv;
-	char *argv[32];
+	int error_code;
 	char *output;
+	char *argv[32];
 
-	output = malloc(4096);
 	append(argv, 0, "ssh-add", "-l", NULL);
-	rv = cmd_pipe_stdout(argv, output, 4096);
+	output = cmd_pipe_stdout(argv, &error_code);
 	free(output);
 
-	return rv;
+	return error_code;
 }
 
 int

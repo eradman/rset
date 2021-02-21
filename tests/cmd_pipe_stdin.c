@@ -5,8 +5,6 @@
 
 #include "execute.h"
 
-#define MAX_SCRIPT_SIZE 16384
-
 /* globals */
 FILE* yyin;
 char* yyfn;
@@ -29,9 +27,9 @@ int main(int argc, char *argv[])
 
 	cmd_argv[0] = "/bin/cat";
 	cmd_argv[1] = NULL;
-	buf = malloc(MAX_SCRIPT_SIZE);
+	buf = malloc(BUFFER_SIZE);
 	fd = open(argv[1], 'r');
-	len = read(fd, buf, MAX_SCRIPT_SIZE);
+	len = read(fd, buf, BUFFER_SIZE);
 	close(fd);
 
 	cmd_pipe_stdin(cmd_argv, buf, len);

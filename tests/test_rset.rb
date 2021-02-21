@@ -68,11 +68,19 @@ try "Try a pipe to a command" do
 end
 
 try "Try capturing the output of a command" do
-    cmd = "./cmd_pipe_stdout /bin/hostname"
+    cmd = "./cmd_pipe_stdout head -n1 #{__FILE__}"
     out, err, status = Open3.capture3(cmd)
     eq err, ""
     eq status.success?, true
-    eq out, "#{Socket.gethostname}\n"
+    eq out, "#!/usr/bin/env ruby\n"
+end
+
+try "Try capturing multi-line output from a command" do
+    cmd = "./cmd_pipe_stdout tail -c 4096 #{__FILE__}"
+    out, err, status = Open3.capture3(cmd)
+    eq err, ""
+    eq status.success?, true
+    eq out.length, 4096
 end
 
 try "Locate an executable in the current path" do

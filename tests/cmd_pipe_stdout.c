@@ -6,8 +6,6 @@
 
 #include "execute.h"
 
-#define MAX_SCRIPT_SIZE 16384
-
 /* globals */
 FILE* yyin;
 char* yyfn;
@@ -19,22 +17,17 @@ Options current_options;
 int main(int argc, char *argv[])
 {
 	int fd;
-	int status;
-	char *buf;
-	char *cmd_argv[16];
+	int error_code;
+	char *output;
 
-	if (argc != 2) {
-		fprintf(stderr, "usage: ./cmd_pipe_stdout command\n");
+	if (argc < 2) {
+		fprintf(stderr, "usage: ./cmd_pipe_stdout cmd [args ...]\n");
 		return 1;
 	}
 
-	cmd_argv[0] = argv[1];
-	cmd_argv[1] = NULL;
+	output = cmd_pipe_stdout(argv+1, &error_code);
+	write(1, output, strlen(output));
+	free(output);
 
-	buf = malloc(MAX_SCRIPT_SIZE);
-	status = cmd_pipe_stdout(cmd_argv, buf, MAX_SCRIPT_SIZE);
-	write(1, buf, strlen(buf));
-	free(buf);
-
-	return status;
+	return error_code;
 }
