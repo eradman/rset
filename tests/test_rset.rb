@@ -3,6 +3,7 @@
 require "open3"
 require "tempfile"
 require "socket"
+require "securerandom"
 
 # Test Utilities
 $tests = 0
@@ -70,7 +71,7 @@ end
 try "Try capturing the output of a command" do
     cmd = "./cmd_pipe_stdout head -n1 #{__FILE__}"
     out, err, status = Open3.capture3(cmd)
-    eq err, ""
+    eq err, "output_size: 20\n"
     eq status.success?, true
     eq out, "#!/usr/bin/env ruby\n"
 end
@@ -78,9 +79,24 @@ end
 try "Try capturing multi-line output from a command" do
     cmd = "./cmd_pipe_stdout tail -c 4096 #{__FILE__}"
     out, err, status = Open3.capture3(cmd)
-    eq err, ""
+    eq err, "output_size: 4096\n"
     eq status.success?, true
     eq out.length, 4096
+end
+
+try "Try capturing a large chunk of text from a command" do
+    tin = "#{$systmp}/random_text_in"
+    tout = "#{$systmp}/random_text_out"
+    random_s = SecureRandom.alphanumeric(32768)
+    File.open(tin, 'w') { |f| f.write(random_s) }
+    cmd = "./cmd_pipe_stdout /bin/cat #{tin} > #{tout}"
+    out, err, status = Open3.capture3(cmd)
+    eq err, "output_size: 32768\n"
+    eq status.success?, true
+    cmd = "diff #{tin} #{tout}"
+    out, err, status = Open3.capture3(cmd)
+    eq err, ""
+    eq status.success?, true
 end
 
 try "Locate an executable in the current path" do

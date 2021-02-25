@@ -1,7 +1,6 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "execute.h"
@@ -16,8 +15,9 @@ Options current_options;
 
 int main(int argc, char *argv[])
 {
-	int fd;
 	int error_code;
+	int fd;
+	int output_size;
 	char *output;
 
 	if (argc < 2) {
@@ -25,9 +25,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	output = cmd_pipe_stdout(argv+1, &error_code);
-	write(1, output, strlen(output));
+	output = cmd_pipe_stdout(argv+1, &error_code, &output_size);
+	write(1, output, output_size);
 	free(output);
+	fprintf(stderr, "output_size: %d\n", output_size);
 
 	return error_code;
 }

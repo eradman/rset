@@ -78,17 +78,19 @@ run(char *const argv[]) {
  */
 
 char *
-cmd_pipe_stdout(char *const argv[], int *error_code) {
+cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size) {
 	int nr, nbytes;
+	int buffer_size;
 	int status;
 	int stdout_pipe[2];
-	char buf[80];
+	char buf[512];
 	char *output;
-	char *p;
+	char *p, *newp;
 	pid_t pid;
 
 	nbytes = 0;
-	output = malloc(BUFFER_SIZE);
+	buffer_size = ALLOCATION_SIZE;
+	output = malloc(buffer_size);
 	*error_code = -1;
 
 	pipe(stdout_pipe);
@@ -110,9 +112,12 @@ cmd_pipe_stdout(char *const argv[], int *error_code) {
 
 	while ((nr = read(stdout_pipe[0], buf, sizeof(buf))) != -1 && nr != 0) {
 		p = output + nbytes;
-		if (nbytes + nr > BUFFER_SIZE) {
-			fprintf(stderr, "%s: output too overflow (> %d)\n", argv[0], BUFFER_SIZE);
-			exit(1);
+		/* ensure we have enough space to terminate string */
+		if (nbytes + nr + 1 > buffer_size) {
+			buffer_size += ALLOCATION_SIZE;
+			if ((newp = realloc(output, buffer_size)) == NULL)
+				err(1, "realloc");
+			output = newp;
 		}
 		memcpy(p, buf, nr);
 		nbytes += nr;
@@ -125,6 +130,7 @@ cmd_pipe_stdout(char *const argv[], int *error_code) {
 		err(1, "wait on pid %d", pid);
 
 	*error_code = WEXITSTATUS(status);
+	*output_size = nbytes;
 	return output;
 }
 
@@ -232,11 +238,12 @@ findprog(char *prog)
 int
 verify_ssh_agent() {
 	int error_code;
+	int output_size;
 	char *output;
 	char *argv[32];
 
 	append(argv, 0, "ssh-add", "-l", NULL);
-	output = cmd_pipe_stdout(argv, &error_code);
+	output = cmd_pipe_stdout(argv, &error_code, &output_size);
 	free(output);
 
 	return error_code;

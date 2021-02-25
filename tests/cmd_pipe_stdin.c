@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
 
 	cmd_argv[0] = "/bin/cat";
 	cmd_argv[1] = NULL;
-	buf = malloc(BUFFER_SIZE);
+	buf = malloc(ALLOCATION_SIZE);
 	fd = open(argv[1], 'r');
-	len = read(fd, buf, BUFFER_SIZE);
+	len = read(fd, buf, ALLOCATION_SIZE);
 	close(fd);
 
 	cmd_pipe_stdin(cmd_argv, buf, len);
