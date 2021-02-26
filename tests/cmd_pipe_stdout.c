@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "execute.h"
 
@@ -27,8 +28,9 @@ int main(int argc, char *argv[])
 
 	output = cmd_pipe_stdout(argv+1, &error_code, &output_size);
 	write(1, output, output_size);
-	free(output);
 	fprintf(stderr, "output_size: %d\n", output_size);
+	fprintf(stderr, "strlen: %lu\n", strlen(output));
+	free(output);
 
 	return error_code;
 }

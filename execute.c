@@ -35,6 +35,8 @@
 #include "config.h"
 #include "execute.h"
 
+#define BLOCK_SIZE 512
+
 /*
  * append - add a list of arguments to an array
  */
@@ -83,14 +85,14 @@ cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size) {
 	int buffer_size;
 	int status;
 	int stdout_pipe[2];
-	char buf[512];
+	char buf[BLOCK_SIZE];
 	char *output;
-	char *p, *newp;
+	char *newp;
 	pid_t pid;
 
 	nbytes = 0;
 	buffer_size = ALLOCATION_SIZE;
-	output = malloc(buffer_size);
+	output = malloc(buffer_size + 1);  /* Add room for NULL */
 	*error_code = -1;
 
 	pipe(stdout_pipe);
@@ -110,21 +112,19 @@ cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size) {
 	/* parent closes the output side */
 	close(stdout_pipe[1]);
 
-	while ((nr = read(stdout_pipe[0], buf, sizeof(buf))) != -1 && nr != 0) {
-		p = output + nbytes;
+	while ((nr = read(stdout_pipe[0], buf, BLOCK_SIZE)) != -1 && nr != 0) {
 		/* ensure we have enough space to terminate string */
 		if (nbytes + nr + 1 > buffer_size) {
 			buffer_size += ALLOCATION_SIZE;
-			if ((newp = realloc(output, buffer_size)) == NULL)
+			if ((newp = realloc(output, buffer_size + 1)) == NULL)
 				err(1, "realloc");
 			output = newp;
 		}
-		memcpy(p, buf, nr);
+		memcpy(output + nbytes, buf, nr);
 		nbytes += nr;
 	}
 
-	p = output + nbytes;
-	*p = '\0';
+	*(output + nbytes) = '\0';
 
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "wait on pid %d", pid);

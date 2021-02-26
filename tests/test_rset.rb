@@ -71,7 +71,7 @@ end
 try "Try capturing the output of a command" do
     cmd = "./cmd_pipe_stdout head -n1 #{__FILE__}"
     out, err, status = Open3.capture3(cmd)
-    eq err, "output_size: 20\n"
+    eq err, "output_size: 20\nstrlen: 20\n"
     eq status.success?, true
     eq out, "#!/usr/bin/env ruby\n"
 end
@@ -79,7 +79,7 @@ end
 try "Try capturing multi-line output from a command" do
     cmd = "./cmd_pipe_stdout tail -c 4096 #{__FILE__}"
     out, err, status = Open3.capture3(cmd)
-    eq err, "output_size: 4096\n"
+    eq err, "output_size: 4096\nstrlen: 4096\n"
     eq status.success?, true
     eq out.length, 4096
 end
@@ -91,7 +91,7 @@ try "Try capturing a large chunk of text from a command" do
     File.open(tin, 'w') { |f| f.write(random_s) }
     cmd = "./cmd_pipe_stdout /bin/cat #{tin} > #{tout}"
     out, err, status = Open3.capture3(cmd)
-    eq err, "output_size: 32768\n"
+    eq err, "output_size: 32768\nstrlen: 32768\n"
     eq status.success?, true
     cmd = "diff #{tin} #{tout}"
     out, err, status = Open3.capture3(cmd)
