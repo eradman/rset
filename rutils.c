@@ -115,6 +115,9 @@ format_options(Options *op) {
 	if (*op->interpreter)
 		pos += snprintf(buf+pos, sizeof(buf)-pos, "interpreter=%s,",
 		    op->interpreter);
+	if (*op->local_interpreter)
+		pos += snprintf(buf+pos, sizeof(buf)-pos, "local_interpreter=%s,",
+		    op->local_interpreter);
 	if (*op->execute_with)
 		pos += snprintf(buf+pos, sizeof(buf)-pos, "execute_with=%s,",
 		    op->execute_with);

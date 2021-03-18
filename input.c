@@ -15,13 +15,17 @@
  */
 
 #include <err.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "missing/compat.h"
 
+#include "config.h"
 #include "input.h"
+#include "execute.h"
 
 #define LABELS_MAX 100
 #define BUFSIZE 4096
@@ -40,11 +44,19 @@ Label *lp;
 void
 yylex() {
 	int content_allocation = 0;
+	int error_code;
+	int tfd = 0;
+	int local_argc;
+	enum {Local, Remote} context;
 	unsigned n = 0;
+	char tmp_src[128];
 	char *line = NULL;
+	char *local_argv[PLN_MAX_PATHS];
 	size_t linesize = 0;
 	ssize_t linelen;
+	Options op;
 
+	context = Remote;
 	while ((linelen = getline(&line, &linesize, yyin)) != -1) {
 		n++;
 
@@ -58,16 +70,65 @@ yylex() {
 			exit(1);
 		}
 
+		/* { ... } local execution */
+		else if (line[0] == '{') {
+			context = Local;
+			if (strlen(line) > 2) {
+				fprintf(stderr, "%s: invalid trailing characters on line %d: '%s'\n",
+				    yyfn, n, line);
+				exit(1);
+			}
+			strlcpy(tmp_src, "/tmp/rset_local.XXXXXX", sizeof tmp_src);
+			mktemp(tmp_src);
+			if ((tfd = open(tmp_src, O_CREAT|O_RDWR, 0600)) == -1)
+				err(1, "open %s", tmp_src);
+		}
+
+		else if (line[0] == '}') {
+			context = Remote;
+			if (strlen(line) > 2) {
+				fprintf(stderr, "%s: invalid trailing characters on line %d: '%s'\n",
+				    yyfn, n, line);
+				exit(1);
+			}
+			if (tfd > 0) {
+				close(tfd);
+				lp = host_labels[n_labels-1];
+				apply_default(op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
+
+				local_argc = str_to_array(local_argv, op.local_interpreter, PLN_MAX_PATHS);
+				(void) append(local_argv, local_argc, tmp_src, NULL);
+
+				lp->content = cmd_pipe_stdout(local_argv, &error_code, &content_allocation);
+				lp->content_size = strlen(lp->content);
+				unlink(tmp_src);
+				if (error_code != 0) {
+					fprintf(stderr, "rset: local execution for %s label '%s' exited with code %d\n",
+					    yyfn, lp->name, error_code);
+						exit(1);
+					}
+				tfd = 0;
+			}
+		}
+
 		/* tab-intended content */
 		else if (line[0] == '\t') {
-			lp = host_labels[n_labels-1];
-			while ((linelen + lp->content_size) >= content_allocation) {
-				content_allocation += BUFSIZE;
-				lp->content = realloc(lp->content, content_allocation);
+			switch (context) {
+				case Local:
+					if ((write(tfd, line+1, linelen)) == -1)
+						err(1, "write");
+					break;
+				case Remote:
+					lp = host_labels[n_labels-1];
+					while ((linelen + lp->content_size) >= content_allocation) {
+						content_allocation += BUFSIZE;
+						lp->content = realloc(lp->content, content_allocation);
+					}
+					memcpy(lp->content+lp->content_size, line+1, linelen-1);
+					lp->content_size += linelen-1;
+					lp->content[lp->content_size] = '\0';
+					break;
 			}
-			memcpy(lp->content+lp->content_size, line+1, linelen-1);
-			lp->content_size += linelen-1;
-			lp->content[lp->content_size] = '\0';
 		}
 
 		/* label */
@@ -164,16 +225,20 @@ read_host_labels(Label *route_label) {
  * str_to_array - map space-separated tokens to an array using the input string
  *                as the buffer.  If no entries are found, *argv will be NULL
  */
-void
+int
 str_to_array(char *argv[], char *inputstring, int siz) {
+	int argc;
 	char **ap;
 
+	argc = 0;
 	for (ap = argv; ap < &argv[siz] &&
 		(*ap = strsep(&inputstring, " ")) != NULL;) {
+			argc++;
 			if (**ap != '\0')
 				ap++;
 	}
 	*ap = NULL;
+	return argc;
 }
 
 /*
@@ -238,6 +303,8 @@ read_option(char *text, Options *op) {
 		strlcpy(op->execute_with, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "interpreter") == 0)
 		strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
+	else if (strcmp(k, "local_interpreter") == 0)
+		strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
 	else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
 		exit(1);

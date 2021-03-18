@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 15, 2021
+.Dd March 18, 2021
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -100,6 +100,10 @@ The interpreter to run a script fragment with.
 Defaults to
 .Pa /bin/sh ,
 but any language may be used that is capable of reading scripts over STDIN.
+.Ss \&local_interpreter=
+The interpreter to evaluate content that is prepended to a script
+Defaults to
+.Pa /bin/sh .
 .Ss \&execute_with=
 Command for elevating privileges, such as
 .Xr doas 1

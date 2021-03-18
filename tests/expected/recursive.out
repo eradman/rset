@@ -2,7 +2,7 @@ t430s, content_size: 29
 t430s, options: t430s/ common/
 chroot, content_size: 146
 chroot, options: execute_with=doas
-common packages, content_size: 168
-common packages, options: interpreter=/bin/ksh -x,execute_with=doas
+common packages, content_size: 210
+common packages, options: interpreter=/bin/ksh -x,local_interpreter=/bin/sh -e,execute_with=doas
 desktop, content_size: 30
-desktop, options: interpreter=/bin/ksh -x,execute_with=doas
+desktop, options: interpreter=/bin/ksh -x,local_interpreter=/bin/sh -e,execute_with=doas

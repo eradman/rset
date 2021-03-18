@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 11, 2020
+.Dd March 18, 2021
 .Dt PLN 5
 .Os
 .Sh NAME
@@ -36,13 +36,21 @@ packages:
 	ln -sf /usr/local/bin/ruby27 /usr/local/bin/ruby
 	ln -sf /usr/local/bin/irb27 /usr/local/bin/irb
 
-interpreter=
-
 services:
 	./rinstall mail/smtpd_relay.conf /etc/mail/smtpd.conf \\
 	    && rcctl restart smtpd
 
 # vim:ts=4:syntax=sh
+.Ed
+.Pp
+A label may also be followed by special content between a pair of braces on the
+beginning of a line
+.Bd -literal -offset indent
+www:
+{
+	echo "SSL_PASSWORD=XYZ"
+}
+	echo $SSL_PASSWORD > /etc/keys/global.pass
 .Ed
 .Sh OPTIONS
 Each option may be set multiple times, and is effective for labels that follow.
@@ -51,7 +59,7 @@ Reset an option to the implementation-defined default using
 without a value.
 .Sh LABELS
 Label names do not need to be unique and may contain any series of
-characters except for single and douple quotes.
+characters except for single and double quotes.
 A series of pathnames for use by the application may be specified after the
 .Ql \&: .
 .Sh COMMENTS

@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	int status;
-	char *hostnames[ARG_MAX];
+	char *hostnames[ARG_MAX/8];
 	char *http_srv_argv[9], *inputstring;
 	char *rinstall_bin, *rsub_bin, *httpd_bin;
 	char routes_realpath[PATH_MAX];
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 	/* Select a port to communicate on */
 	http_port = get_socket();
 
-	if (pledge("stdio rpath proc exec unveil", NULL) == -1)
+	if (pledge("stdio rpath proc exec unveil tmppath", NULL) == -1)
 		err(1, "pledge");
 
 	/* Convert http server command line into a vector */

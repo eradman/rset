@@ -1,8 +1,12 @@
 # a comment
 
 interpreter=/bin/ksh -x
+local_interpreter=/bin/sh -e
 
 common packages:
+{
+	echo "MIRROR=http://cdn.openbsd.org/pub/OpenBSD"
+}
 	pkg_add rsync-- ruby%2.6
 	echo "inet 172.16.0.1/16" > /etc/hostname.vether0
 	echo "add vether0" > /etc/hostname.bridge0
