@@ -316,8 +316,8 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	Options op;
 
 	/* construct command to execute on remote host  */
-	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
+	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' "
 	    "ROUTE_LABEL='%s' INSTALL_URL='" INSTALL_URL "' exec %s\"",

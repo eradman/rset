@@ -28,6 +28,7 @@
 typedef struct {
 	char execute_with[PLN_OPTION_SIZE];
 	char interpreter[PLN_OPTION_SIZE];
+	char local_interpreter[PLN_OPTION_SIZE];
 } Options;
 
 typedef struct Label {
@@ -52,7 +53,7 @@ void yylex();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
 char* array_to_str(char *argv[]);
-void str_to_array(char *argv[], char *input, int siz);
+int str_to_array(char *argv[], char *input, int siz);
 
 char* ltrim(char *s, int c);
 void read_label(char *line, Label *label);
