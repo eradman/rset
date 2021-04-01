@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 18, 2021
+.Dd March 31, 2021
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -21,7 +21,7 @@
 .Nd configure systems using labeled scripts
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl eln
+.Op Fl elntv
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
 .Op Fl x Ar label_pattern
@@ -37,13 +37,21 @@ accepts one or more hostnames which match the labels in
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.It Fl e
+Stop executing if an error is encountered within a label.
 .It Fl l
 List the options associated with each label.
 .It Fl n
-Do not execute commands.
+Do not connect to remote hosts.
+Special text defined between { and } is still executed locally.
 Hostnames are highlighted to show what characters the
 .Ar hostname
 matched.
+.It Fl t
+Allow TTY input by copying the content of each label to the remote host instead
+of opening a pipe to the interpreter.
+.It Fl v
+Print the HTTP log messages after each label is executed.
 .It Fl F
 Specify a
 .Pa config
@@ -58,13 +66,6 @@ hostnames or IP addresses which are matched against
 .Ar hostname .
 The default is
 .Pa routes.pln .
-.It Fl t
-Allow TTY input by copying the content of each label to the remote host instead
-of opening a pipe to the interpreter.
-.It Fl e
-Stop executing if an error is encountered within a label.
-.It Fl v
-Print the HTTP log messages after each label is executed
 .It Fl x
 Execute labels matching the specified regex.
 By default only labels beginning with [0-9a-z] are evaluated.
@@ -93,8 +94,9 @@ remote host, hence the capabilities of
 .Nm
 may easily be extend by accessing utilities at this location.
 .Sh OPTIONS
-Most options are not set in the command line, but are modified using key-value
-pairs.
+The following options are recognized when parsing a
+.Xr pln 5
+file:
 .Ss \&interpreter=
 The interpreter to run a script fragment with.
 Defaults to
