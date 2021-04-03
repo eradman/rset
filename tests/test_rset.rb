@@ -235,10 +235,10 @@ end
 
 try "Show matching routes and hosts" do
     fn = "#{$systmp}/routes.pln"
-    FileUtils.mkdir_p("#{$systmp}/_sources")
     out, err, status = nil
     cmd = "#{Dir.pwd}/../rset -ln t430s"
     Dir.chdir("input") do
+        FileUtils.mkdir("_sources")
         out, err, status = Open3.capture3(cmd)
     end
     eq err, ""

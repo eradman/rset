@@ -1,6 +1,7 @@
 = Next Release: 2.1
 
- - New syntax for pln(5) for for piping input to a local_interpreter
+ - New syntax for pln(5): special text can be defined between '{' and '}'
+ - New local_interpreter option for executing script in a local context
    to generate text that is prepended to a label
 
 = Release History
