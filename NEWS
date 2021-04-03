@@ -1,18 +1,18 @@
-= Next Release: 2.1
+= Release History
+
+== 2.1: April 3, 2021
 
  - New syntax for pln(5): special text can be defined between '{' and '}'
  - New local_interpreter option for executing script in a local context
    to generate text that is prepended to a label
 
-= Release History
-
-== 2.0: February 26, 2020
+== 2.0: February 26, 2021
 
  - Handle HTTP install from files in subdirectories
  - rinstall(1) always sets owner and mode if specified
  - Add '-e' option to stop execution if an interpreter returns non-zero
 
-== 1.9: January 28, 2020
+== 1.9: January 28, 2021
 
  - A variable list of hostnames is accepted instead of a host regex
  - label_pattern is specified using '-x'
