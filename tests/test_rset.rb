@@ -238,7 +238,7 @@ try "Show matching routes and hosts" do
     out, err, status = nil
     cmd = "#{Dir.pwd}/../rset -ln t430s"
     Dir.chdir("input") do
-        FileUtils.mkdir("_sources")
+        FileUtils.mkdir_p("_sources")
         out, err, status = Open3.capture3(cmd)
     end
     eq err, ""

@@ -414,8 +414,7 @@ usage() {
 
 static void
 not_found(char *name) {
-	fprintf(stderr, "rset: %s not found in PATH\n", name);
-	exit(1);
+	errx(1, "'%s' not found in PATH", name);
 }
 
 static void

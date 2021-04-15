@@ -102,11 +102,9 @@ yylex() {
 				lp->content = cmd_pipe_stdout(local_argv, &error_code, &content_allocation);
 				lp->content_size = strlen(lp->content);
 				unlink(tmp_src);
-				if (error_code != 0) {
-					fprintf(stderr, "rset: local execution for %s label '%s' exited with code %d\n",
+				if (error_code != 0)
+					errx(1, "local execution for %s label '%s' exited with code %d",
 					    yyfn, lp->name, error_code);
-						exit(1);
-					}
 				tfd = 0;
 			}
 		}
