@@ -164,7 +164,7 @@ try "Run rset with no arguments" do
     eq status.success?, false
 end
 
-# Parsing Progressive Label Notation (.pln)
+# Parse Progressive Label Notation (pass)
 
 try "Try parsing a label file" do
     cmd = "./parser H input/t430s.pln"
@@ -198,7 +198,7 @@ try "Format and run a command line" do
     eq out, File.read('expected/args.out')
 end
 
-# Error Handling
+# Parse Progressive Label Notation (fail)
 
 try "Report an unknown syntax" do
     fn = "#{$systmp}/routes.pln"
@@ -210,6 +210,16 @@ try "Report an unknown syntax" do
     eq status.success?, false
     eq out, ""
 end
+
+try "Detect local execution that does not emit a newline" do
+    cmd = "./parser H input/syntax_01.pln"
+    out, err, status = Open3.capture3(cmd)
+    eq err, "input/syntax_01.pln: output of local execution for the label 'two' must end with a newline\n"
+    eq out, ""
+    eq status.exitstatus, 1
+end
+
+# Error Handling
 
 try "Report a bad regex" do
     fn = "#{$systmp}/routes.pln"

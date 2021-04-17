@@ -101,6 +101,11 @@ yylex() {
 
 				lp->content = cmd_pipe_stdout(local_argv, &error_code, &content_allocation);
 				lp->content_size = strlen(lp->content);
+				if ((lp->content_size > 0) && (lp->content[lp->content_size-1] != '\n')) {
+					fprintf(stderr, "%s: output of local execution for the label '%s' "
+					    "must end with a newline\n", yyfn, lp->name);
+					exit(1);
+				}
 				unlink(tmp_src);
 				if (error_code != 0)
 					errx(1, "local execution for %s label '%s' exited with code %d",

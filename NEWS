@@ -1,3 +1,7 @@
+= Next Release: 2.2
+
+ - Raise an error if the output of local execution does not end with '\n'
+
 = Release History
 
 == 2.1: April 3, 2021

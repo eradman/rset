@@ -26,18 +26,17 @@ void usage() {
 int main(int argc, char *argv[])
 {
 	int i, j;
-	char *input_fn;
 	char *mode;
 
 	if (argc != 3) usage();
 	mode = argv[1];
-	input_fn = argv[2];
+	yyfn = argv[2];
 
 	n_labels = 0;
 	host_labels = alloc_labels();
-	yyin = fopen(input_fn, "r");
+	yyin = fopen(yyfn, "r");
 	if (!yyin)
-		perror(input_fn);
+		perror(yyfn);
 	yylex();
 
 	switch (mode[0]) {
@@ -48,7 +47,7 @@ int main(int argc, char *argv[])
 		}
 		break;
 	case 'R':
-		chdir(dirname(input_fn));
+		chdir(dirname(yyfn));
 
 		route_labels = host_labels;
 		for (i=0; route_labels[i]; i++) {
