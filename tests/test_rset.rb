@@ -212,9 +212,10 @@ try "Report an unknown syntax" do
 end
 
 try "Detect local execution that does not emit a newline" do
-    cmd = "./parser H input/syntax_01.pln"
+    pln = "input/local_exec_out_01.pln"
+    cmd = "./parser H #{pln}"
     out, err, status = Open3.capture3(cmd)
-    eq err, "input/syntax_01.pln: output of local execution for the label 'two' must end with a newline\n"
+    eq err, "#{pln}: output of local execution for the label 'two' must end with a newline\n"
     eq out, ""
     eq status.exitstatus, 1
 end
