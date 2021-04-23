@@ -1,5 +1,5 @@
-Remote Sequential Execution Tool
-================================
+Remote Staging Execution Tool
+=============================
 
 [rset(1)] operates by staging files on a remote system, then executing
 instructions embedded in the [pln(5)] files. Any interpreter capable of running
