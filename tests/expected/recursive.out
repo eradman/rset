@@ -1,5 +1,5 @@
-t430s, content_size: 29
-t430s, options: t430s/ common/
+t460s, content_size: 29
+t460s, options: t460s/ common/
 chroot, content_size: 146
 chroot, options: execute_with=doas
 common packages, content_size: 210

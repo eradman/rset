@@ -1,4 +1,4 @@
-[33m[7mt430s[0m[33m               [0m  t430s/ common/
+[33m[7mt460s[0m[33m               [0m  t460s/ common/
 [36m[7mc[0m[36mhroot              [0m  execute_with=doas
 [36m[7mc[0m[36mommon packages     [0m  interpreter=/bin/ksh -x,local_interpreter=/bin/sh -e,execute_with=doas
 [36m[7md[0m[36mesktop             [0m  interpreter=/bin/ksh -x,local_interpreter=/bin/sh -e,execute_with=doas
