@@ -23,7 +23,11 @@ end
 $systmp = Dir.mktmpdir
 at_exit { child_wait; FileUtils.remove_dir $systmp if parent_pid == Process.pid }
 
-def try(descr)
+def try(descr, skip=false)
+    if skip then
+        puts "0.000: #{descr} [skipped]"
+        return
+    end
     start = Time.now
     $tests += 1
     $test_description = descr
@@ -128,7 +132,8 @@ try "HEAD request for missing file" do
     }
 end
 
-try "GET a file that does have have read permission" do
+is_root = Process.uid == 0
+try "GET a file that does not have have read permission", is_root do
     Socket.tcp("127.0.0.1", port) {|sock|
         sock.print "GET /noread.sh HTTP/1.1\r\n\r\n"
         sock.close_write

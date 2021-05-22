@@ -24,13 +24,13 @@ rset.o: ${RSET_INC} rset.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -DRELEASE=\"${RELEASE}\" -c rset.c
 
 rset: ${RSET_COMPONENTS:=.h} ${RSET_OBJS}
-	${CC} ${CFLAGS} ${CPPFLAGS} -o $@ ${RSET_OBJS} ${LDFLAGS}
+	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} -o $@ ${RSET_OBJS}
 
 miniquark.o: ${QUARK_INC} miniquark.c
 	${CC} ${CFLAGS} ${CPPFLAGS} -DRELEASE=\"${RELEASE}\" -c miniquark.c
 
 miniquark: ${QUARK_COMPONENTS:=.h} ${QUARK_OBJS}
-	${CC} ${CFLAGS} ${CPPFLAGS} -o $@ ${QUARK_OBJS} ${LDFLAGS}
+	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} -o $@ ${QUARK_OBJS}
 
 .sh:
 	sed -e 's/$${release}/${RELEASE}/' $< > $@
