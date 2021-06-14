@@ -78,7 +78,7 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-	char ch;
+	int ch;
 	struct sockaddr_storage in_sa;
 	socklen_t in_sa_len;
 	int insock, status = 0, infd;
@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 	s.port = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "p:h:d:")) != -1)
+	while ((ch = getopt(argc, argv, "p:h:d:")) != -1) {
 		switch (ch) {
 		case 'd':
 			servedir = argv[optind-1];
@@ -103,6 +103,7 @@ main(int argc, char *argv[])
 			break;
 		default:
 			usage();
+		}
 	}
 	if (argc > optind+1) usage();
 	if (s.port == NULL) usage();

@@ -2,6 +2,7 @@
 
  - Raise an error if the output of local execution does not end with '\n'
  - Rename "Remote Sequential Execution Tool" to "Remote Staging Execution Tool"
+ - Fix miniquark arg parsing on arm
 
 = Release History
 

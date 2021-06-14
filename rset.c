@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 	char *sshconfig_file = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "elntvF:f:x:")) != -1)
+	while ((ch = getopt(argc, argv, "elntvF:f:x:")) != -1) {
 		switch (ch) {
 		case 'e':
 			stop_on_err_opt = 1;
@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
 
 		default:
 			usage();
+		}
 	}
 	if (optind >= argc) usage();
 
