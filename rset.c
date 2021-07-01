@@ -172,13 +172,18 @@ int main(int argc, char *argv[])
 		/* close input side of pipe, and connect stdout */
 		dup2(stdout_pipe[1], STDOUT_FILENO);
 		close(stdout_pipe[1]);
-		if (pledge("stdio rpath proc exec unveil", "stdio rpath proc inet") == -1)
+
+		if (unveil(xdirname(PUBLIC_DIRECTORY), "r") == -1)
+			err(1, "unveil");
+		if (unveil(xdirname(httpd_bin), "x") == -1)
+			err(1, "unveil");
+		if (unveil("/usr/lib", "r") == -1)
+			err(1, "unveil");
+		if (unveil("/usr/libexec", "r") == -1)
+			err(1, "unveil");
+		if (pledge("stdio rpath proc exec", "stdio rpath proc inet") == -1)
 			err(1, "pledge");
 
-		unveil(xdirname(PUBLIC_DIRECTORY), "r");
-		unveil(xdirname(httpd_bin), "x");
-		unveil("/usr/lib", "r");
-		unveil("/usr/libexec", "r");
 
 		execv(httpd_bin, http_srv_argv);
 		fprintf(stderr, "Fatal: unable to start web server\n");
