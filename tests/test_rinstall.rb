@@ -135,6 +135,19 @@ try "Install a file from the local staging directory" do
     eq File.exists?(dst), true
 end
 
+try "Install a file from the using a directory target" do
+    fn = "test_#{$tests}.txt"
+    dst = "#{$systmp}/#{fn}"
+    src = "#{$wwwtmp}/#{fn}"
+    File.open(src, 'w') { |f| f.write("456") }
+    cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{$systmp}"
+    out, err, status = Open3.capture3(cmd, :chdir=>$systmp)
+    eq out.chomp, "rinstall: created #{dst}"
+    eq err, ""
+    eq status.exitstatus, 0
+    eq File.exists?(dst), true
+end
+
 try "No need to update a file" do
     fn = "test_#{$tests}.txt"
     dst = "#{$systmp}/#{$tests}/#{fn}"

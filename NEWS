@@ -1,6 +1,7 @@
 = Next Release: 2.3
 
  - Tweaks to unveil(2)
+ - rinstall(1) accepts a directory instead of a target, similar to cp(1)
 
 = Release History
 

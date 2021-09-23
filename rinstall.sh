@@ -26,7 +26,7 @@ done
 [ $# -eq 2 ] || usage
 
 source=$1
-target=$2
+test -d "$2" && target="$2/$(basename "$source")" || target=$2
 
 case $(dirname "$target") in
 	/*) ;;
@@ -68,8 +68,7 @@ test -s "$source" || {
 
 test -e "$target" && diff -U 2 "$target" "$source" || {
 	test -e "$target" || echo "rinstall: created $target"
-	cp "$source" "$target"
-	ret=0
+	cp "$source" "$target" && ret=0
 }
 
 [ -n "$OWNER" ] && chown $OWNER "$target"
