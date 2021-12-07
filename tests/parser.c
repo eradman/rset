@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 			    host_labels[j]->name, format_options(&host_labels[j]->options));
 		}
 		break;
-	defualt:
+	default:
 		usage();
 	}
 

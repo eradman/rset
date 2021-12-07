@@ -17,14 +17,6 @@ test: ${OBJS}
 	@ruby test_labelgrep.rb
 	@ruby test_rset.rb
 
-lint:
-	@mandoc -Tlint ../rsub.1
-	@mandoc -Tlint ../miniquark.1
-	@mandoc -Tlint ../rinstall.1
-	@mandoc -Tlint ../labelgrep.1
-	@mandoc -Tlint ../rset.1
-	@mandoc -Tlint ../pln.5
-
 clean:
 	rm -f *.core ${OBJS} *.o
 

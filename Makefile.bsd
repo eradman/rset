@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 2.3
+RELEASE = 2.4
 
 RSET_COMPONENTS = rutils input execute
 RSET_OBJS = ${RSET_COMPONENTS:=.o} compat.o rset.o
@@ -70,9 +70,6 @@ uninstall:
 
 test: ${PROGS}
 	make -C tests
-
-gcc-lint: clean
-	@CPPFLAGS="-std=c99 -pedantic -Wall -Wpointer-arith -Wbad-function-cast" make
 
 clean:
 	rm -f compat.c *.o *.core ${PROGS}

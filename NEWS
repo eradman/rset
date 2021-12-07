@@ -1,3 +1,7 @@
+= Next Release: 2.4:
+
+ - Remove incomplete lint build targets
+
 = Release History
 
 == 2.3: November 17, 2021
