@@ -1,7 +1,7 @@
 /* compat.h */
 
 #if defined(_LINUX_PORT) && defined(__GLIBC__)
-size_t strlcpy(char *to, const char *from, int l);
+size_t strlcpy(char *dst, const char *src, size_t dsize);
 #endif
 
 #if defined(_MACOS_PORT) || defined(_LINUX_PORT)
