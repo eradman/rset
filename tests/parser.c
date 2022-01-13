@@ -25,7 +25,7 @@ void usage() {
 
 int main(int argc, char *argv[])
 {
-	int i, j;
+	int i, j, l;
 	char *mode;
 
 	if (argc != 3) usage();
@@ -42,7 +42,13 @@ int main(int argc, char *argv[])
 	switch (mode[0]) {
 	case 'H':
 		for (i=0; host_labels[i]; i++) {
-			printf("[%d] %s\n", i, host_labels[i]->name);
+			printf("[%d] %s", i, host_labels[i]->name);
+			if (host_labels[i]->n_aliases > 1) {
+				printf(" ->");
+				for (l=0; l < host_labels[i]->n_aliases; l++)
+					printf(" %s", host_labels[i]->aliases[l]);
+			}
+			printf("\n");
 			printf("%s.\n", host_labels[i]->content);
 		}
 		break;

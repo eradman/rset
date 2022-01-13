@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	int ch;
 	int fd;
 	int flags;
-	int i, j, k;
+	int i, j, k, l;
 	int nr;
 	int rv;
 	int stdout_pipe[2];
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 	/* Convert http server command line into a vector */
 	inputstring = malloc(PATH_MAX);
 	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d " PUBLIC_DIRECTORY, http_port);
-	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv));
+	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv), " ");
 	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
 
@@ -245,12 +245,14 @@ int main(int argc, char *argv[])
 
 	/* find arguments that don't match */
 	for (k=0; hostnames[k]; k++) {
-		rv = 1;
+		labels_matched = 0;
 		for (i=0; route_labels[i]; i++) {
-			rv = strcmp(hostnames[k], route_labels[i]->name);
-			if (rv == 0) break;
+			for (l=0; l < route_labels[i]->n_aliases; l++) {
+				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0)
+					labels_matched++;
+			}
 		}
-		if (rv != 0) {
+		if (labels_matched == 0) {
 			fprintf(stderr, "No match for '%s' in %s\n", hostnames[k], routes_file);
 			exit(1);
 		}
@@ -270,13 +272,16 @@ int main(int argc, char *argv[])
 
 	/* execute commands on remote hosts */
 	for (i=0; route_labels[i]; i++) {
-		hostname = route_labels[i]->name;
 		host_labels = route_labels[i]->labels;
 
 		rv = 1;
 		for (k=0; hostnames[k]; k++) {
-			rv = strcmp(hostnames[k], hostname);
-			if (rv == 0) break;
+			for (l=0; l < route_labels[i]->n_aliases; l++) {
+				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0) {
+					hostname = route_labels[i]->aliases[l];
+					rv = 0;
+				}
+			}
 		}
 
 		if (rv == 0) {
@@ -292,7 +297,7 @@ int main(int argc, char *argv[])
 
 			len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
 			socket_path = malloc(len);
-			snprintf(socket_path, len, LOCAL_SOCKET_PATH, route_labels[i]->name);
+			snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
 			if (start_connection(socket_path, route_labels[i], http_port, sshconfig_file) == -1) {
 				end_connection(socket_path, hostname, http_port);
@@ -352,13 +357,16 @@ exit:
 
 dry_run:
 	for (i=0; route_labels[i]; i++) {
-		hostname = route_labels[i]->name;
 		host_labels = route_labels[i]->labels;
 
 		rv = 1;
 		for (k=0; hostnames[k]; k++) {
-			rv = strcmp(hostnames[k], hostname);
-			if (rv == 0) break;
+			for (l=0; l < route_labels[i]->n_aliases; l++) {
+				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0) {
+					hostname = route_labels[i]->aliases[l];
+					rv = 0;
+				}
+			}
 		}
 
 		if (rv == 0) {

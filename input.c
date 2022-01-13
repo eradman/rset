@@ -96,7 +96,7 @@ yylex() {
 				lp = host_labels[n_labels-1];
 				apply_default(op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
 
-				local_argc = str_to_array(local_argv, op.local_interpreter, PLN_MAX_PATHS);
+				local_argc = str_to_array(local_argv, op.local_interpreter, PLN_MAX_PATHS, " ");
 				(void) append(local_argv, local_argc, tmp_src, NULL);
 
 				lp->content = cmd_pipe_stdout(local_argv, &error_code, &content_allocation);
@@ -227,17 +227,18 @@ read_host_labels(Label *route_label) {
 }
 
 /*
- * str_to_array - map space-separated tokens to an array using the input string
- *                as the buffer.  If no entries are found, *argv will be NULL
+ * str_to_array - split a string using the specified delimiter using the input
+ *                string as the buffer.  If no entries are found, *argv will be
+ *                NULL
  */
 int
-str_to_array(char *argv[], char *inputstring, int siz) {
+str_to_array(char *argv[], char *inputstring, int siz, const char *delim) {
 	int argc;
 	char **ap;
 
 	argc = 0;
 	for (ap = argv; ap < &argv[siz] &&
-		(*ap = strsep(&inputstring, " ")) != NULL;) {
+		(*ap = strsep(&inputstring, delim)) != NULL;) {
 			argc++;
 			if (**ap != '\0')
 				ap++;
@@ -279,14 +280,18 @@ ltrim(char *s, int c) {
 }
 
 /*
- * read_label - populate label name, export_paths and options
+ * read_label - populate label name, alias, export_paths and options
  */
 void
 read_label(char *line, Label *label) {
 	line[strlen(line)-1] = '\0';
-
 	strlcpy(label->name, strsep(&line, ":"), PLN_LABEL_SIZE);
-	str_to_array(label->export_paths, strdup(ltrim(line, ' ')), PLN_MAX_PATHS);
+
+	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES, ",");
+	if (label->n_aliases == PLN_MAX_ALIASES)
+		errx(1, "a maximum %d aliases may be specified for label '%s'", PLN_MAX_ALIASES-2, label->name);
+
+	str_to_array(label->export_paths, strdup(ltrim(line, ' ')), PLN_MAX_PATHS, " ");
 	memcpy(&label->options, &current_options, sizeof(current_options));
 
 	label->content_size = 0;

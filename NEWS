@@ -1,6 +1,7 @@
 = Next Release: 2.4:
 
  - Remove incomplete lint build targets
+ - Route labels may be a comma-separated list
 
 = Release History
 

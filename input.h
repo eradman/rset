@@ -24,6 +24,7 @@
 #define PLN_LABEL_SIZE 128
 #define PLN_OPTION_SIZE 64
 #define PLN_MAX_PATHS 64
+#define PLN_MAX_ALIASES 3
 
 typedef struct {
 	char execute_with[PLN_OPTION_SIZE];
@@ -33,6 +34,8 @@ typedef struct {
 
 typedef struct Label {
 	char name[PLN_LABEL_SIZE];
+	char *aliases[PLN_MAX_ALIASES];
+	int n_aliases;
 	char* export_paths[PLN_MAX_PATHS];
 	char* content;
 	int content_size;
@@ -53,7 +56,7 @@ void yylex();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
 char* array_to_str(char *argv[]);
-int str_to_array(char *argv[], char *input, int siz);
+int str_to_array(char *argv[], char *input, int siz, const char *delim);
 
 char* ltrim(char *s, int c);
 void read_label(char *line, Label *label);

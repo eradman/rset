@@ -1,7 +1,7 @@
 
 execute_with=doas
 
-t460s: t460s/ common/
+t460s,localhost: t460s/ common/
 	common/openbsd.pln
 	t460s.pln
 
