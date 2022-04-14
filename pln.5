@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 12, 2022
+.Dd April 14, 2022
 .Dt PLN 5
 .Os
 .Sh NAME
@@ -59,12 +59,12 @@ Reset an option to the implementation-defined default using
 without a value.
 .Sh LABELS
 Label names do not need to be unique and may contain any series of
-characters except for single and double quotes.  Labels may be split into
-multiple aliases by separating hostnames with commas.  A series of pathnames for
-use by the application may be specified after the
+characters except for single and double quotes.
+Labels may be split into multiple aliases by using commas.
+A series of pathnames for use by the application may be specified after the
 .Ql \&:
 .Bd -literal -offset indent
-svc1,10.0.0.10: etc/
+svc1,10.0.0.10: etc/ rc.d/
 	base.pln
 .Ed
 .Sh COMMENTS
