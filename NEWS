@@ -1,9 +1,9 @@
-= Next Release: 2.4:
-
- - Remove incomplete lint build targets
- - Route labels may be a comma-separated list
-
 = Release History
+
+== 2.4: May 3, 2022
+
+ - Formatting improvements to tests
+ - Route labels may be a comma-separated list
 
 == 2.3: November 17, 2021
 
