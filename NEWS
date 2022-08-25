@@ -1,3 +1,7 @@
+= Next Release: 2.5
+
+ - rinstall: ignore environment variable http_proxy
+
 = Release History
 
 == 2.4: May 3, 2022

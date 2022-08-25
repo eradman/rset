@@ -32,9 +32,9 @@ pairs and text fragments designated by tab indentation
 interpreter=/bin/sh -x
 
 packages:
-	pkg_add -I nginx ruby%3.0
-	ln -sf /usr/local/bin/ruby30 /usr/local/bin/ruby
-	ln -sf /usr/local/bin/irb30 /usr/local/bin/irb
+	pkg_add -I nginx ruby%3.1
+	ln -sf /usr/local/bin/ruby31 /usr/local/bin/ruby
+	ln -sf /usr/local/bin/irb31 /usr/local/bin/irb
 
 services:
 	./rinstall mail/smtpd_relay.conf /etc/mail/smtpd.conf \\

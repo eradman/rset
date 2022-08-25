@@ -5,6 +5,7 @@
 
 ret=1
 : ${INSTALL_URL:=http://localhost:9000}
+unset http_proxy
 
 usage() {
 	>&2 echo "release: ${release}"
