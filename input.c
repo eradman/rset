@@ -45,11 +45,13 @@ void
 yylex() {
 	int content_allocation = 0;
 	int error_code;
+	int j;
 	int tfd = 0;
 	int local_argc;
 	enum {Local, Remote} context;
 	unsigned n = 0;
 	char tmp_src[128];
+	char *aliases;
 	char *line = NULL;
 	char *local_argv[PLN_MAX_PATHS];
 	size_t linesize = 0;
@@ -142,6 +144,14 @@ yylex() {
 			host_labels[n_labels]->content = malloc(BUFSIZE);
 			content_allocation = BUFSIZE;
 			read_label(line, host_labels[n_labels]);
+			for (j=0; j < host_labels[n_labels]->n_aliases; j++) {
+				aliases = host_labels[n_labels]->aliases[j];
+				if (aliases && aliases[0] == ' ') {
+					fprintf(stderr, "%s: invalid leading character for label alias on "
+					    "line %d: '%c'\n", yyfn, n, aliases[0]);
+					exit(1);
+				}
+			}
 			n_labels++;
 			if (n_labels == LABELS_MAX) {
 				fprintf(stderr, "%s: maximum number of labels (%d) "

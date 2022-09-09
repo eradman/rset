@@ -1,6 +1,7 @@
 = Next Release: 2.5
 
  - rinstall: ignore environment variable http_proxy
+ - Raise error if a label alias begins with a space
 
 = Release History
 
