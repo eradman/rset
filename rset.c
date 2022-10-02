@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
 	/* Convert http server command line into a vector */
 	inputstring = malloc(PATH_MAX);
-	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d " PUBLIC_DIRECTORY, http_port);
+	snprintf(inputstring, PATH_MAX, "miniquark -h ::1 -p %d -d " PUBLIC_DIRECTORY, http_port);
 	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv), " ");
 	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
