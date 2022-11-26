@@ -16,14 +16,14 @@ usage() {
 
 trap '' HUP
 
-while [ $# -gt 2 ]; do
-	case "$1" in
-		-o) OWNER="$2"; shift ;;
-		-m) MODE="$2"; shift ;;
-		 *) usage ;;
+while getopts m:o: arg; do
+	case "$arg" in
+		o) OWNER="$OPTARG" ;;
+		m) MODE="$OPTARG" ;;
+		?) usage ;;
 	esac
-	shift
 done
+shift $(($OPTIND - 1))
 [ $# -eq 2 ] || usage
 
 source=$1
