@@ -15,15 +15,15 @@ usage() {
 trap '' HUP
 append=1
 
-while [ $# -gt 1 ]; do
-	case "$1" in
-		-A) append=0 ;;
-		-r) shift; line_regex=$1 ;;
-		-l) shift; line_text=$1 ;;
-		 *) usage ;;
+while getopts Al:r: arg; do
+	case "$arg" in
+		A) append=0 ;;
+		r) line_regex="$OPTARG" ;;
+		l) line_text="$OPTARG" ;;
+		?) usage ;;
 	esac
-	shift
 done
+shift $(($OPTIND - 1))
 [ $# -eq 1 ] || usage
 
 source=$(mktemp rsub_XXXXXXXX)
