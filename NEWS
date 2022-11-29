@@ -2,6 +2,7 @@
 
  - rinstall: ignore environment variable http_proxy
  - Raise error if a label alias begins with a space
+ - Use shell getopts to parse arguments
 
 = Release History
 
