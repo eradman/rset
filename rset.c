@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
 					exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
 				else
 					exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
-				
+
 				if ((stop_on_err_opt) && exit_code != 0) {
 					apply_default(op.interpreter, host_labels[j]->options.interpreter, INTERPRETER);
 					snprintf(buf, sizeof(buf), "%s exited with code %d", op.interpreter, exit_code);

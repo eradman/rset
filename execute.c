@@ -60,7 +60,7 @@ int
 run(char *const argv[]) {
 	int status;
 	pid_t pid;
-	
+
 	pid = fork();
 	switch (pid) {
 		case -1:
@@ -393,4 +393,3 @@ apply_default(char *option, const char *user_option, const char *default_option)
 	else
 		memcpy(option, default_option, strlen(default_option)+1);
 }
-

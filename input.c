@@ -159,7 +159,7 @@ yylex() {
 				exit(1);
 			}
 		}
-		
+
 		/* option */
 		else if (strchr(line, '=')) {
 			line[linelen-1] = '\0';

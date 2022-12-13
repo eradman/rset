@@ -34,4 +34,3 @@ int ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int h
 void end_connection(char *socket_path, char *host_name, int http_port);
 
 void apply_default(char *option, const char *user_option, const char *default_option);
-
