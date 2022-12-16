@@ -1,10 +1,10 @@
-= Next Release: 2.5
+= Release History
+
+== 2.5: December 16, 2022
 
  - rinstall: ignore environment variable http_proxy
+ - rinstall: Use shell getopts to parse arguments
  - Raise error if a label alias begins with a space
- - Use shell getopts to parse arguments
-
-= Release History
 
 == 2.4: May 3, 2022
 
