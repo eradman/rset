@@ -1,3 +1,7 @@
+= Next Release: 2.6
+
+ - rinstall: use wget with fallback to curl except for *BSD
+
 = Release History
 
 == 2.5: December 16, 2022
