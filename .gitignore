@@ -2,9 +2,11 @@
 Makefile
 compat.c
 labelgrep
+log/
 miniquark
 rinstall
 rset
+rset-fanout
 rsub
 tests/args
 tests/cmd_pipe_stdin
