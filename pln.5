@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 3, 2022
+.Dd May 25, 2023
 .Dt PLN 5
 .Os
 .Sh NAME
@@ -32,9 +32,9 @@ pairs and text fragments designated by tab indentation
 interpreter=/bin/sh -x
 
 packages:
-	pkg_add -I nginx ruby%3.1
-	ln -sf /usr/local/bin/ruby31 /usr/local/bin/ruby
-	ln -sf /usr/local/bin/irb31 /usr/local/bin/irb
+	pkg_add ruby%3.2
+	ln -sf /usr/local/bin/ruby32 /usr/local/bin/ruby
+	ln -sf /usr/local/bin/irb32 /usr/local/bin/irb
 
 services:
 	./rinstall mail/smtpd_relay.conf /etc/mail/smtpd.conf \\
