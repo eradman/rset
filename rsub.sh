@@ -1,7 +1,6 @@
 #!/bin/sh
 # A helper utility for rset(1)
 # Substitute lines in a file or append if not found
-# 2018 Eric Radman <ericshane@eradman.com>
 
 ret=1
 
@@ -51,14 +50,14 @@ if test -z "$line_regex$line_text"; then
 	${end}
 	EOF
 	awk -v m="$start" -v n="$end" -v block=${source}_b '
-		$0 == m, $0 == n { if (!x) system("cat " block) ; x=1; next; }; 1
-		END { if (!x) system("cat " block) }
-		' "$target" > $source
+	    $0 == m, $0 == n { if (!x) system("cat " block) ; x=1; next; }; 1
+	    END { if (!x) system("cat " block) }
+	    ' "$target" > $source
 	rm ${source}_b
 else
 	awk -v n=$append -v a="$line_regex" -v b="$line_text" \
-		'{ n+=sub(a, b)}; {print}; END {if (n==0) print b}' \
-		"$target" > $source
+	    '{ n+=sub(a, b)}; {print}; END {if (n==0) print b}' \
+	    "$target" > $source
 fi
 
 test -e "$target" && diff -U 2 "$target" $source || {

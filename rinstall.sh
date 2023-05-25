@@ -1,7 +1,6 @@
 #!/bin/sh
 # A helper utility for rset(1)
 # Install files from the local staging area or a remote URL
-# 2018 Eric Radman <ericshane@eradman.com>
 
 ret=1
 : ${INSTALL_URL:=http://localhost:9000}
