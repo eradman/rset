@@ -46,12 +46,15 @@ if test ! -f "$1"; then
 		FreeBSD|DragonFly)
 			fetch -q -o "$source" "$INSTALL_URL/$1"
 			;;
-		Linux|Darwin|SunOS|*)
+		Linux|Darwin|SunOS)
 			if command -pv wget > /dev/null; then
 				wget -q -O "$source" "$INSTALL_URL/$1"
 			else
 				curl -f -s -o "$source" "$INSTALL_URL/$1"
 			fi
+			;;
+		*)
+			echo "Unknown OS"; exit 2
 			;;
 	esac
 

@@ -81,4 +81,4 @@ distclean:
 versioncheck:
 	@head -n3 NEWS | egrep -q "^= Next Release: ${RELEASE}|^== ${RELEASE}: "
 
-.PHONY: all clean distclean test versioncheck
+.PHONY: all clean distclean install test uninstall versioncheck
