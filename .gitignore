@@ -14,3 +14,4 @@ tests/getsocket
 tests/parser
 tests/ssh_command
 tests/which
+tests/tmp
