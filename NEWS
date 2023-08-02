@@ -2,6 +2,7 @@
 
  - rinstall: use wget with fallback to curl except for *BSD
  - configure: use TARGET_OS to override the output of uname(1)
+ - MacOS: use tar -c --no-xattrs
 
 = Release History
 

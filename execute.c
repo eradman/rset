@@ -296,7 +296,7 @@ start_connection(char *socket_path, Label *route_label, int http_port, const cha
 	if (run(argv) != 0)
 		return -1;
 
-	snprintf(cmd, PATH_MAX, "tar -cf - %s -C " REPLICATED_DIRECTORY " ./ | "
+	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s -C " REPLICATED_DIRECTORY " ./ | "
 	   "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
 	    array_to_str(route_label->export_paths), socket_path, host_name,
 	    http_port);
