@@ -29,3 +29,9 @@
 
 /* checks */
 #define REQUIRE_SSH_AGENT
+
+#if defined(_MACOS_PORT)
+#define TAR_OPTIONS "--no-xattrs"
+#else
+#define TAR_OPTIONS ""
+#endif
