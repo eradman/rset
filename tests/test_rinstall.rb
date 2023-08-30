@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-ENV["GEM_HOME"] ||= "tmp"
+ENV["GEM_HOME"] ||= ".gem"
 Gem.paths = ENV
 
 require 'bundler/inline'

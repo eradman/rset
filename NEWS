@@ -3,6 +3,8 @@
  - rinstall: use wget with fallback to curl except for *BSD
  - configure: use TARGET_OS to override the output of uname(1)
  - MacOS: use tar -c --no-xattrs
+ - Use mkstemp(3) to avoid compiler warnings
+ - Add bundler/inline and install webrick locally to run tests
 
 = Release History
 

@@ -19,6 +19,7 @@ test: ${OBJS}
 	@${RUBY} test_rset.rb
 
 clean:
+	rm -rf .gem
 	rm -f *.core ${OBJS} *.o
 
 .PHONY: all clean test
