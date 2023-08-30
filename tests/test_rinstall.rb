@@ -1,6 +1,16 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+ENV["GEM_HOME"] ||= "tmp"
+Gem.paths = ENV
+
+require 'bundler/inline'
+gemfile do
+  source 'https://rubygems.org'
+
+  gem 'webrick'
+end
+
 require 'open3'
 require 'tempfile'
 require 'webrick'
