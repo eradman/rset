@@ -81,8 +81,7 @@ yylex() {
 				exit(1);
 			}
 			strlcpy(tmp_src, "/tmp/rset_local.XXXXXX", sizeof tmp_src);
-			mkstemp(tmp_src);
-			if ((tfd = open(tmp_src, O_CREAT|O_RDWR, 0600)) == -1)
+			if ((tfd = mkstemp(tmp_src)) == -1)
 				err(1, "open %s", tmp_src);
 		}
 
