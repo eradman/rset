@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 
 	switch (mode[0]) {
 	case 'S':
-		start_connection(socket_path, &host_label, http_port, NULL);
+		start_connection(socket_path, host_name, &host_label, http_port, NULL);
 		break;
 	case 'P':
 		ssh_command_pipe(host_name, socket_path, &host_label, http_port);

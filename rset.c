@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 			socket_path = malloc(len);
 			snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
-			if (start_connection(socket_path, route_labels[i], http_port, sshconfig_file) == -1) {
+			if (start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file) == -1) {
 				end_connection(socket_path, hostname, http_port);
 				free(socket_path);
 				socket_path = NULL;

@@ -113,9 +113,9 @@ try 'Start an ssh session' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M networking
-    ssh -S /tmp/test_rset_socket networking mkdir /tmp/rset_staging_6000
-    ssh -q -S /tmp/test_rset_socket networking tar -xf - -C /tmp/rset_staging_6000
+    ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
+    ssh -S /tmp/test_rset_socket 10.0.0.99 mkdir /tmp/rset_staging_6000
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 tar -xf - -C /tmp/rset_staging_6000
   RESULT
 end
 

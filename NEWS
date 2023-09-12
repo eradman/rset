@@ -1,3 +1,8 @@
+= Next Release: 2.7
+
+ - Avoid opening temporary files twice
+ - Connect to the hostname specified, not the primary label name
+
 = Release History
 
 == 2.6: September 6, 2023

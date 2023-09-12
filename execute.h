@@ -28,7 +28,7 @@ int get_socket();
 char *findprog(char *prog);
 
 int verify_ssh_agent();
-int start_connection(char *socket_path, Label *route_label, int http_port, const char *ssh_config);
+int start_connection(char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config);
 int ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port);
 int ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port);
 void end_connection(char *socket_path, char *host_name, int http_port);

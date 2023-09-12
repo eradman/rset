@@ -250,13 +250,12 @@ verify_ssh_agent() {
 }
 
 int
-start_connection(char *socket_path, Label *route_label, int http_port, const char *ssh_config) {
+start_connection(char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config) {
 	int argc;
 	char cmd[PATH_MAX];
 	char tmp_path[64];
 	char port_forwarding[64];
 	char *argv[32];
-	char *host_name;
 	char **path;
 	struct stat sb;
 
@@ -269,8 +268,6 @@ start_connection(char *socket_path, Label *route_label, int http_port, const cha
 	}
 
 	/* construct command to execute on remote host  */
-	host_name = route_label->name;
-
 	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
 	if (stat(socket_path, &sb) != -1) {
