@@ -220,8 +220,6 @@ try 'Detect local execution that does not emit a newline' do
   eq status.exitstatus, 1
 end
 
-# Error Handling
-
 try 'Report a bad regex' do
   fn = "#{@systmp}/routes.pln"
   File.open(fn, 'w') { |f| f.write('') }
@@ -241,6 +239,56 @@ try 'Report an unknown option' do
   eq status.success?, false
   eq out, ''
 end
+
+# Hostlists
+
+try 'Simple hostlist' do
+  cmd = "./hostlist web12.dev"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out, <<~RESULT
+  (1)
+  web12.dev
+  RESULT
+  eq status.success?, true
+end
+
+try 'Expand hostlist' do
+  cmd = "./hostlist web{8..11}.dev"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out, <<~RESULT
+  (4)
+  web8.dev
+  web9.dev
+  web10.dev
+  web11.dev
+  RESULT
+  eq status.success?, true
+end
+
+try 'Multiple hostlist ranges' do
+  cmd = "./hostlist web{1..2}-{11..8}.dev"
+  out, err, status = Open3.capture3(cmd)
+  eq err, "hostlist: maximum of 1 groups\n"
+  eq out, ''
+  eq status.success?, false
+end
+
+try 'Invalid hostlist range' do
+  cmd = "./hostlist web{11..8}.dev"
+  out, err, status = Open3.capture3(cmd)
+  eq err, "hostlist: non-ascending range: 11..8\n"
+  eq out, ''
+  eq status.success?, false
+
+  cmd = "./hostlist web{1..9999}.dev"
+  out, err, status = Open3.capture3(cmd)
+  eq err, "hostlist: maximum range exceeds 100\n"
+  eq out, ''
+  eq status.success?, false
+end
+
 
 # Dry Run
 

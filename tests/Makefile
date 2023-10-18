@@ -1,6 +1,6 @@
 RUBY = ruby
 CFLAGS = -I..
-OBJS = args cmd_pipe_stdin cmd_pipe_stdout copyfile getsocket parser ssh_command which
+OBJS = args cmd_pipe_stdin cmd_pipe_stdout copyfile getsocket parser ssh_command which hostlist
 RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o
 
 all: rset.o test

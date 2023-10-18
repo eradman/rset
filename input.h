@@ -24,7 +24,7 @@
 #define PLN_LABEL_SIZE 128
 #define PLN_OPTION_SIZE 64
 #define PLN_MAX_PATHS 64
-#define PLN_MAX_ALIASES 3
+#define PLN_MAX_ALIASES 100
 
 typedef struct {
 	char execute_with[PLN_OPTION_SIZE];
@@ -61,5 +61,6 @@ int str_to_array(char *argv[], char *input, int siz, const char *delim);
 char* ltrim(char *s, int c);
 void read_label(char *line, Label *label);
 void read_option(char *text, Options *op);
+int expand_hostlist(const char *hostname, char **hostlist);
 
 #endif /* _RSET_INPUT_H_ */

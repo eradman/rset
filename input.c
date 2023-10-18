@@ -329,3 +329,114 @@ read_option(char *text, Options *op) {
 		exit(1);
 	}
 }
+
+/*
+ * expand_hostlist - bash-style numeric ranges {n..m}
+ */
+
+#define RANGE_SIZE 2
+#define MAX_DIGITS 6
+
+int
+expand_hostlist(const char *hostname, char **hostlist) {
+	int ch;
+	int group;
+	int n;
+	int seq;
+	int pos, out_pos;
+	int hostcount;
+	const char *errstr;
+
+	int parts_index = 0;
+	char parts[RANGE_SIZE][PLN_LABEL_SIZE];
+
+	int range_index[RANGE_SIZE];
+	int range_numeric[RANGE_SIZE];
+	char range_string[RANGE_SIZE][MAX_DIGITS];
+
+	bzero(parts, sizeof(parts));
+	bzero(range_string, sizeof(range_string));
+	for (n=0; n<RANGE_SIZE; n++)
+		range_index[n] = 0;
+	hostcount = 0;
+
+	for (group=0, pos=0, out_pos=0; hostname[pos]; pos++) {
+		ch = hostname[pos];
+
+		if (group > RANGE_SIZE)
+			errx(1, "maximum of %d groups", RANGE_SIZE/2);
+
+		switch (ch) {
+			case '.':
+				if (group % 2 == 1) {
+					switch (hostname[pos+1]) {
+						case '.':
+							group++; pos++;
+							continue;
+						default:
+							errx(1, "unexpected %c at position %d", ch, pos);
+					}
+				}
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				if (group > 0) {
+					n = group - 1; /* [low, high] */
+					if (range_index[n] > MAX_DIGITS-2)
+						errx(1, "range %s too large at position %d", range_string[n], pos);
+					range_string[n][range_index[n]++] = ch;
+				}
+				continue;
+			case '{':
+				group++;
+				n = group - 1; /* [low, high] */
+				range_index[n] = 0;
+				continue;
+			case '}':
+				if (group % 2 == 1)
+					errx(1, "unexpected: %c at position %d", ch, pos);
+				parts_index++;
+				out_pos=0;
+				continue;
+		}
+
+		parts[parts_index][out_pos++] = ch;
+	}
+
+	if (parts_index > 0) {
+		for (n=0; n<group; n++) {
+			range_numeric[n] = strtonum(range_string[n], 0, 9999, &errstr);
+			if (errstr != NULL)
+				errx(1, "range %s: %s", errstr, range_string[n]);
+		}
+
+		for (n=0; n<group; n+=2) {
+			if (range_numeric[n] >= range_numeric[n+1])
+				errx(1, "non-ascending range: %d..%d", range_numeric[n], range_numeric[+1]);
+
+			if ((range_numeric[n+1] - range_numeric[n]) > PLN_MAX_ALIASES)
+				errx(1, "maximum range exceeds %d", PLN_MAX_ALIASES);
+
+			for (seq=range_numeric[n]; seq<=range_numeric[n+1]; seq++) {
+				/* only one group level supported */
+				hostlist[hostcount] = malloc(PLN_LABEL_SIZE);
+				snprintf(hostlist[hostcount], PLN_LABEL_SIZE, "%s%d%s", parts[n], seq, parts[n+1]);
+				hostcount++;
+			}
+		}
+	}
+	else {
+		hostlist[0] = (char *)hostname;
+		hostcount = 1;
+	}
+	hostlist[hostcount] = NULL;
+	return hostcount;
+}

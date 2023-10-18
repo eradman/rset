@@ -11,6 +11,7 @@ tests/cmd_pipe_stdin
 tests/cmd_pipe_stdout
 tests/copyfile
 tests/getsocket
+tests/hostlist
 tests/parser
 tests/ssh_command
 tests/which
