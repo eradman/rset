@@ -37,6 +37,7 @@
 
 static void handle_exit(int sig);
 static void usage();
+void set_options(int argc, char *argv[], char *hostnames[]);
 static void not_found(char *name);
 static void format_http_log(char *output, size_t len);
 
@@ -54,17 +55,24 @@ int dryrun_opt;
 int tty_opt;
 int verbose_opt;
 int stop_on_err_opt;
+char *sshconfig_file;
+char *label_pattern = DEFAULT_LABEL_PATTERN;
+char *routes_file = ROUTES_FILE;
 
 /* globals used by signal handlers */
 char *socket_path;
 char *hostname;
 int http_port;
 
-int main(int argc, char *argv[])
+/*
+ * Remote Staging Execution Tool
+ * configure systems using any scripting language
+ */
+int
+main(int argc, char *argv[])
 {
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
-	int ch;
 	int fd;
 	int flags;
 	int i, j, k, l;
@@ -87,47 +95,8 @@ int main(int argc, char *argv[])
 
 	int exit_code = 0;
 	int labels_matched = 0;
-	char *label_pattern = DEFAULT_LABEL_PATTERN;
-	char *routes_file = ROUTES_FILE;
-	char *sshconfig_file = NULL;
 
-	opterr = 0;
-	while ((ch = getopt(argc, argv, "elntvF:f:x:")) != -1) {
-		switch (ch) {
-		case 'e':
-			stop_on_err_opt = 1;
-			break;
-		case 'l':
-			list_opt = 1;
-			break;
-		case 'n':
-			dryrun_opt = 1;
-			break;
-		case 't':
-			tty_opt = 1;
-			break;
-		case 'v':
-			verbose_opt = 1;
-			break;
-		case 'F':
-			sshconfig_file = argv[optind-1];
-			break;
-		case 'f':
-			routes_file = argv[optind-1];
-			break;
-		case 'x':
-			label_pattern = argv[optind-1];
-			break;
-
-		default:
-			usage();
-		}
-	}
-	if (optind >= argc) usage();
-
-	for (i=0; i < argc - optind; i++)
-		hostnames[i] = argv[optind+i];
-	hostnames[i] = NULL;
+	set_options(argc, argv, hostnames);
 
 	if ((rinstall_bin = findprog("rinstall")) == 0)
 		not_found("rinstall");
@@ -183,7 +152,6 @@ int main(int argc, char *argv[])
 			err(1, "unveil");
 		if (pledge("stdio rpath proc exec", "stdio rpath proc inet") == -1)
 			err(1, "pledge");
-
 
 		execv(httpd_bin, http_srv_argv);
 		fprintf(stderr, "Fatal: unable to start web server\n");
@@ -424,6 +392,50 @@ usage() {
 	fprintf(stderr, "usage: rset [-elntv] [-F sshconfig_file] [-f routes_file] "
 	    "[-x label_pattern] hostname ...\n");
 	exit(1);
+}
+
+void
+set_options(int argc, char *argv[], char *hostnames[]) {
+	int i;
+	int ch;
+	opterr = 0;
+
+	while ((ch = getopt(argc, argv, "elntvF:f:x:")) != -1) {
+		switch (ch) {
+		case 'e':
+			stop_on_err_opt = 1;
+			break;
+		case 'l':
+			list_opt = 1;
+			break;
+		case 'n':
+			dryrun_opt = 1;
+			break;
+		case 't':
+			tty_opt = 1;
+			break;
+		case 'v':
+			verbose_opt = 1;
+			break;
+		case 'F':
+			sshconfig_file = argv[optind-1];
+			break;
+		case 'f':
+			routes_file = argv[optind-1];
+			break;
+		case 'x':
+			label_pattern = argv[optind-1];
+			break;
+
+		default:
+			usage();
+		}
+	}
+	if (optind >= argc) usage();
+
+	for (i=0; i < argc - optind; i++)
+		hostnames[i] = argv[optind+i];
+	hostnames[i] = NULL;
 }
 
 static void
