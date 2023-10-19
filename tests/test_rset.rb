@@ -60,7 +60,7 @@ end
 
 # Execution functions
 
-try 'Try a pipe to a command' do
+try 'Pipe input to a command' do
   cmd = './cmd_pipe_stdin input/whereami.sh'
   out, err, status = Open3.capture3(cmd)
   eq err, ''
@@ -68,7 +68,7 @@ try 'Try a pipe to a command' do
   eq out, File.read('input/whereami.sh')
 end
 
-try 'Try capturing the output of a command' do
+try 'Capture output of a command' do
   cmd = "./cmd_pipe_stdout head -n1 #{__FILE__}"
   out, err, status = Open3.capture3(cmd)
   eq err, "output_size: 20\nstrlen: 20\n"
@@ -76,7 +76,7 @@ try 'Try capturing the output of a command' do
   eq out, "#!/usr/bin/env ruby\n"
 end
 
-try 'Try capturing multi-line output from a command' do
+try 'Capture multi-line output from a command' do
   cmd = "./cmd_pipe_stdout tail -c 4096 #{__FILE__}"
   out, err, status = Open3.capture3(cmd)
   eq err, "output_size: 4096\nstrlen: 4096\n"
@@ -84,7 +84,7 @@ try 'Try capturing multi-line output from a command' do
   eq out.length, 4096
 end
 
-try 'Try capturing a large chunk of text from a command' do
+try 'Capture a large chunk of text from a command' do
   tin = "#{@systmp}/random_text_in"
   tout = "#{@systmp}/random_text_out"
   random_s = SecureRandom.alphanumeric(32_768)
@@ -166,7 +166,7 @@ end
 
 # Parse Progressive Label Notation (pass)
 
-try 'Try parsing a label file' do
+try 'Parse a label file' do
   cmd = './parser H input/t460s.pln'
   out, err, status = Open3.capture3(cmd)
   eq err, ''
@@ -174,7 +174,7 @@ try 'Try parsing a label file' do
   eq status.success?, true
 end
 
-try 'Try parsing routes as if they were a host file' do
+try 'Parse a routes file' do
   cmd = './parser H input/routes.pln'
   out, err, status = Open3.capture3(cmd)
   eq out, File.read('expected/routes.out')

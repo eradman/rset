@@ -128,7 +128,7 @@ try 'Install a file from a remote URL containing special characters', (is_busybo
   eq File.stat(dst).mode.to_s(8), '100644'
 end
 
-try 'Try to fetch a file that does not exist' do
+try 'Fetch a file that does not exist' do
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall bogus.txt #{dst}"

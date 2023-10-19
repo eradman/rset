@@ -364,7 +364,7 @@ try 'List a directory' do
   end
 end
 
-try 'POST json conent' do
+try 'POST JSON content' do
   Socket.tcp('127.0.0.1', port) do |sock|
     sock.print <<~DATA
       POST /login HTTP/1.1\r"
