@@ -42,6 +42,8 @@ static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
 static void format_http_log(char *output, size_t len);
 static void compare_argv_routes(char *hostnames[], Label **route_labels);
+static int execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg, int stdout_pipe[]);
+static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 
 /* globals used by input.h */
 
@@ -74,23 +76,16 @@ int
 main(int argc, char *argv[])
 {
 	char buf[_POSIX2_LINE_MAX];
-	char httpd_log[32768];
 	int fd;
-	int i, j, k, l;
-	int nr;
+	int i;
 	int rv;
 	int stdout_pipe[2];
 	char *hostnames[ARG_MAX/8];
 	char *rinstall_bin, *rsub_bin;
 	char routes_realpath[PATH_MAX];
-	regmatch_t regmatch;
 	regex_t label_reg;
-	size_t len;
 	struct sigaction act;
-	Options toplevel_options, op;
-
-	int exit_code = 0;
-	int labels_matched = 0;
+	Options toplevel_options;
 
 	set_options(argc, argv, hostnames);
 
@@ -117,12 +112,13 @@ main(int argc, char *argv[])
 		create_dir(PUBLIC_DIRECTORY);
 	}
 
-	/* Select a port to communicate on */
+	/* select a port to communicate on */
 	http_port = get_socket();
 
 	if (pledge("stdio rpath proc exec unveil tmppath", NULL) == -1)
 		err(1, "pledge");
 
+	/* start background web server */
 	start_http_server(stdout_pipe, http_port);
 
 	/* terminate SSH connection if a signal is caught */
@@ -157,11 +153,10 @@ main(int argc, char *argv[])
 		memcpy(&current_options, &toplevel_options, sizeof(current_options));
 	}
 
+	/* ensure hostnames are valid */
 	compare_argv_routes(hostnames, route_labels);
 
-	if (dryrun_opt) goto dry_run;
-
-#ifdef REQUIRE_SSH_AGENT
+    /* require SSH agent */
 	if (verify_ssh_agent() != 0) {
 		printf("Try running:\n");
 			if (!getenv("SSH_AUTH_SOCK"))
@@ -169,9 +164,27 @@ main(int argc, char *argv[])
 			printf("  ssh-add\n");
 		exit(1);
 	}
-#endif
 
-	/* execute commands on remote hosts */
+	/* main loop */
+	if (dryrun_opt)
+		return dry_run(hostnames, route_labels, &label_reg);
+	else
+		return execute_remote(hostnames, route_labels, &label_reg, stdout_pipe);
+}
+
+/* execute commands on remote hosts */
+
+static int
+execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg, int stdout_pipe[]) {
+	char buf[_POSIX2_LINE_MAX];
+	char httpd_log[32768];
+	int i, j, k, l;
+	int nr, rv;
+	int exit_code = 0;
+	size_t len;
+	regmatch_t regmatch;
+	Options op;
+
 	for (i=0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
 
@@ -207,7 +220,7 @@ main(int argc, char *argv[])
 				continue;
 			}
 			for (j=0; host_labels[j]; j++) {
-				rv = regexec(&label_reg, host_labels[j]->name, 1, &regmatch, 0);
+				rv = regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0);
 				if (rv != 0)
 					continue;
 				if (list_opt) {
@@ -255,8 +268,18 @@ exit:
 		return exit_code;
 	else
 		return 0;
+}
 
-dry_run:
+/* show hosts and labels matched by label pattern and argv hostlist */
+
+static int
+dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
+	int i, j, k, l;
+	int rv;
+	int labels_matched = 0;
+	char buf[_POSIX2_LINE_MAX];
+	regmatch_t regmatch;
+
 	for (i=0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
 
@@ -281,7 +304,7 @@ dry_run:
 				printf("\n");
 			}
 			for (j=0; host_labels[j]; j++) {
-				rv = regexec(&label_reg, host_labels[j]->name, 1, &regmatch, 0);
+				rv = regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0);
 				if (rv != 0)
 					continue;
 				labels_matched++;

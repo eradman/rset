@@ -27,9 +27,7 @@
 #define HL_LABEL    "\x1b[36m" /* cyan */
 #define HL_ERROR    "\x1b[31m" /* red */
 
-/* checks */
-#define REQUIRE_SSH_AGENT
-
+/* options */
 #if defined(_MACOS_PORT)
 #define TAR_OPTIONS "--no-xattrs"
 #else
