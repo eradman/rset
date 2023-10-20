@@ -41,6 +41,7 @@ static void set_options(int argc, char *argv[], char *hostnames[]);
 static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
 static void format_http_log(char *output, size_t len);
+static void compare_argv_routes(char *hostnames[], Label **route_labels);
 
 /* globals used by input.h */
 
@@ -156,20 +157,7 @@ main(int argc, char *argv[])
 		memcpy(&current_options, &toplevel_options, sizeof(current_options));
 	}
 
-	/* find arguments that don't match */
-	for (k=0; hostnames[k]; k++) {
-		labels_matched = 0;
-		for (i=0; route_labels[i]; i++) {
-			for (l=0; l < route_labels[i]->n_aliases; l++) {
-				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0)
-					labels_matched++;
-			}
-		}
-		if (labels_matched == 0) {
-			fprintf(stderr, "No match for '%s' in %s\n", hostnames[k], routes_file);
-			exit(1);
-		}
-	}
+	compare_argv_routes(hostnames, route_labels);
 
 	if (dryrun_opt) goto dry_run;
 
@@ -386,6 +374,26 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 static void
 not_found(char *name) {
 	errx(1, "'%s' not found in PATH", name);
+}
+
+/* ensure each hostname is found in the routes */
+
+static void
+compare_argv_routes(char *hostnames[], Label **route_labels) {
+	int i, j, k;
+	int labels_matched;
+
+	for (i=0; hostnames[i]; i++) {
+		labels_matched = 0;
+		for (j=0; route_labels[j]; j++) {
+			for (k=0; k < route_labels[j]->n_aliases; k++) {
+				if (strcmp(hostnames[i], route_labels[j]->aliases[k]) == 0)
+					labels_matched++;
+			}
+		}
+		if (labels_matched == 0)
+			errx(1, "No match for '%s' in %s", hostnames[i], routes_file);
+	}
 }
 
 /* built-in http server */
