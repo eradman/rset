@@ -37,8 +37,9 @@
 
 static void handle_exit(int sig);
 static void usage();
-void set_options(int argc, char *argv[], char *hostnames[]);
+static void set_options(int argc, char *argv[], char *hostnames[]);
 static void not_found(char *name);
+static void start_http_server(int stdout_pipe[], int http_port);
 static void format_http_log(char *output, size_t len);
 
 /* globals used by input.h */
@@ -74,21 +75,15 @@ main(int argc, char *argv[])
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
 	int fd;
-	int flags;
 	int i, j, k, l;
 	int nr;
 	int rv;
 	int stdout_pipe[2];
-	pid_t http_server_pid;
-	pid_t rset_pid;
-	int status;
 	char *hostnames[ARG_MAX/8];
-	char *http_srv_argv[9], *inputstring;
-	char *rinstall_bin, *rsub_bin, *httpd_bin;
+	char *rinstall_bin, *rsub_bin;
 	char routes_realpath[PATH_MAX];
 	regmatch_t regmatch;
 	regex_t label_reg;
-	sigset_t set;
 	size_t len;
 	struct sigaction act;
 	Options toplevel_options, op;
@@ -127,57 +122,7 @@ main(int argc, char *argv[])
 	if (pledge("stdio rpath proc exec unveil tmppath", NULL) == -1)
 		err(1, "pledge");
 
-	/* Convert http server command line into a vector */
-	inputstring = malloc(PATH_MAX);
-	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d " PUBLIC_DIRECTORY, http_port);
-	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv), " ");
-	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
-		not_found(http_srv_argv[0]);
-
-	/* start the web server */
-	pipe(stdout_pipe);
-	http_server_pid = fork();
-	if (http_server_pid == 0) {
-		/* close input side of pipe, and connect stdout */
-		dup2(stdout_pipe[1], STDOUT_FILENO);
-		close(stdout_pipe[1]);
-
-		if (unveil(xdirname(PUBLIC_DIRECTORY), "r") == -1)
-			err(1, "unveil");
-		if (unveil(xdirname(httpd_bin), "x") == -1)
-			err(1, "unveil");
-		if (unveil("/usr/lib", "r") == -1)
-			err(1, "unveil");
-		if (unveil("/usr/libexec", "r") == -1)
-			err(1, "unveil");
-		if (pledge("stdio rpath proc exec", "stdio rpath proc inet") == -1)
-			err(1, "pledge");
-
-		execv(httpd_bin, http_srv_argv);
-		fprintf(stderr, "Fatal: unable to start web server\n");
-		err(1, "%s", httpd_bin);
-	}
-
-	/* close output side of pipe, and ensure readers don't block */
-	close(stdout_pipe[1]);
-	flags = fcntl(stdout_pipe[0], F_GETFL);
-	fcntl(stdout_pipe[0], F_SETFL, flags | O_NONBLOCK);
-
-	/* watchdog to ensure that the http server is shut down*/
-	rset_pid = fork();
-	if (rset_pid > 0) {
-		if (pledge("stdio proc", NULL) == -1)
-			err(1, "pledge");
-
-		setproctitle("watch on pid %d", rset_pid);
-		sigfillset(&set);
-		sigprocmask(SIG_BLOCK, &set, NULL);
-		if (waitpid(rset_pid, &status, 0) == -1)
-			warn("wait on rset with pid %d", rset_pid);
-		if (kill(http_server_pid, SIGTERM) == -1)
-			err(1, "terminate http_server with pid %d", http_server_pid);
-		exit(WEXITSTATUS(status));
-	}
+	start_http_server(stdout_pipe, http_port);
 
 	/* terminate SSH connection if a signal is caught */
 	act.sa_flags = 0;
@@ -394,7 +339,7 @@ usage() {
 	exit(1);
 }
 
-void
+static void
 set_options(int argc, char *argv[], char *hostnames[]) {
 	int i;
 	int ch;
@@ -441,6 +386,71 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 static void
 not_found(char *name) {
 	errx(1, "'%s' not found in PATH", name);
+}
+
+/* built-in http server */
+
+static void
+start_http_server(int stdout_pipe[], int http_port) {
+	int flags;
+	int status;
+	char *http_srv_argv[9], *inputstring;
+	char *httpd_bin;
+	pid_t http_server_pid;
+	pid_t rset_pid;
+	sigset_t set;
+
+	/* Convert http server command line into a vector */
+	inputstring = malloc(PATH_MAX);
+	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d " PUBLIC_DIRECTORY, http_port);
+	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv), " ");
+	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
+		not_found(http_srv_argv[0]);
+
+	/* start the web server */
+	pipe(stdout_pipe);
+	http_server_pid = fork();
+	if (http_server_pid == 0) {
+		/* close input side of pipe, and connect stdout */
+		dup2(stdout_pipe[1], STDOUT_FILENO);
+		close(stdout_pipe[1]);
+
+		if (unveil(xdirname(PUBLIC_DIRECTORY), "r") == -1)
+			err(1, "unveil");
+		if (unveil(xdirname(httpd_bin), "x") == -1)
+			err(1, "unveil");
+		if (unveil("/usr/lib", "r") == -1)
+			err(1, "unveil");
+		if (unveil("/usr/libexec", "r") == -1)
+			err(1, "unveil");
+		if (pledge("stdio rpath proc exec", "stdio rpath proc inet") == -1)
+			err(1, "pledge");
+
+		execv(httpd_bin, http_srv_argv);
+		fprintf(stderr, "Fatal: unable to start web server\n");
+		err(1, "%s", httpd_bin);
+	}
+
+	/* close output side of pipe, and ensure readers don't block */
+	close(stdout_pipe[1]);
+	flags = fcntl(stdout_pipe[0], F_GETFL);
+	fcntl(stdout_pipe[0], F_SETFL, flags | O_NONBLOCK);
+
+	/* watchdog to ensure that the http server is shut down*/
+	rset_pid = fork();
+	if (rset_pid > 0) {
+		if (pledge("stdio proc", NULL) == -1)
+			err(1, "pledge");
+
+		setproctitle("watch on pid %d", rset_pid);
+		sigfillset(&set);
+		sigprocmask(SIG_BLOCK, &set, NULL);
+		if (waitpid(rset_pid, &status, 0) == -1)
+			warn("wait on rset with pid %d", rset_pid);
+		if (kill(http_server_pid, SIGTERM) == -1)
+			err(1, "terminate http_server with pid %d", http_server_pid);
+		exit(WEXITSTATUS(status));
+	}
 }
 
 static void
