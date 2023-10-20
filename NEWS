@@ -2,6 +2,7 @@
 
  - Avoid opening temporary files twice
  - Connect to the hostname specified, not the primary label name
+ - Do not start web server during dry run
 
 = Release History
 

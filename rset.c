@@ -42,7 +42,7 @@ static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
 static void format_http_log(char *output, size_t len);
 static void compare_argv_routes(char *hostnames[], Label **route_labels);
-static int execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg, int stdout_pipe[]);
+static int execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg);
 static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 
 /* globals used by input.h */
@@ -79,13 +79,21 @@ main(int argc, char *argv[])
 	int fd;
 	int i;
 	int rv;
-	int stdout_pipe[2];
 	char *hostnames[ARG_MAX/8];
 	char *rinstall_bin, *rsub_bin;
 	char routes_realpath[PATH_MAX];
 	regex_t label_reg;
 	struct sigaction act;
 	Options toplevel_options;
+
+	/* terminate SSH connection if a signal is caught */
+	act.sa_flags = 0;
+	act.sa_flags = SA_RESETHAND;
+	act.sa_handler = handle_exit;
+	if (sigemptyset(&act.sa_mask) & (sigaction(SIGINT, &act, NULL) != 0))
+		err(1, "Failed to set SIGINT handler");
+	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
+		err(1, "Failed to set SIGTERM handler");
 
 	set_options(argc, argv, hostnames);
 
@@ -117,18 +125,6 @@ main(int argc, char *argv[])
 
 	if (pledge("stdio rpath proc exec unveil tmppath", NULL) == -1)
 		err(1, "pledge");
-
-	/* start background web server */
-	start_http_server(stdout_pipe, http_port);
-
-	/* terminate SSH connection if a signal is caught */
-	act.sa_flags = 0;
-	act.sa_flags = SA_RESETHAND;
-	act.sa_handler = handle_exit;
-	if (sigemptyset(&act.sa_mask) & (sigaction(SIGINT, &act, NULL) != 0))
-		err(1, "Failed to set SIGINT handler");
-	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
-		err(1, "Failed to set SIGTERM handler");
 
 	/* parse route labels */
 	n_labels = 0;
@@ -169,21 +165,25 @@ main(int argc, char *argv[])
 	if (dryrun_opt)
 		return dry_run(hostnames, route_labels, &label_reg);
 	else
-		return execute_remote(hostnames, route_labels, &label_reg, stdout_pipe);
+		return execute_remote(hostnames, route_labels, &label_reg);
 }
 
 /* execute commands on remote hosts */
 
 static int
-execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg, int stdout_pipe[]) {
+execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
 	int i, j, k, l;
 	int nr, rv;
 	int exit_code = 0;
+	int stdout_pipe[2];
 	size_t len;
 	regmatch_t regmatch;
 	Options op;
+
+	/* start background web server */
+	start_http_server(stdout_pipe, http_port);
 
 	for (i=0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
