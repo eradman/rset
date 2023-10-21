@@ -168,7 +168,10 @@ main(int argc, char *argv[])
 		return execute_remote(hostnames, route_labels, &label_reg);
 }
 
-/* execute commands on remote hosts */
+/*
+ * Execute commands on remote hosts
+ * Returns an exit status
+ */
 
 static int
 execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
@@ -270,13 +273,15 @@ exit:
 		return 0;
 }
 
-/* show hosts and labels matched by label pattern and argv hostlist */
+/*
+ * Dry run: print hostnames and regex label matches
+ * Returns an exit code
+ */
 
 static int
 dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	int i, j, k, l;
 	int rv;
-	int labels_matched = 0;
 	char buf[_POSIX2_LINE_MAX];
 	regmatch_t regmatch;
 
@@ -307,7 +312,6 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				rv = regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0);
 				if (rv != 0)
 					continue;
-				labels_matched++;
 				if (list_opt) {
 					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
 					hl_range(buf, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
@@ -322,8 +326,7 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 			}
 		}
 	}
-	if (labels_matched == 0)
-		errx(1, "no matching labels found");
+
 	return 0;
 }
 
