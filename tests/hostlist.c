@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	n_hosts = expand_hostlist(argv[1], hostlist);
+	n_hosts = expand_numeric_range(hostlist, argv[1], 50);
 	printf("(%d)\n", n_hosts);
 	for (n=0; hostlist[n]; n++)
 		printf("%s\n", hostlist[n]);

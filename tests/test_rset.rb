@@ -243,7 +243,7 @@ end
 # Hostlists
 
 try 'Simple hostlist' do
-  cmd = "./hostlist web12.dev"
+  cmd = "./hostlist 'web12.dev'"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -254,7 +254,7 @@ try 'Simple hostlist' do
 end
 
 try 'Expand hostlist' do
-  cmd = "./hostlist web{8..11}.dev"
+  cmd = "./hostlist 'web{8..11}.dev'"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -268,7 +268,7 @@ try 'Expand hostlist' do
 end
 
 try 'Expand hostlist of IP addresses' do
-  cmd = "./hostlist 172.16.{1..2}.2"
+  cmd = "./hostlist '172.16.{1..2}.2'"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -280,7 +280,7 @@ try 'Expand hostlist of IP addresses' do
 end
 
 try 'Multiple hostlist ranges' do
-  cmd = "./hostlist web{1..2}-{11..8}.dev"
+  cmd = "./hostlist 'web{1..2}-{11..8}.dev'"
   out, err, status = Open3.capture3(cmd)
   eq err, "hostlist: maximum of 1 groups\n"
   eq out, ''
@@ -288,15 +288,15 @@ try 'Multiple hostlist ranges' do
 end
 
 try 'Invalid hostlist range' do
-  cmd = "./hostlist web{9..9}.dev"
+  cmd = "./hostlist 'web{9..9}.dev'"
   out, err, status = Open3.capture3(cmd)
   eq err, "hostlist: non-ascending range: 9..9\n"
   eq out, ''
   eq status.success?, false
 
-  cmd = "./hostlist web{1..9999}.dev"
+  cmd = "./hostlist 'web{1..9999}.dev'"
   out, err, status = Open3.capture3(cmd)
-  eq err, "hostlist: maximum range exceeds 100\n"
+  eq err, "hostlist: maximum range exceeds 50\n"
   eq out, ''
   eq status.success?, false
 end

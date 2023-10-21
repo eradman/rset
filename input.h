@@ -56,11 +56,11 @@ void yylex();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
 char* array_to_str(char *argv[]);
-int str_to_array(char *argv[], char *input, int siz, const char *delim);
+int str_to_array(char *argv[], char *input, int max_elements, const char *delim);
 
 char* ltrim(char *s, int c);
 void read_label(char *line, Label *label);
 void read_option(char *text, Options *op);
-int expand_hostlist(const char *hostname, char **hostlist);
+int expand_numeric_range(char **argv, char *input, int max_elements);
 
 #endif /* _RSET_INPUT_H_ */

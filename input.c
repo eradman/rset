@@ -241,12 +241,12 @@ read_host_labels(Label *route_label) {
  *                NULL
  */
 int
-str_to_array(char *argv[], char *inputstring, int siz, const char *delim) {
+str_to_array(char *argv[], char *inputstring, int max_elements, const char *delim) {
 	int argc;
 	char **ap;
 
 	argc = 0;
-	for (ap = argv; ap < &argv[siz] &&
+	for (ap = argv; ap < &argv[max_elements] &&
 		(*ap = strsep(&inputstring, delim)) != NULL;) {
 			argc++;
 			if (**ap != '\0')
@@ -331,14 +331,14 @@ read_option(char *text, Options *op) {
 }
 
 /*
- * expand_hostlist - bash-style numeric ranges {n..m}
+ * expand_numeric_range - bash-style numeric ranges {n..m}
  */
 
 #define RANGE_SIZE 2
 #define MAX_DIGITS 6
 
 int
-expand_hostlist(const char *hostname, char **hostlist) {
+expand_numeric_range(char **argv, char *input, int max_elements) {
 	int ch;
 	int group;
 	int n;
@@ -362,8 +362,8 @@ expand_hostlist(const char *hostname, char **hostlist) {
 		range_index[n] = 0;
 	hostcount = 0;
 
-	for (group=0, pos=0, out_pos=0; hostname[pos]; pos++) {
-		ch = hostname[pos];
+	for (group=0, pos=0, out_pos=0; input[pos]; pos++) {
+		ch = input[pos];
 
 		if (group > RANGE_SIZE)
 			errx(1, "maximum of %d groups", RANGE_SIZE/2);
@@ -371,7 +371,7 @@ expand_hostlist(const char *hostname, char **hostlist) {
 		switch (ch) {
 			case '.':
 				if (in_range) {
-					switch (hostname[pos+1]) {
+					switch (input[pos+1]) {
 						case '.':
 							group++; pos++;
 							continue;
@@ -429,20 +429,18 @@ expand_hostlist(const char *hostname, char **hostlist) {
 		if ((range_numeric[1] - range_numeric[0]) < 1)
 			errx(1, "non-ascending range: %d..%d", range_numeric[0], range_numeric[1]);
 
-		if ((range_numeric[1] - range_numeric[0]) > PLN_MAX_ALIASES)
-			errx(1, "maximum range exceeds %d", PLN_MAX_ALIASES);
+		if ((range_numeric[1] - range_numeric[0]) > max_elements)
+			errx(1, "maximum range exceeds %d", max_elements);
 
 		for (seq=range_numeric[0]; seq<=range_numeric[1]; seq++) {
-			/* only one group level supported */
-			hostlist[hostcount] = malloc(PLN_LABEL_SIZE);
-			snprintf(hostlist[hostcount], PLN_LABEL_SIZE, "%s%d%s", parts[0], seq, parts[1]);
+			asprintf(&argv[hostcount], "%s%d%s", parts[0], seq, parts[1]);
 			hostcount++;
 		}
 	}
 	else {
-		hostlist[0] = (char *)hostname;
+		argv[0] = (char *)input;
 		hostcount = 1;
 	}
-	hostlist[hostcount] = NULL;
+	argv[hostcount] = NULL;
 	return hostcount;
 }
