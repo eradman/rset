@@ -276,9 +276,9 @@ try 'Multiple hostlist ranges' do
 end
 
 try 'Invalid hostlist range' do
-  cmd = "./hostlist web{11..8}.dev"
+  cmd = "./hostlist web{9..9}.dev"
   out, err, status = Open3.capture3(cmd)
-  eq err, "hostlist: non-ascending range: 11..8\n"
+  eq err, "hostlist: non-ascending range: 9..9\n"
   eq out, ''
   eq status.success?, false
 

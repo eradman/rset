@@ -342,6 +342,7 @@ expand_hostlist(const char *hostname, char **hostlist) {
 	int ch;
 	int group;
 	int n;
+	int i;
 	int seq;
 	int pos, out_pos;
 	int hostcount;
@@ -412,25 +413,26 @@ expand_hostlist(const char *hostname, char **hostlist) {
 	}
 
 	if (parts_index > 0) {
-		for (n=0; n<group; n++) {
-			range_numeric[n] = strtonum(range_string[n], 0, 9999, &errstr);
+		/* multiple groups may be captures, but only the first is formatted */
+		range_numeric[0] = range_numeric[1] = 0;
+
+		for (i=0; i<group; i++) {
+			range_numeric[i] = strtonum(range_string[i], 0, 9999, &errstr);
 			if (errstr != NULL)
 				errx(1, "range %s: %s", errstr, range_string[n]);
 		}
 
-		for (n=0; n<group; n+=2) {
-			if (range_numeric[n] >= range_numeric[n+1])
-				errx(1, "non-ascending range: %d..%d", range_numeric[n], range_numeric[+1]);
+		if ((range_numeric[1] - range_numeric[0]) < 1)
+			errx(1, "non-ascending range: %d..%d", range_numeric[0], range_numeric[1]);
 
-			if ((range_numeric[n+1] - range_numeric[n]) > PLN_MAX_ALIASES)
-				errx(1, "maximum range exceeds %d", PLN_MAX_ALIASES);
+		if ((range_numeric[1] - range_numeric[0]) > PLN_MAX_ALIASES)
+			errx(1, "maximum range exceeds %d", PLN_MAX_ALIASES);
 
-			for (seq=range_numeric[n]; seq<=range_numeric[n+1]; seq++) {
-				/* only one group level supported */
-				hostlist[hostcount] = malloc(PLN_LABEL_SIZE);
-				snprintf(hostlist[hostcount], PLN_LABEL_SIZE, "%s%d%s", parts[n], seq, parts[n+1]);
-				hostcount++;
-			}
+		for (seq=range_numeric[0]; seq<=range_numeric[1]; seq++) {
+			/* only one group level supported */
+			hostlist[hostcount] = malloc(PLN_LABEL_SIZE);
+			snprintf(hostlist[hostcount], PLN_LABEL_SIZE, "%s%d%s", parts[0], seq, parts[1]);
+			hostcount++;
 		}
 	}
 	else {
