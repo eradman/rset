@@ -178,7 +178,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
 	int i, j, k, l;
-	int nr, rv;
+	int nr;
 	int exit_code = 0;
 	int stdout_pipe[2];
 	size_t len;
@@ -191,78 +191,74 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	for (i=0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
 
-		rv = 1;
 		for (k=0; hostnames[k]; k++) {
 			for (l=0; l < route_labels[i]->n_aliases; l++) {
-				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0) {
+				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0)
 					hostname = route_labels[i]->aliases[l];
-					rv = 0;
-				}
-			}
-		}
-
-		if (rv == 0) {
-			if (list_opt) {
-					snprintf(buf, sizeof(buf), "%-20s", hostname);
-					hl_range(buf, HL_HOST, 0, 0);
-					printf("  %s\n", array_to_str(route_labels[i]->export_paths));
-			}
-			else {
-				hl_range(hostname, HL_HOST, 0, 0);
-				printf("\n");
-			}
-
-			len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
-			socket_path = malloc(len);
-			snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
-
-			if (start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file) == -1) {
-				end_connection(socket_path, hostname, http_port);
-				free(socket_path);
-				socket_path = NULL;
-				continue;
-			}
-			for (j=0; host_labels[j]; j++) {
-				rv = regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0);
-				if (rv != 0)
+				else
 					continue;
+
 				if (list_opt) {
-					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
-					hl_range(buf, HL_LABEL, 0, 0);
-					printf("  %s\n", format_options(&host_labels[j]->options));
+						snprintf(buf, sizeof(buf), "%-20s", hostname);
+						hl_range(buf, HL_HOST, 0, 0);
+						printf("  %s\n", array_to_str(route_labels[i]->export_paths));
 				}
 				else {
-					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+					hl_range(hostname, HL_HOST, 0, 0);
 					printf("\n");
 				}
 
-				if (tty_opt)
-					exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
-				else
-					exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+				len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
+				socket_path = malloc(len);
+				snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
-				if ((stop_on_err_opt) && exit_code != 0) {
-					apply_default(op.interpreter, host_labels[j]->options.interpreter, INTERPRETER);
-					snprintf(buf, sizeof(buf), "%s exited with code %d", op.interpreter, exit_code);
-					hl_range(buf, HL_ERROR, 0, 0);
-					printf("\n");
-
-					goto exit;
+				if (start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file) == -1) {
+					end_connection(socket_path, hostname, http_port);
+					free(socket_path);
+					socket_path = NULL;
+					continue;
 				}
+				for (j=0; host_labels[j]; j++) {
+					if(regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
+						continue;
+					if (list_opt) {
+						snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
+						hl_range(buf, HL_LABEL, 0, 0);
+						printf("  %s\n", format_options(&host_labels[j]->options));
+					}
+					else {
+						hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+						printf("\n");
+					}
 
-				/* read output of web server */
-				nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
-				if ((verbose_opt) && (nr > 0))
-					format_http_log(httpd_log, nr);
-				if ((nr == -1) && (errno != EAGAIN))
-					warn("read from httpd output");
-			}
+					if (tty_opt)
+						exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
+					else
+						exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+
+					if ((stop_on_err_opt) && exit_code != 0) {
+						apply_default(op.interpreter, host_labels[j]->options.interpreter, INTERPRETER);
+						snprintf(buf, sizeof(buf), "%s exited with code %d", op.interpreter, exit_code);
+						hl_range(buf, HL_ERROR, 0, 0);
+						printf("\n");
+
+						goto exit;
+					}
+
+					/* read output of web server */
+					nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
+					if ((verbose_opt) && (nr > 0))
+						format_http_log(httpd_log, nr);
+					if ((nr == -1) && (errno != EAGAIN))
+						warn("read from httpd output");
+				}
 
 exit:
-			if (socket_path) {
-				end_connection(socket_path, hostname, http_port);
-				free(socket_path);
-				socket_path = NULL;
+				if (socket_path) {
+					end_connection(socket_path, hostname, http_port);
+					free(socket_path);
+					socket_path = NULL;
+				}
 			}
 		}
 	}
@@ -281,48 +277,43 @@ exit:
 static int
 dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	int i, j, k, l;
-	int rv;
 	char buf[_POSIX2_LINE_MAX];
 	regmatch_t regmatch;
 
 	for (i=0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
 
-		rv = 1;
 		for (k=0; hostnames[k]; k++) {
 			for (l=0; l < route_labels[i]->n_aliases; l++) {
-				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0) {
+				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0)
 					hostname = route_labels[i]->aliases[l];
-					rv = 0;
-				}
-			}
-		}
-
-		if (rv == 0) {
-			if (list_opt) {
-					snprintf(buf, sizeof(buf), "%-20s", hostname);
-					hl_range(buf, HL_HOST, 0, strlen(hostname));
-					printf("  %s\n", array_to_str(route_labels[i]->export_paths));
-			}
-			else {
-				hl_range(hostname, HL_HOST, 0, strlen(hostname));
-				printf("\n");
-			}
-			for (j=0; host_labels[j]; j++) {
-				rv = regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0);
-				if (rv != 0)
+				else
 					continue;
+
 				if (list_opt) {
-					snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
-					hl_range(buf, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
-					printf("  %s\n", format_options(&host_labels[j]->options));
+						snprintf(buf, sizeof(buf), "%-20s", hostname);
+						hl_range(buf, HL_HOST, 0, strlen(hostname));
+						printf("  %s\n", array_to_str(route_labels[i]->export_paths));
 				}
 				else {
-					hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
+					hl_range(hostname, HL_HOST, 0, strlen(hostname));
 					printf("\n");
 				}
-				if (dryrun_opt)
-					continue;
+				for (j=0; host_labels[j]; j++) {
+					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
+						continue;
+					if (list_opt) {
+						snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
+						hl_range(buf, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
+						printf("  %s\n", format_options(&host_labels[j]->options));
+					}
+					else {
+						hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
+						printf("\n");
+					}
+					if (dryrun_opt)
+						continue;
+				}
 			}
 		}
 	}
