@@ -267,6 +267,18 @@ try 'Expand hostlist' do
   eq status.success?, true
 end
 
+try 'Expand hostlist of IP addresses' do
+  cmd = "./hostlist 172.16.{1..2}.2"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out, <<~RESULT
+  (2)
+  172.16.1.2
+  172.16.2.2
+  RESULT
+  eq status.success?, true
+end
+
 try 'Multiple hostlist ranges' do
   cmd = "./hostlist web{1..2}-{11..8}.dev"
   out, err, status = Open3.capture3(cmd)

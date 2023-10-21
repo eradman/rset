@@ -348,6 +348,7 @@ expand_hostlist(const char *hostname, char **hostlist) {
 	int hostcount;
 	const char *errstr;
 
+	int in_range = 0;
 	int parts_index = 0;
 	char parts[RANGE_SIZE][PLN_LABEL_SIZE];
 
@@ -369,7 +370,7 @@ expand_hostlist(const char *hostname, char **hostlist) {
 
 		switch (ch) {
 			case '.':
-				if (group % 2 == 1) {
+				if (in_range) {
 					switch (hostname[pos+1]) {
 						case '.':
 							group++; pos++;
@@ -389,23 +390,26 @@ expand_hostlist(const char *hostname, char **hostlist) {
 			case '7':
 			case '8':
 			case '9':
-				if (group > 0) {
+				if (in_range) {
 					n = group - 1; /* [low, high] */
 					if (range_index[n] > MAX_DIGITS-2)
 						errx(1, "range %s too large at position %d", range_string[n], pos);
 					range_string[n][range_index[n]++] = ch;
+					continue;
 				}
-				continue;
+				break;
 			case '{':
+				in_range = 1;
 				group++;
 				n = group - 1; /* [low, high] */
 				range_index[n] = 0;
 				continue;
 			case '}':
-				if (group % 2 == 1)
+				if (!in_range)
 					errx(1, "unexpected: %c at position %d", ch, pos);
+				in_range = 0;
 				parts_index++;
-				out_pos=0;
+				out_pos = 0;
 				continue;
 		}
 
@@ -419,7 +423,7 @@ expand_hostlist(const char *hostname, char **hostlist) {
 		for (i=0; i<group; i++) {
 			range_numeric[i] = strtonum(range_string[i], 0, 9999, &errstr);
 			if (errstr != NULL)
-				errx(1, "range %s: %s", errstr, range_string[n]);
+				errx(1, "number out of bounds %s: '%s'", errstr, range_string[i]);
 		}
 
 		if ((range_numeric[1] - range_numeric[0]) < 1)
