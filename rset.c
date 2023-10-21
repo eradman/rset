@@ -152,7 +152,10 @@ main(int argc, char *argv[])
 	/* ensure hostnames are valid */
 	compare_argv_routes(hostnames, route_labels);
 
-    /* require SSH agent */
+	/* main loop */
+	if (dryrun_opt)
+		return dry_run(hostnames, route_labels, &label_reg);
+
 	if (verify_ssh_agent() != 0) {
 		printf("Try running:\n");
 			if (!getenv("SSH_AUTH_SOCK"))
@@ -160,12 +163,7 @@ main(int argc, char *argv[])
 			printf("  ssh-add\n");
 		exit(1);
 	}
-
-	/* main loop */
-	if (dryrun_opt)
-		return dry_run(hostnames, route_labels, &label_reg);
-	else
-		return execute_remote(hostnames, route_labels, &label_reg);
+	return execute_remote(hostnames, route_labels, &label_reg);
 }
 
 /*
