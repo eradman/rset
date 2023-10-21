@@ -16,3 +16,4 @@ tests/parser
 tests/ssh_command
 tests/which
 tests/.gem
+^tests/Makefile
