@@ -1,8 +1,6 @@
 t460s, content_size: 29
 t460s, options: t460s/ common/
+relay{1..3}.local, content_size: 19
+relay{1..3}.local, options: common/
 chroot, content_size: 146
 chroot, options: execute_with=doas
-common packages, content_size: 210
-common packages, options: interpreter=/bin/ksh -x,local_interpreter=/bin/sh -e,execute_with=doas
-desktop, content_size: 30
-desktop, options: interpreter=/bin/ksh -x,local_interpreter=/bin/sh -e,execute_with=doas

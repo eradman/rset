@@ -5,4 +5,7 @@ t460s,localhost: t460s/ common/
 	common/openbsd.pln
 	t460s.pln
 
+relay{1..3}.local: common/
+	common/openbsd.pln
+
 # vim:noexpandtab:syntax=sh:ts=4

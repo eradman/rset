@@ -300,6 +300,9 @@ read_label(char *line, Label *label) {
 	if (label->n_aliases == PLN_MAX_ALIASES)
 		errx(1, "a maximum %d aliases may be specified for label '%s'", PLN_MAX_ALIASES-2, label->name);
 
+	if (label->n_aliases == 1)
+		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
+
 	str_to_array(label->export_paths, strdup(ltrim(line, ' ')), PLN_MAX_PATHS, " ");
 	memcpy(&label->options, &current_options, sizeof(current_options));
 

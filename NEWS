@@ -4,6 +4,7 @@
  - Connect to the hostname specified, not the primary label name
  - Do not start web server during dry run
  - Execute all hostnames specified on the command line
+ - Support for hostname sequence ranges in routes file
 
 = Release History
 

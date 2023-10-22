@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 6, 2023
+.Dd October 21, 2023
 .Dt PLN 5
 .Os
 .Sh NAME
@@ -44,11 +44,12 @@ services:
 .Ed
 .Pp
 A label may also be followed by special content between a pair of braces on the
-beginning of a line
+beginning of a line. A common use for this is to set environment variables using
+local configuration
 .Bd -literal -offset indent
 www:
 {
-	echo "SSL_PASSWORD=XYZ"
+	cat ssl.env
 }
 	echo $SSL_PASSWORD > /etc/keys/global.pass
 .Ed
@@ -60,12 +61,23 @@ without a value.
 .Sh LABELS
 Label names do not need to be unique and may contain any series of
 characters except for single and double quotes.
-Labels may be split into multiple aliases by using commas.
 A series of pathnames for use by the application may be specified after the
 .Ql \&:
 .Bd -literal -offset indent
-svc1,10.0.0.10: etc/ rc.d/
-	base.pln
+svc1.local: etc/ rc.d/
+	httpd.pln
+.Ed
+.Pp
+Labels may be split into multiple aliases separated by using commas
+.Bd -literal -offset indent
+svc1.local,10.0.0.10:
+	common.pln
+.Ed
+.Pp
+Alternatively, sequence expressions may be used to match a range of hosts
+.Bd -literal -offset indent
+db{1..4}.local:
+	autofailover.pln
 .Ed
 .Sh COMMENTS
 Comments begin with a hash
