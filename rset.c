@@ -175,6 +175,7 @@ static int
 execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
+	char paths[PLN_LABEL_SIZE];
 	int i, j, k, l;
 	int nr;
 	int exit_code = 0;
@@ -199,7 +200,8 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				if (list_opt) {
 						snprintf(buf, sizeof(buf), "%-20s", hostname);
 						hl_range(buf, HL_HOST, 0, 0);
-						printf("  %s\n", array_to_str(route_labels[i]->export_paths));
+						array_to_str(route_labels[i]->export_paths, paths, sizeof(paths), " ");
+						printf("  %s\n", paths);
 				}
 				else {
 					hl_range(hostname, HL_HOST, 0, 0);
@@ -276,6 +278,7 @@ static int
 dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	int i, j, k, l;
 	char buf[_POSIX2_LINE_MAX];
+	char paths[PLN_LABEL_SIZE];
 	regmatch_t regmatch;
 
 	for (i=0; route_labels[i]; i++) {
@@ -291,7 +294,8 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				if (list_opt) {
 						snprintf(buf, sizeof(buf), "%-20s", hostname);
 						hl_range(buf, HL_HOST, 0, strlen(hostname));
-						printf("  %s\n", array_to_str(route_labels[i]->export_paths));
+						array_to_str(route_labels[i]->export_paths, paths, sizeof(paths), " ");
+						printf("  %s\n", paths);
 				}
 				else {
 					hl_range(hostname, HL_HOST, 0, strlen(hostname));

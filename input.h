@@ -55,7 +55,7 @@ extern Options current_options;
 void yylex();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
-char* array_to_str(char *argv[]);
+int array_to_str(char *argv[], char *output, int max_length, const char *delim);
 int str_to_array(char *argv[], char *input, int max_elements, const char *delim);
 
 char* ltrim(char *s, int c);

@@ -224,10 +224,9 @@ read_host_labels(Label *route_label) {
 		/* unsupported options */
 		for (j=0; host_labels[j]; j++) {
 			if (*host_labels[j]->export_paths != NULL) {
-				fprintf(stderr, "%s: label validation error: '%s: %s'\n"
+				fprintf(stderr, "%s: label validation error: '%s'\n"
 				    "      path export lists are only supported route files\n",
-				    yyfn, host_labels[j]->name,
-				    array_to_str(host_labels[j]->export_paths));
+				    yyfn, host_labels[j]->name);
 				exit(1);
 			}
 		}
@@ -236,9 +235,7 @@ read_host_labels(Label *route_label) {
 }
 
 /*
- * str_to_array - split a string using the specified delimiter using the input
- *                string as the buffer.  If no entries are found, *argv will be
- *                NULL
+ * str_to_array - split a string using the input string as the buffer
  */
 int
 str_to_array(char *argv[], char *inputstring, int max_elements, const char *delim) {
@@ -257,22 +254,21 @@ str_to_array(char *argv[], char *inputstring, int max_elements, const char *deli
 }
 
 /*
- * array_to_str - represent an array as a string, returning a pointer to a
- *                static buffer
+ * array_to_str - format an array using the output string as the buffer
  */
-char *
-array_to_str(char *argv[]) {
-	int n = 0;
-	static char s[1024];
-	char *p = s;
+int
+array_to_str(char *argv[], char *outputstring, int max_length, const char *delim) {
+	int argc = 0;
+	char *p = outputstring;
 
 	while (argv && *argv) {
-		n += snprintf(p+n, sizeof(s)-n, "%s ", *argv);
+		argc += strlcpy(p+argc, *argv, max_length-argc);
 		argv++;
+		if (argv && *argv)
+			argc += strlcpy(p+argc, delim, max_length-argc);
 	}
-	s[n-1] = '\0';
-
-	return s;
+	outputstring[argc] = '\0';
+	return argc;
 }
 
 /*
