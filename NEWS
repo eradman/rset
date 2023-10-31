@@ -1,3 +1,8 @@
+= Next Release: 2.8
+
+ - No longer set ROUTE_LABEL, and LABEL on remote host
+ - Set SD on the remote host to identify staging directory
+
 = Release History
 
 == 2.7: October 28, 2023
@@ -7,7 +12,6 @@
  - Do not start web server during dry run
  - Execute all hostnames specified on the command line
  - Support for hostname sequence ranges in routes file
-
 
 == 2.6: September 6, 2023
 

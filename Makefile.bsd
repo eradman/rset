@@ -1,6 +1,6 @@
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
-RELEASE = 2.7
+RELEASE = 2.8
 
 RSET_COMPONENTS = rutils input execute
 RSET_OBJS = ${RSET_COMPONENTS:=.o} compat.o rset.o

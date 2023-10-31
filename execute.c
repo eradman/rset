@@ -317,10 +317,9 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' "
-	    "ROUTE_LABEL='%s' INSTALL_URL='" INSTALL_URL "' exec %s\"",
-	    op.execute_with, http_port, host_label->name, host_name,
-	    op.interpreter);
+	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH
+	    "; SD=" REMOTE_TMP_PATH " INSTALL_URL='" INSTALL_URL "' exec %s\"",
+	    op.execute_with, http_port, http_port, op.interpreter);
 
 	/* construct ssh command */
 	argc = 0;
@@ -350,11 +349,10 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH "; LABEL='%s' "
-	    "ROUTE_LABEL='%s' INSTALL_URL='" INSTALL_URL "' exec %s "
+	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH
+	    "; SD=" REMOTE_TMP_PATH " INSTALL_URL='" INSTALL_URL "' exec %s "
 	    REMOTE_SCRIPT_PATH "\"",
-	    op.execute_with, http_port, host_label->name, host_name,
-	    op.interpreter, http_port);
+	    op.execute_with, http_port, http_port, op.interpreter, http_port);
 
 	/* construct ssh command */
 	argc = 0;

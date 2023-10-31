@@ -72,9 +72,17 @@ By default only labels beginning with [0-9a-z] are evaluated.
 .El
 .Sh ENVIRONMENT
 Execution on the remote host sets the following environment variables:
-.Ev INSTALL_URL ,
-.Ev LABEL ,
-.Ev ROUTE_LABEL .
+.Bl -tag -width "RSET_ENVIRON"
+.It Ev INSTALL_URL
+Used by
+.Xr rinstall 1
+for fetching conent from
+.Pa _sources .
+.It Ev SD
+Staging directory where
+.Nm
+unpacks utilities and configuration files.
+.El
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from
 .Pa routes.pln ,
@@ -86,13 +94,9 @@ interactions with a host are run over a socket at
 .Pp
 The local directory
 .Pa _rutils
-must exist, and is shipped to the remote host at the beginning of each
-execution as a temporary directory named
+is created if it does not exist, and is shipped to the remote host at the
+beginning of each execution to directory named
 .Pa /tmp/rset_staging_{http_port} .
-This is used to set the current working directory in the environment of the
-remote host, hence the capabilities of
-.Nm
-may easily be extend by accessing utilities at this location.
 .Sh OPTIONS
 The following options are recognized when parsing a
 .Xr pln 5
