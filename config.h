@@ -19,6 +19,7 @@
 #define INSTALL_URL "http://127.0.0.1:6000"
 #define INTERPRETER "/bin/sh"
 #define LOCAL_INTERPRETER "/bin/sh"
+#define ENV_FILE "default.env"
 
 /* colors */
 #define HL_REVERSE  "\x1b[7m"

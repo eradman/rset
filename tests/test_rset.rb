@@ -125,7 +125,7 @@ try 'Execute commands over ssh using a pipe' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    ssh -T -S /tmp/test_rset_socket 10.0.0.98  sh -c "cd /tmp/rset_staging_6000; SD=/tmp/rset_staging_6000 INSTALL_URL='http://127.0.0.1:6000' exec /bin/sh"
+    ssh -T -S /tmp/test_rset_socket 10.0.0.98  sh -a -c "cd /tmp/rset_staging_6000; . ./default.env; INSTALL_URL='http://127.0.0.1:6000'; exec /bin/sh"
   RESULT
 end
 
@@ -136,7 +136,7 @@ try 'Execute commands over ssh using a tty' do
   eq status.success?, true
   eq out, <<~RESULT
     ssh -T -S /tmp/test_rset_socket 10.0.0.99 cat > /tmp/rset_staging_6000/_script
-    ssh -t -S /tmp/test_rset_socket 10.0.0.99  sh -c "cd /tmp/rset_staging_6000; SD=/tmp/rset_staging_6000 INSTALL_URL='http://127.0.0.1:6000' exec /bin/sh /tmp/rset_staging_6000/_script"
+    ssh -t -S /tmp/test_rset_socket 10.0.0.99  sh -a -c "cd /tmp/rset_staging_6000; . ./default.env; INSTALL_URL='http://127.0.0.1:6000'; exec /bin/sh /tmp/rset_staging_6000/_script"
   RESULT
 end
 

@@ -295,7 +295,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		return -1;
 
 	array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
-	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s -C " REPLICATED_DIRECTORY " ./ | "
+	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
+        "-C " REPLICATED_DIRECTORY " ./ | "
 	   "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
 	    paths, socket_path, host_name, http_port);
 	if (system(cmd) != 0) {
@@ -316,10 +317,11 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	/* construct command to execute on remote host  */
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
+	apply_default(op.env_file, host_label->options.env_file, ENV_FILE);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH
-	    "; SD=" REMOTE_TMP_PATH " INSTALL_URL='" INSTALL_URL "' exec %s\"",
-	    op.execute_with, http_port, http_port, op.interpreter);
+	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
+	    "cd " REMOTE_TMP_PATH "; . ./%s; INSTALL_URL='" INSTALL_URL "'; exec %s\"",
+	    op.execute_with, http_port, op.env_file, op.interpreter);
 
 	/* construct ssh command */
 	argc = 0;
@@ -348,11 +350,12 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	/* construct command to execute on remote host  */
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
+	apply_default(op.env_file, host_label->options.env_file, ENV_FILE);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \"cd " REMOTE_TMP_PATH
-	    "; SD=" REMOTE_TMP_PATH " INSTALL_URL='" INSTALL_URL "' exec %s "
+	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
+	    "cd " REMOTE_TMP_PATH "; . ./%s; INSTALL_URL='" INSTALL_URL "'; exec %s "
 	    REMOTE_SCRIPT_PATH "\"",
-	    op.execute_with, http_port, http_port, op.interpreter, http_port);
+	    op.execute_with, http_port, op.env_file, op.interpreter, http_port);
 
 	/* construct ssh command */
 	argc = 0;

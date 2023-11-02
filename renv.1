@@ -1,0 +1,52 @@
+.\"
+.\" Copyright (c) 2023 Eric Radman <ericshane@eradman.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd November 1, 2023
+.Dt RENV 1
+.Os
+.Sh NAME
+.Nm renv
+.Nd combine environment variables
+.Sh SYNOPSIS
+.Nm renv
+.Op Ar name="value" ...
+.Sh DESCRIPTION
+Filter and combine environment variables in a format
+suitable for
+.Xr sh 1 .
+Arguments and input in STDIN are validated and combined.
+Only lines defining a varaible names using the characters
+.Bq _A-Z0-9
+with a value in double-quotes are emitted:
+.Pp
+.Dl name="value"
+.Pp
+Escape sequences starting with
+.Sq \e ,
+or subshells using
+.Sq $(...)
+are not permitted.
+.Pp
+Arguments may be supplied separately, or in a space-delimited list.
+.Sh EXAMPLES
+Combine environment variables
+.Pp
+.Dl $ renv 'TMPDIR="/var/scratch"' < default.env
+.Sh SEE ALSO
+.Xr rset 1
+.Sh CAVEATS
+Argument parsing requires
+.Nm
+to be found in the search path.

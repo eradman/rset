@@ -12,6 +12,7 @@ rset.o: ${RSET_LIBS}
 	${CC} ${CFLAGS} $< rset.o ${LDFLAGS} -o $@
 
 test: ${OBJS}
+	@${RUBY} test_renv.rb
 	@${RUBY} test_rsub.rb
 	@${RUBY} test_miniquark.rb
 	@${RUBY} test_rinstall.rb

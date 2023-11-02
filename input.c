@@ -96,6 +96,7 @@ yylex() {
 				close(tfd);
 				lp = host_labels[n_labels-1];
 				apply_default(op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
+				apply_default(op.env_file, lp->options.env_file, ENV_FILE);
 
 				local_argc = str_to_array(local_argv, op.local_interpreter, PLN_MAX_PATHS, " ");
 				(void) append(local_argv, local_argc, tmp_src, NULL);

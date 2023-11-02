@@ -1,7 +1,7 @@
 = Next Release: 2.8
 
  - No longer set ROUTE_LABEL, and LABEL on remote host
- - Set SD on the remote host to identify staging directory
+ - Set environment on remote host based on defaults.env
 
 = Release History
 

@@ -10,7 +10,7 @@ QUARK_COMPONENTS = sock http
 QUARK_OBJS = ${QUARK_COMPONENTS:=.o} compat.o miniquark.o
 QUARK_INC = ${QUARK_COMPONENTS:=.h} missing/compat.h
 
-PROGS = rset miniquark rinstall rsub labelgrep
+PROGS = rset miniquark rinstall rsub labelgrep renv
 
 all: versioncheck ${PROGS}
 
@@ -40,18 +40,24 @@ labelgrep: labelgrep.awk
 	sed -e 's/$${release}/${RELEASE}/' labelgrep.awk > labelgrep
 	@chmod +x $@
 
+renv: renv.awk
+	sed -e 's/$${release}/${RELEASE}/' renv.awk > renv
+	@chmod +x $@
+
 install: ${PROGS}
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man5
 	install -m 644 labelgrep.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 miniquark.1 ${DESTDIR}${MANPREFIX}/man1
+	install -m 644 renv.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 pln.5 ${DESTDIR}${MANPREFIX}/man5
 	install -m 644 rinstall.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rset.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rsub.1 ${DESTDIR}${MANPREFIX}/man1
 	install labelgrep ${DESTDIR}${PREFIX}/bin
 	install miniquark ${DESTDIR}${PREFIX}/bin
+	install renv ${DESTDIR}${PREFIX}/bin
 	install rinstall ${DESTDIR}${PREFIX}/bin
 	install rset ${DESTDIR}${PREFIX}/bin
 	install rsub ${DESTDIR}${PREFIX}/bin
@@ -59,11 +65,14 @@ install: ${PROGS}
 uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man1/labelgrep.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rinstall.1
+	rm ${DESTDIR}${MANPREFIX}/man1/miniquark.1
+	rm ${DESTDIR}${MANPREFIX}/man1renv.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rset.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rsub.1
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5
 	rm ${DESTDIR}${PREFIX}/bin/labelgrep
 	rm ${DESTDIR}${PREFIX}/bin/miniquark
+	rm ${DESTDIR}${PREFIX}/bin/renv
 	rm ${DESTDIR}${PREFIX}/bin/rinstall
 	rm ${DESTDIR}${PREFIX}/bin/rset
 	rm ${DESTDIR}${PREFIX}/bin/rsub

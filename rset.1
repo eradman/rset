@@ -70,19 +70,6 @@ The default is
 Execute labels matching the specified regex.
 By default only labels beginning with [0-9a-z] are evaluated.
 .El
-.Sh ENVIRONMENT
-Execution on the remote host sets the following environment variables:
-.Bl -tag -width "RSET_ENVIRON"
-.It Ev INSTALL_URL
-Used by
-.Xr rinstall 1
-for fetching conent from
-.Pa _sources .
-.It Ev SD
-Staging directory where
-.Nm
-unpacks utilities and configuration files.
-.El
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from
 .Pa routes.pln ,

@@ -18,6 +18,7 @@
 #include <sys/wait.h>
 
 #include <err.h>
+#include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
@@ -83,6 +84,18 @@ install_if_new(const char *src, const char *dst) {
 	waitpid(pid, &status, 0);
 	if (status != 0)
 		warnx("copy failed %s -> %s", src, dst);
+}
+
+void
+install_blank(const char *dst) {
+	int fd;
+	struct stat dst_sb;
+
+	if (stat(dst, &dst_sb) == -1) {
+		printf("rset: creating '%s'\n", dst);
+		fd = open(dst, O_CREAT | O_WRONLY, 0640);
+		close(fd);
+	}
 }
 
 /*
