@@ -304,6 +304,14 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		return -1;
 	}
 
+	snprintf(cmd, PATH_MAX,
+	    "exec ssh -q -S %s %s 'cd " REMOTE_TMP_PATH "; ./renv < " ENV_FILE " > final.env'",
+	    socket_path, host_name, http_port);
+	if (system(cmd) != 0) {
+		warn("unable to read " ENV_FILE);
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -320,8 +328,8 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	apply_default(op.env_file, host_label->options.env_file, ENV_FILE);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./%s; INSTALL_URL='" INSTALL_URL "'; exec %s\"",
-	    op.execute_with, http_port, op.env_file, op.interpreter);
+	    "cd " REMOTE_TMP_PATH "; . ./final.env; INSTALL_URL='" INSTALL_URL "'; exec %s\"",
+	    op.execute_with, http_port, op.interpreter);
 
 	/* construct ssh command */
 	argc = 0;
@@ -353,9 +361,9 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	apply_default(op.env_file, host_label->options.env_file, ENV_FILE);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./%s; INSTALL_URL='" INSTALL_URL "'; exec %s "
+	    "cd " REMOTE_TMP_PATH "; . ./final.env; INSTALL_URL='" INSTALL_URL "'; exec %s "
 	    REMOTE_SCRIPT_PATH "\"",
-	    op.execute_with, http_port, op.env_file, op.interpreter, http_port);
+	    op.execute_with, http_port, op.interpreter, http_port);
 
 	/* construct ssh command */
 	argc = 0;

@@ -13,40 +13,39 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 1, 2023
+.Dd November 3, 2023
 .Dt RENV 1
 .Os
 .Sh NAME
 .Nm renv
-.Nd combine environment variables
+.Nd normalize environment variables
 .Sh SYNOPSIS
 .Nm renv
-.Op Ar name="value" ...
 .Sh DESCRIPTION
-Filter and combine environment variables in a format
-suitable for
+Filter environment variables in a format suitable for
 .Xr sh 1 .
 Arguments and input in STDIN are validated and combined.
 Only lines defining a varaible names using the characters
-.Bq _A-Z0-9
-with a value in double-quotes are emitted:
+.Bq _a-zA-Z0-9
+with a value in double-quotes are emitted.
+More than one entry may be be specified on each line
 .Pp
-.Dl name="value"
-.Pp
+.Dl A="one"
+.Dl B="two" C="three"
+.Sh LITERALS
 Escape sequences starting with
 .Sq \e ,
 or subshells using
 .Sq $(...)
 are not permitted.
 .Pp
-Arguments may be supplied separately, or in a space-delimited list.
+.Ql \&$$
+expands to a single dollar sign.
 .Sh EXAMPLES
-Combine environment variables
+Print valid environment variables
 .Pp
-.Dl $ renv 'TMPDIR="/var/scratch"' < default.env
+.Dl $ renv < default.env
 .Sh SEE ALSO
 .Xr rset 1
 .Sh CAVEATS
-Argument parsing requires
-.Nm
-to be found in the search path.
+Tabs and multiple spaces are are converted to into a single space.
