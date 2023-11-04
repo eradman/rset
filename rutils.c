@@ -18,7 +18,6 @@
 #include <sys/wait.h>
 
 #include <err.h>
-#include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
 #include <stdio.h>

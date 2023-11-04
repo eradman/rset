@@ -312,19 +312,23 @@ read_label(char *line, Label *label) {
 void
 read_option(char *text, Options *op) {
 	char *k, *v;
+	int fd;
 
 	k = text;
 	strsep(&text, "=");
 	v = text;
-
 	if (strcmp(k, "execute_with") == 0)
 		strlcpy(op->execute_with, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "interpreter") == 0)
 		strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "local_interpreter") == 0)
 		strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
-	else if (strcmp(k, "env_file") == 0)
+	else if (strcmp(k, "env_file") == 0) {
 		strlcpy(op->env_file, v, PLN_OPTION_SIZE);
+		if ((fd = open(op->env_file, O_RDONLY)) == -1)
+			err(1, "%s: %s", yyfn, op->env_file);
+		close(fd);
+	}
 	else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
 		exit(1);
