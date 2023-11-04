@@ -96,7 +96,6 @@ yylex() {
 				close(tfd);
 				lp = host_labels[n_labels-1];
 				apply_default(op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
-				apply_default(op.env_file, lp->options.env_file, ENV_FILE);
 
 				local_argc = str_to_array(local_argv, op.local_interpreter, PLN_MAX_PATHS, " ");
 				(void) append(local_argv, local_argc, tmp_src, NULL);
@@ -324,6 +323,8 @@ read_option(char *text, Options *op) {
 		strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "local_interpreter") == 0)
 		strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
+	else if (strcmp(k, "env_file") == 0)
+		strlcpy(op->env_file, v, PLN_OPTION_SIZE);
 	else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
 		exit(1);

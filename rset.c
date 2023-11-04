@@ -120,7 +120,6 @@ main(int argc, char *argv[])
 		install_if_new(renv_bin, REPLICATED_DIRECTORY "/renv");
 		install_if_new(rinstall_bin, REPLICATED_DIRECTORY "/rinstall");
 		install_if_new(rsub_bin, REPLICATED_DIRECTORY "/rsub");
-		install_blank(REPLICATED_DIRECTORY "/" ENV_FILE);
 		create_dir(PUBLIC_DIRECTORY);
 	}
 
