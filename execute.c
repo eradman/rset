@@ -322,8 +322,8 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	strlcpy(environment_file_set, op.environment_file, sizeof(environment_file_set));
 
 	snprintf(cmd, PATH_MAX,
-	    "exec ssh -q -S %s %s 'cd " REMOTE_TMP_PATH "; ./renv < %s > final.env'",
-	    socket_path, host_name, http_port, op.environment_file);
+	    "PATH=_rutils:$PATH renv < %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env'",
+	    op.environment_file, socket_path, host_name, http_port);
 	if (system(cmd) != 0) {
 		warn("unable to read %s", op.environment_file);
 		return -1;
