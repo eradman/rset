@@ -308,25 +308,24 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 }
 
 int
-update_env_file(char *host_name, char *socket_path, Label *host_label, int http_port) {
-	int argc;
+update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port) {
 	char cmd[PATH_MAX];
 	Options op;
-	static char env_file_set[PLN_OPTION_SIZE] = "";
+	static char environment_file_set[PLN_OPTION_SIZE] = "";
 
-	apply_default(op.env_file, host_label->options.env_file, ENV_FILE);
+	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	/* only update when value changes */
-	if (strcmp(env_file_set, op.env_file) == 0)
+	if (strcmp(environment_file_set, op.environment_file) == 0)
 		return 0;
 
-	strlcpy(env_file_set, op.env_file, sizeof(env_file_set));
+	strlcpy(environment_file_set, op.environment_file, sizeof(environment_file_set));
 
 	snprintf(cmd, PATH_MAX,
 	    "exec ssh -q -S %s %s 'cd " REMOTE_TMP_PATH "; ./renv < %s > final.env'",
-	    socket_path, host_name, http_port, op.env_file);
+	    socket_path, host_name, http_port, op.environment_file);
 	if (system(cmd) != 0) {
-		warn("unable to read %s", op.env_file);
+		warn("unable to read %s", op.environment_file);
 		return -1;
 	}
 
@@ -341,7 +340,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	Options op;
 
 	/* setup environment file */
-	update_env_file(host_name, socket_path, host_label, http_port);
+	update_environment_file(host_name, socket_path, host_label, http_port);
 
 	/* construct command to execute on remote host  */
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
@@ -367,7 +366,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	Options op;
 
 	/* setup environment file */
-	update_env_file(host_name, socket_path, host_label, http_port);
+	update_environment_file(host_name, socket_path, host_label, http_port);
 
 	/* copy the contents of the script */
 	snprintf(cmd, sizeof(cmd), "cat > " REMOTE_SCRIPT_PATH,
@@ -381,7 +380,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	/* construct command to execute on remote host  */
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
-	apply_default(op.env_file, host_label->options.env_file, ENV_FILE);
+	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
 	    "cd " REMOTE_TMP_PATH "; . ./final.env; INSTALL_URL='" INSTALL_URL "'; exec %s "

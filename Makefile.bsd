@@ -66,7 +66,7 @@ uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man1/labelgrep.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rinstall.1
 	rm ${DESTDIR}${MANPREFIX}/man1/miniquark.1
-	rm ${DESTDIR}${MANPREFIX}/man1renv.1
+	rm ${DESTDIR}${MANPREFIX}/man1/renv.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rset.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rsub.1
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5

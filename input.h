@@ -30,7 +30,7 @@ typedef struct {
 	char execute_with[PLN_OPTION_SIZE];
 	char interpreter[PLN_OPTION_SIZE];
 	char local_interpreter[PLN_OPTION_SIZE];
-	char env_file[PLN_OPTION_SIZE];
+	char environment_file[PLN_OPTION_SIZE];
 } Options;
 
 typedef struct Label {

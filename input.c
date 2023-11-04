@@ -323,10 +323,10 @@ read_option(char *text, Options *op) {
 		strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "local_interpreter") == 0)
 		strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
-	else if (strcmp(k, "env_file") == 0) {
-		strlcpy(op->env_file, v, PLN_OPTION_SIZE);
-		if ((fd = open(op->env_file, O_RDONLY)) == -1)
-			err(1, "%s: %s", yyfn, op->env_file);
+	else if (strcmp(k, "environment_file") == 0) {
+		strlcpy(op->environment_file, v, PLN_OPTION_SIZE);
+		if ((fd = open(op->environment_file, O_RDONLY)) == -1)
+			err(1, "%s: %s", yyfn, op->environment_file);
 		close(fd);
 	}
 	else {
