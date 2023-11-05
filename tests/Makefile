@@ -1,6 +1,14 @@
 RUBY = ruby
 CFLAGS = -I..
-OBJS = args cmd_pipe_stdin cmd_pipe_stdout copyfile getsocket parser ssh_command which hostlist
+OBJS += args
+OBJS += cmd_pipe_stdin
+OBJS += cmd_pipe_stdout
+OBJS += copyfile
+OBJS += getsocket
+OBJS += hostlist
+OBJS += parser
+OBJS += ssh_command
+OBJS += which
 RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o
 
 all: rset.o test
@@ -8,7 +16,7 @@ all: rset.o test
 rset.o: ${RSET_LIBS}
 	${LD} -r ${RSET_LIBS} -o $@
 
-.c: rset.o
+.c: rset.o ${RSET_LIBS}
 	${CC} ${CFLAGS} $< rset.o ${LDFLAGS} -o $@
 
 test: ${OBJS}

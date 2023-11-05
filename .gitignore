@@ -1,5 +1,5 @@
 *.o
-Makefile
+/Makefile
 compat.c
 labelgrep
 miniquark
@@ -17,4 +17,3 @@ tests/parser
 tests/ssh_command
 tests/which
 tests/.gem
-^tests/Makefile
