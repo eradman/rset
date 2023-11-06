@@ -46,9 +46,9 @@ try 'Scan multiple files with more than one label' do
   eq err, ''
   expected = <<~OUTPUT
     input/t460s.pln ([36mcommon packages[0m)
-    [33m10[0m	[4mpkg_add [0mrsync-- ruby%2.6
+    [33m11[0m	[4mpkg_add [0mrsync-- ruby%2.6
     input/t460s.pln ([36mdesktop[0m)
-    [33m20[0m	[4mpkg_add [0mhermit-font vim--gtk2
+    [33m21[0m	[4mpkg_add [0mhermit-font vim--gtk2
   OUTPUT
   eq out, expected
   eq status.success?, true
@@ -60,8 +60,8 @@ try 'Find more than one match per label' do
   eq err, ''
   expected = <<~OUTPUT
     input/t460s.pln ([36mcommon packages[0m)
-    [33m11[0m	echo "inet 172.16.0.1/16" > [4m/etc/hostname[0m.vether0
-    [33m12[0m	echo "add vether0" > [4m/etc/hostname[0m.bridge0
+    [33m12[0m	echo "inet 172.16.0.1/16" > [4m/etc/hostname[0m.vether0
+    [33m13[0m	echo "add vether0" > [4m/etc/hostname[0m.bridge0
   OUTPUT
   eq out, expected
   eq status.success?, true

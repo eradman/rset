@@ -309,25 +309,42 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 
 int
 update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port) {
+	int fd;
 	char cmd[PATH_MAX];
+	char tmp_src[128];
+	size_t len;
 	Options op;
+	static char environment_set[PLN_OPTION_SIZE] = "";
 	static char environment_file_set[PLN_OPTION_SIZE] = "";
 
+	apply_default(op.environment, host_label->options.environment, ENVIRONMENT);
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	/* only update when value changes */
-	if (strcmp(environment_file_set, op.environment_file) == 0)
+	if ((strcmp(environment_set, op.environment) == 0) &&
+	    (strcmp(environment_file_set, op.environment_file) == 0))
 		return 0;
 
-	strlcpy(environment_file_set, op.environment_file, sizeof(environment_file_set));
+	len = strlcpy(environment_set, op.environment, PLN_OPTION_SIZE);
+	strlcpy(environment_file_set, op.environment_file, PLN_OPTION_SIZE);
+
+	strlcpy(tmp_src, "/tmp/rset_env_XXXXXX", sizeof tmp_src);
+	if ((fd = mkstemp(tmp_src)) == -1)
+		err(1, "mkstemp");
+	write(fd, environment_set, len);
+	write(fd, "\n", 1);
+	write(fd, ENVIRONMENT_DEFAULT, sizeof ENVIRONMENT_DEFAULT);
+	write(fd, "\n", 1);
+	close(fd);
 
 	snprintf(cmd, PATH_MAX,
-	    "PATH=_rutils:$PATH renv < %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env'",
-	    op.environment_file, socket_path, host_name, http_port);
+	    "cat %s %s | renv | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env'",
+	    op.environment_file, tmp_src, socket_path, host_name, http_port);
 	if (system(cmd) != 0) {
 		warn("unable to read %s", op.environment_file);
 		return -1;
 	}
+	unlink(tmp_src);
 
 	return 0;
 }

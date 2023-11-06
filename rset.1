@@ -88,12 +88,14 @@ beginning of each execution to directory named
 The following options are recognized when parsing a
 .Xr pln 5
 file:
-.Ss \&environment_file=
-Path to a file which defines environment variables validated by
-.Xr renv 1 .
+.Ss \&environment=
+Space separated list of environment variables.
 Only values matching the pattern
 .Ql key="value"
 are added to the environment on the remote host.
+.Ss \&environment_file=
+Path to a file which defines environment variables validated by
+.Xr renv 1 .
 .Ss \&interpreter=
 The interpreter to run a script fragment with.
 Defaults to

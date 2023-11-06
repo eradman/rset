@@ -1,8 +1,9 @@
 = Next Release: 2.8
 
  - No longer set ROUTE_LABEL, and LABEL on remote host
- - New environment_file option for defining variables
  - New renv(1) utility for validating environment varables
+ - New environment_file option for defining variables
+ - New environment option for defining variables inline
 
 = Release History
 

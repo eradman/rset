@@ -119,7 +119,6 @@ main(int argc, char *argv[])
 		/* Auto-upgrade utilities and verify path */
 		install_if_new(renv_bin, REPLICATED_DIRECTORY "/renv");
 		install_if_new(rinstall_bin, REPLICATED_DIRECTORY "/rinstall");
-		install_if_new(rsub_bin, REPLICATED_DIRECTORY "/rsub");
 		create_dir(PUBLIC_DIRECTORY);
 	}
 

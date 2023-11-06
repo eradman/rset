@@ -2,6 +2,7 @@
 
 interpreter=/bin/ksh -x
 local_interpreter=/bin/sh -e
+environment=WORKDIR="$PWD"
 
 common packages:
 {
