@@ -316,15 +316,18 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	Options op;
 	static char environment_set[PLN_OPTION_SIZE] = "";
 	static char environment_file_set[PLN_OPTION_SIZE] = "";
+	static char host_name_set[PLN_LABEL_SIZE] = "";
 
 	apply_default(op.environment, host_label->options.environment, ENVIRONMENT);
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	/* only update when value changes */
-	if ((strcmp(environment_set, op.environment) == 0) &&
+	if ((strcmp(host_name_set, host_name) == 0) &&
+	    (strcmp(environment_set, op.environment) == 0) &&
 	    (strcmp(environment_file_set, op.environment_file) == 0))
 		return 0;
 
+	strlcpy(host_name_set, host_name, PLN_OPTION_SIZE);
 	len = strlcpy(environment_set, op.environment, PLN_OPTION_SIZE);
 	strlcpy(environment_file_set, op.environment_file, PLN_OPTION_SIZE);
 
