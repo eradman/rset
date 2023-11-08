@@ -64,10 +64,10 @@ try 'Disallow shell subsitution' do
   eq status.success?, true
 end
 
-try 'Filter malformed line' do
+try 'Filter malformed lines' do
   cmd = '../renv'
   input = <<~'IN'
-    SD="$PWD"
+    SD="$PWD"  
     DS=""
     X="width" Y=height Z="height"
   IN

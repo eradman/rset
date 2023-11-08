@@ -13,6 +13,10 @@ BEGIN {
 /\\|\$\(|`/ {
 	next
 }
+# strip trailing spaces
+{
+	sub(/[ ]+$/, "")
+}
 $0~pattern {
 	pos=0
 
