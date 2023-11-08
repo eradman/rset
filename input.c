@@ -326,10 +326,11 @@ read_option(char *text, Options *op) {
 	else if (strcmp(k, "environment") == 0)
 		strlcpy(op->environment, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "environment_file") == 0) {
-		strlcpy(op->environment_file, v, PLN_OPTION_SIZE);
-		if ((fd = open(op->environment_file, O_RDONLY)) == -1)
-			err(1, "%s: %s", yyfn, op->environment_file);
-		close(fd);
+		if (strlcpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
+			if ((fd = open(op->environment_file, O_RDONLY)) == -1)
+				err(1, "%s: %s", yyfn, op->environment_file);
+			close(fd);
+		}
 	}
 	else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
