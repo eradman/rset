@@ -2,7 +2,7 @@
 
 interpreter=/bin/ksh -x
 local_interpreter=/bin/sh -e
-environment=WORKDIR="$PWD"
+environment=WORKDIR="$PWD" http_proxy="http://192.168.2.6:3128"
 
 common packages:
 {

@@ -137,6 +137,12 @@ yylex() {
 			}
 		}
 
+		/* option */
+		else if (strchr(line, '=')) {
+			line[linelen-1] = '\0';
+			read_option(line, &current_options);
+		}
+
 		/* label */
 		else if (strchr(line, ':')) {
 			host_labels[n_labels] = malloc(sizeof(Label));
@@ -157,12 +163,6 @@ yylex() {
 				    "exceeded\n", yyfn, n_labels );
 				exit(1);
 			}
-		}
-
-		/* option */
-		else if (strchr(line, '=')) {
-			line[linelen-1] = '\0';
-			read_option(line, &current_options);
 		}
 
 		/* unknown */
