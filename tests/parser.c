@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 	int i, j, l;
 	char *mode;
 	char paths[1024];
+	Options *options;
 
 	if (argc != 3) usage();
 	mode = argv[1];
@@ -62,14 +63,17 @@ int main(int argc, char *argv[])
 			read_host_labels(route_labels[i]);
 			printf("%s, content_size: %d\n",
 			    route_labels[i]->name, route_labels[i]->content_size);
-			printf("%s, options: %s\n",
+			printf("%s, option: %s\n",
 			    route_labels[i]->name, paths);
 		}
 		for (j=0; host_labels[j]; j++) {
-			printf("%s, content_size: %d\n",
-			    host_labels[j]->name, host_labels[j]->content_size);
-			printf("%s, options: %s\n",
-			    host_labels[j]->name, format_options(&host_labels[j]->options));
+			printf("%s, content_size: %d\n", host_labels[j]->name, host_labels[j]->content_size);
+			options = &host_labels[j]->options;
+			printf("%s, %s\n", host_labels[j]->name, format_option(options, "environment"));
+			printf("%s, %s\n", host_labels[j]->name, format_option(options, "environment_file"));
+			printf("%s, %s\n", host_labels[j]->name, format_option(options, "interpreter"));
+			printf("%s, %s\n", host_labels[j]->name, format_option(options, "local_interpreter"));
+			printf("%s, %s\n", host_labels[j]->name, format_option(options, "execute_with"));
 		}
 		break;
 	default:

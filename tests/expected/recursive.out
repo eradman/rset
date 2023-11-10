@@ -1,6 +1,10 @@
 t460s, content_size: 29
-t460s, options: t460s/ common/
+t460s, option: t460s/ common/
 relay{1..3}.local, content_size: 19
-relay{1..3}.local, options: common/
+relay{1..3}.local, option: common/
 chroot, content_size: 146
-chroot, options: execute_with=doas
+chroot, environment=
+chroot, environment_file=
+chroot, interpreter=
+chroot, local_interpreter=
+chroot, execute_with=doas

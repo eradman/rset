@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 3, 2023
+.Dd November 10, 2023
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -21,9 +21,10 @@
 .Nd remote staging and execution tool
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl elntv
+.Op Fl entv
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
+.Op Fl l Ar option_name
 .Op Fl x Ar label_pattern
 .Ar hostname ...
 .Sh DESCRIPTION
@@ -39,8 +40,6 @@ The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl e
 Stop executing if an error is encountered within a label.
-.It Fl l
-List the options associated with each label.
 .It Fl n
 Do not connect to remote hosts.
 Special text defined between { and } is still executed locally.
@@ -66,6 +65,11 @@ hostnames or IP addresses which are matched against
 .Ar hostname .
 The default is
 .Pa routes.pln .
+.It Fl l
+List the specified option state associated with each label.
+See
+.Sx OPTIONS
+for the set of supported arguments.
 .It Fl x
 Execute labels matching the specified regex.
 By default only labels beginning with [0-9a-z] are evaluated.
