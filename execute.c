@@ -336,8 +336,6 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 		err(1, "mkstemp");
 	write(fd, environment_set, len);
 	write(fd, "\n", 1);
-	write(fd, ENVIRONMENT_DEFAULT, sizeof ENVIRONMENT_DEFAULT);
-	write(fd, "\n", 1);
 	close(fd);
 
 	snprintf(cmd, PATH_MAX,
@@ -367,8 +365,8 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./final.env; INSTALL_URL='" INSTALL_URL "'; exec %s\"",
-	    op.execute_with, http_port, op.interpreter);
+	    "cd " REMOTE_TMP_PATH "; . ./final.env; SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
+	    op.execute_with, http_port, http_port, op.interpreter);
 
 	/* construct ssh command */
 	argc = 0;
@@ -403,9 +401,9 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./final.env; INSTALL_URL='" INSTALL_URL "'; exec %s "
+	    "cd " REMOTE_TMP_PATH "; . ./final.env; SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s "
 	    REMOTE_SCRIPT_PATH "\"",
-	    op.execute_with, http_port, op.interpreter, http_port);
+	    op.execute_with, http_port, http_port, op.interpreter, http_port);
 
 	/* construct ssh command */
 	argc = 0;

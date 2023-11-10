@@ -21,7 +21,6 @@
 #define LOCAL_INTERPRETER "/bin/sh"
 #define ENVIRONMENT ""
 #define ENVIRONMENT_FILE "/dev/null"
-#define ENVIRONMENT_DEFAULT "SD=\"$PWD\""
 
 /* colors */
 #define HL_REVERSE  "\x1b[7m"
