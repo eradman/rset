@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "missing/compat.h"
 #include "config.h"
@@ -128,4 +129,50 @@ format_option(Options *op, const char *option) {
 		buf[0] = '\0';
 
 	return buf;
+}
+
+/*
+ * log_msg - write log message and interpolate variables
+ */
+
+void
+log_msg(char *template, char *hostname, char *label_name) {
+	char *p;
+	char buf[_POSIX2_LINE_MAX];
+	char tmstr[24];
+	int index = 0;
+	time_t tv;
+	struct tm *tm;
+
+	p = template;
+	tv = time(NULL);
+	tm = localtime(&tv);
+
+	while (p[0] != '\0') {
+		if (p[0] == '%') {
+			p++;
+			switch (p[0]) {
+				case 'h':
+					index += strlcpy(buf+index, hostname, sizeof(buf)-index);
+					break;
+				case 'l':
+					index += strlcpy(buf+index, label_name, sizeof(buf)-index);
+					break;
+				case 'T':
+					strftime(tmstr, sizeof(tmstr), "%F %H:%M:%S", tm);
+					index += strlcpy(buf+index, tmstr, sizeof(buf)-index);
+					break;
+				case '%':
+					buf[index++] = p[0];
+					break;
+				default:
+					break;
+			}
+		}
+		else
+			buf[index++] = p[0];
+		p++;
+	}
+	buf[index++] = '\n';
+	write(STDOUT_FILENO, buf, index);
 }

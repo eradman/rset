@@ -244,6 +244,28 @@ try 'Report an unknown option' do
   eq out, ''
 end
 
+# Custom Logging
+
+try 'Log start message' do
+  cmd = "./log_msg '== Starting on %h at %T %% =='"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out.gsub(/[0-9]/, '0'), <<~RESULT
+  == Starting on localhost at 0000-00-00 00:00:00 % ==
+  RESULT
+  eq status.success?, true
+end
+
+try 'Log run message' do
+  cmd = "./log_msg '== Running %l at %T =='"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out.gsub(/[0-9]/, '0'), <<~RESULT
+  == Running network at 0000-00-00 00:00:00 ==
+  RESULT
+  eq status.success?, true
+end
+
 # Hostlists
 
 try 'Simple hostlist' do

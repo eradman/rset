@@ -6,6 +6,7 @@ OBJS += cmd_pipe_stdout
 OBJS += copyfile
 OBJS += getsocket
 OBJS += hostlist
+OBJS += log_msg
 OBJS += parser
 OBJS += ssh_command
 OBJS += which
