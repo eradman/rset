@@ -164,7 +164,7 @@ try 'Run rset with no arguments' do
   _, err, status = Open3.capture3(cmd)
   eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
      "release: 0.0\n" \
-     "usage: rset [-elntv] [-F sshconfig_file] [-f routes_file] [-x label_pattern] hostname ...\n"
+     "usage: rset [-entv] [-F sshconfig_file] [-f routes_file] [-l option_name] [-x label_pattern] hostname ...\n"
   eq status.success?, false
 end
 
@@ -208,7 +208,7 @@ try 'Report an unknown syntax' do
   fn = "#{@systmp}/routes.pln"
   FileUtils.mkdir_p("#{@systmp}/_sources")
   File.open(fn, 'w') { |f| f.write("php\n") }
-  cmd = "#{Dir.pwd}/../rset -ln localhost"
+  cmd = "#{Dir.pwd}/../rset -l interpreter -n localhost"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown symbol at line 1: 'php'\n"
   eq status.success?, false
@@ -227,7 +227,7 @@ end
 try 'Report a bad regex' do
   fn = "#{@systmp}/routes.pln"
   File.open(fn, 'w') { |f| f.write('') }
-  cmd = "#{Dir.pwd}/../rset -ln -x 't[42' localhost"
+  cmd = "#{Dir.pwd}/../rset -n -x 't[42' localhost"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err[0..20], 'rset: bad expression:'
   eq status.success?, false
@@ -237,7 +237,7 @@ end
 try 'Report an unknown option' do
   fn = "#{@systmp}/routes.pln"
   File.open(fn, 'w') { |f| f.write("username=radman\n") }
-  cmd = "#{Dir.pwd}/../rset -ln 't[42'"
+  cmd = "#{Dir.pwd}/../rset -n -l interpreter 't[42'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown option 'username=radman'\n"
   eq status.success?, false
@@ -310,7 +310,7 @@ end
 
 try 'Show matching routes and hosts' do
   out, err, status = nil
-  cmd = "#{Dir.pwd}/../rset -ln t460s"
+  cmd = "#{Dir.pwd}/../rset -l interpreter -n t460s"
   Dir.chdir('input') do
     FileUtils.mkdir_p('_sources')
     out, err, status = Open3.capture3(cmd)

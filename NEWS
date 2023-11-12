@@ -5,6 +5,7 @@
  - New environment_file option for defining variables
  - New environment option for defining variables inline
  - Improve parsing by prioritizing parameters before labels
+ - '-l' requires an option value
 
 = Release History
 

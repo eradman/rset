@@ -104,24 +104,28 @@ hl_range(const char *s, const char *color, unsigned so, unsigned eo) {
 }
 
 /*
- * format_options - print a concise representation of options
+ * format_option - return the value of an option
  */
 
 char *
-format_options(Options *op) {
-	static char buf[2048];
-	int pos = 0;
+format_option(Options *op, const char *option) {
+	static char buf[PLN_LABEL_SIZE];
 
-	if (*op->interpreter)
-		pos += snprintf(buf+pos, sizeof(buf)-pos, "interpreter=%s,",
-		    op->interpreter);
-	if (*op->local_interpreter)
-		pos += snprintf(buf+pos, sizeof(buf)-pos, "local_interpreter=%s,",
-		    op->local_interpreter);
-	if (*op->execute_with)
-		pos += snprintf(buf+pos, sizeof(buf)-pos, "execute_with=%s,",
-		    op->execute_with);
-	buf[pos - (pos > 0 ? 1 : 0)] = '\0';
+	strlcpy(buf, option, sizeof buf);
+	strlcat(buf, "=", sizeof buf);
+
+	if (strcmp(option, "environment") == 0)
+		strlcat(buf, op->environment, sizeof buf);
+	else if (strcmp(option, "environment_file") == 0)
+		strlcat(buf, op->environment_file, sizeof buf);
+	else if (strcmp(option, "interpreter") == 0)
+		strlcat(buf, op->interpreter, sizeof buf);
+	else if (strcmp(option, "local_interpreter") == 0)
+		strlcat(buf, op->local_interpreter, sizeof buf);
+	else if (strcmp(option, "execute_with") == 0)
+		strlcat(buf, op->execute_with, sizeof buf);
+	else
+		buf[0] = '\0';
 
 	return buf;
 }

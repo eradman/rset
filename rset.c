@@ -54,11 +54,11 @@ Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
 Options current_options;
 
-int list_opt;
 int dryrun_opt;
 int tty_opt;
 int verbose_opt;
 int stop_on_err_opt;
+char *list_option_name;
 char *sshconfig_file;
 char *label_pattern = DEFAULT_LABEL_PATTERN;
 char *routes_file = ROUTES_FILE;
@@ -199,7 +199,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				else
 					continue;
 
-				if (list_opt) {
+				if (list_option_name) {
 						snprintf(buf, sizeof(buf), "%-20s", hostname);
 						hl_range(buf, HL_HOST, 0, 0);
 						array_to_str(route_labels[i]->export_paths, paths, sizeof(paths), " ");
@@ -223,10 +223,10 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				for (j=0; host_labels[j]; j++) {
 					if(regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
-					if (list_opt) {
+					if (list_option_name) {
 						snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
 						hl_range(buf, HL_LABEL, 0, 0);
-						printf("  %s\n", format_options(&host_labels[j]->options));
+						printf("  %s\n", format_option(&host_labels[j]->options, list_option_name));
 					}
 					else {
 						hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
@@ -293,7 +293,7 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				else
 					continue;
 
-				if (list_opt) {
+				if (list_option_name) {
 						snprintf(buf, sizeof(buf), "%-20s", hostname);
 						hl_range(buf, HL_HOST, 0, strlen(hostname));
 						array_to_str(route_labels[i]->export_paths, paths, sizeof(paths), " ");
@@ -306,10 +306,10 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				for (j=0; host_labels[j]; j++) {
 					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
-					if (list_opt) {
+					if (list_option_name) {
 						snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
 						hl_range(buf, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
-						printf("  %s\n", format_options(&host_labels[j]->options));
+						printf("  %s\n", format_option(&host_labels[j]->options, list_option_name));
 					}
 					else {
 						hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
@@ -343,8 +343,8 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-elntv] [-F sshconfig_file] [-f routes_file] "
-	    "[-x label_pattern] hostname ...\n");
+	fprintf(stderr, "usage: rset [-entv] [-F sshconfig_file] [-f routes_file] "
+	    "[-l option_name] [-x label_pattern] hostname ...\n");
 	exit(1);
 }
 
@@ -353,14 +353,14 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 	int i;
 	int ch;
 	opterr = 0;
+	Options op;
 
-	while ((ch = getopt(argc, argv, "elntvF:f:x:")) != -1) {
+	bzero(&op, sizeof op);
+
+	while ((ch = getopt(argc, argv, "entvF:f:l:x:")) != -1) {
 		switch (ch) {
 		case 'e':
 			stop_on_err_opt = 1;
-			break;
-		case 'l':
-			list_opt = 1;
 			break;
 		case 'n':
 			dryrun_opt = 1;
@@ -377,6 +377,9 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 		case 'f':
 			routes_file = argv[optind-1];
 			break;
+		case 'l':
+			list_option_name = argv[optind-1];
+			break;
 		case 'x':
 			label_pattern = argv[optind-1];
 			break;
@@ -386,6 +389,9 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 		}
 	}
 	if (optind >= argc) usage();
+
+	if ((list_option_name) && (strlen(format_option(&op, list_option_name)) == 0))
+		errx(1, "invalid option_name: '%s'", list_option_name);
 
 	for (i=0; i < argc - optind; i++)
 		hostnames[i] = argv[optind+i];
