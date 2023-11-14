@@ -3,7 +3,7 @@
 # Install files from the local staging area or a remote URL
 
 ret=1
-: ${INSTALL_URL:=http://localhost:9000}
+: ${INSTALL_URL:=http://localhost:6000}
 unset http_proxy
 
 usage() {
@@ -26,7 +26,7 @@ shift $(($OPTIND - 1))
 [ $# -eq 2 ] || usage
 
 source=$1
-test -d "$2" && target="$2/$(basename "$source")" || target=$2
+[ -d "$2" ] && target="$2/$(basename "$source")" || target=$2
 
 case $(dirname "$target") in
 	/*) ;;
@@ -36,46 +36,51 @@ case $(dirname "$target") in
 		;;
 esac
 
-if test ! -f "$1"; then
+if [ ! -f "$1" ]; then
 	umask 044
 	source="$(basename "$1" | tr -C '0-9a-zA-Z_' '_')$(mktemp XXXXXX)"
-	case `uname` in
+        case $(uname) in
 		OpenBSD|NetBSD)
 			ftp -o "$source" -n "$INSTALL_URL/$1"
 			;;
 		FreeBSD|DragonFly)
-			fetch -q -o "$source" "$INSTALL_URL/$1"
+			fetch -qo "$source" "$INSTALL_URL/$1"
 			;;
 		Linux|Darwin|SunOS)
-			if command -pv wget > /dev/null; then
-				wget -q -O "$source" "$INSTALL_URL/$1"
+			if command -pv curl > /dev/null; then
+				curl -fsSLo "$source" "$INSTALL_URL/$1"
 			else
-				curl -f -s -o "$source" "$INSTALL_URL/$1"
+				wget -qO "$source" "$INSTALL_URL/$1"
 			fi
 			;;
 		*)
-			echo "Unknown OS"; exit 2
+			>&2 echo "Unknown OS"
+                        exit 2
 			;;
 	esac
 
-	test $? -eq 0 || {
+	[ $? -eq 0 ] || {
 		>&2 echo "rinstall: unable to fetch $INSTALL_URL/$1"
 		exit 3
 	}
 	umask 022
 fi
 
-test -s "$source" || {
-	>&2 echo "rinstall: $1 is empty"
-	exit 1
-}
+# create: 0 - files are the same, 1 - a new file,  2 - files are different
+if [ -e "$target" ]; then
+	diff -U 2 "$target" "$source" && create=0 || create=2
+else
+	create=1
+fi
 
-test -e "$target" && diff -U 2 "$target" "$source" || {
-	test -e "$target" || echo "rinstall: created $target"
-	cp "$source" "$target" && ret=0
-}
+if [ $create -ne 0 ]; then
+	cp "$source" "$target" && ret=0 || ret=$?
+	[ $create -eq 1 -a $ret -eq 0 ] && echo "rinstall: created $target" || :
+fi
 
-[ -n "$OWNER" ] && chown $OWNER "$target"
-[ -n "$MODE" ] && chmod $MODE "$target"
+[ -z "$OWNER" ] || chown $OWNER "$target"
+[ -z "$MODE" ] || chmod $MODE "$target"
 
 exit $ret
+
+# vim:noexpandtab:syntax=sh:ts=4
