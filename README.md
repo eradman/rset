@@ -55,8 +55,9 @@ Show configuration files and labels that contain a reference a specific file
 News
 ----
 
-A release history as well as features in the upcoming release are covered in the
-[NEWS](NEWS) file.
+Notification of new releases are provided by an
+[Atom feed](https://github.com/eradman/rset/releases.atom),
+and release history is covered in the [NEWS](NEWS) file.
 
 [rset(1)]: http://scriptedconfiguration.org/man/rset.1.html
 [pln(5)]: http://scriptedconfiguration.org/man/pln.5.html
