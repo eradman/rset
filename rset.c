@@ -177,7 +177,6 @@ static int
 execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
-	char paths[PLN_LABEL_SIZE];
 	int i, j, k, l;
 	int nr;
 	int exit_code = 0;
@@ -199,16 +198,8 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				else
 					continue;
 
-				if (list_option_name) {
-						snprintf(buf, sizeof(buf), "%-20s", hostname);
-						hl_range(buf, HL_HOST, 0, 0);
-						array_to_str(route_labels[i]->export_paths, paths, sizeof(paths), " ");
-						printf("  %s\n", paths);
-				}
-				else {
-					hl_range(hostname, HL_HOST, 0, 0);
-					printf("\n");
-				}
+				hl_range(hostname, HL_HOST, 0, 0);
+				printf("\n");
 
 				len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
 				socket_path = malloc(len);
@@ -223,15 +214,8 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				for (j=0; host_labels[j]; j++) {
 					if(regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
-					if (list_option_name) {
-						snprintf(buf, sizeof(buf), "%-20s", host_labels[j]->name);
-						hl_range(buf, HL_LABEL, 0, 0);
-						printf("  %s\n", format_option(&host_labels[j]->options, list_option_name));
-					}
-					else {
-						hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
-						printf("\n");
-					}
+					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
+					printf("\n");
 
 					if (tty_opt)
 						exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
@@ -390,8 +374,12 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 	}
 	if (optind >= argc) usage();
 
-	if ((list_option_name) && (strlen(format_option(&op, list_option_name)) == 0))
-		errx(1, "invalid option_name: '%s'", list_option_name);
+	if (list_option_name) {
+		if (dryrun_opt == 0)
+			errx(1, "list option required '-n'");
+		if (strlen(format_option(&op, list_option_name)) == 0)
+			errx(1, "invalid option_name: '%s'", list_option_name);
+	}
 
 	for (i=0; i < argc - optind; i++)
 		hostnames[i] = argv[optind+i];
