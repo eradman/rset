@@ -12,7 +12,7 @@ QUARK_INC = ${QUARK_COMPONENTS:=.h} missing/compat.h
 
 PROGS = rset miniquark rinstall rsub labelgrep renv
 
-all: versioncheck ${PROGS}
+all: ${PROGS}
 
 .c.o:
 	${CC} ${CFLAGS} ${CPPFLAGS} -c $<
@@ -87,7 +87,4 @@ clean:
 distclean:
 	rm -f Makefile
 
-versioncheck:
-	@head -n3 NEWS | egrep -q "^= Next Release: ${RELEASE}|^== ${RELEASE}: "
-
-.PHONY: all clean distclean install test uninstall versioncheck
+.PHONY: all clean distclean install test uninstall

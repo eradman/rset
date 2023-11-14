@@ -1,4 +1,6 @@
-= Next Release: 2.8
+= Release History
+
+== 2.8: November 13, 2023
 
  - No longer set ROUTE_LABEL, and LABEL on remote host
  - New renv(1) utility for validating environment variables
@@ -6,8 +8,6 @@
  - New environment option for defining variables inline
  - Improve parsing by prioritizing parameters before labels
  - '-l' requires an option value
-
-= Release History
 
 == 2.7: October 28, 2023
 
