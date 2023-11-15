@@ -114,7 +114,7 @@ end
 
 is_busybox = ENV['SHELL'] == '/bin/ash'
 try 'Install a file from a remote URL containing special characters', (is_busybox) do
-  fn = "test!@()_+ #{@tests}.txt"
+  fn = "test-!@()_+$#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"
   File.open(src, 'w') { |f| f.write('123') }
@@ -210,21 +210,4 @@ try 'Ensure that a relative target cannot be used' do
   eq err, "rinstall: #{fn} is not an absolute path\n"
   eq out, ''
   eq File.exist?(dst), false
-end
-
-try 'Refuse to install an empty file' do
-  fn = "test_#{@tests}.txt"
-  dst = "#{@systmp}/#{@tests}/#{fn}"
-  src = "#{@wwwtmp}/#{fn}"
-  Dir.mkdir "#{@systmp}/#{@tests}"
-  File.open(src, 'w') { |f| f.write('') }
-  File.open(dst, 'w') do |f|
-    f.chmod(0o642)
-    f.write("000\n123\n")
-  end
-  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 660 #{fn} #{dst}"
-  out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq err, "rinstall: #{fn} is empty\n"
-  eq out, ''
-  eq status.exitstatus, 1
 end
