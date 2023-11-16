@@ -175,7 +175,6 @@ main(int argc, char *argv[])
 
 static int
 execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
-	char buf[_POSIX2_LINE_MAX];
 	char httpd_log[32768];
 	int i, j, k, l;
 	int nr;
@@ -185,8 +184,23 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	regmatch_t regmatch;
 	Options op;
 
+	char *host_connect_msg = HL_HOST "%h" HL_RESET;
+	char *label_exec_begin_msg = HL_LABEL "%l" HL_RESET;
+	char *label_exec_end_msg = HL_LABEL "%l" HL_RESET;
+	char *host_disconnect_msg = 0;
+	char *label_exec_error_msg = HL_ERROR "%l exited with code %e" HL_RESET;
+
 	/* start background web server */
 	start_http_server(stdout_pipe, http_port);
+
+	/* custom log format */
+	if (getenv("RSET_HOST_CONNECT")) {
+		host_connect_msg = getenv("RSET_HOST_CONNECT");
+		label_exec_begin_msg = getenv("RSET_LABEL_EXEC_BEGIN");
+		label_exec_end_msg = getenv("RSET_LABEL_EXEC_END");
+		label_exec_error_msg = getenv("RSET_LABEL_EXEC_ERROR");
+		host_disconnect_msg = getenv("RSET_HOST_DISCONNECT");
+	}
 
 	for (i=0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
@@ -198,14 +212,14 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				else
 					continue;
 
-				hl_range(hostname, HL_HOST, 0, 0);
-				printf("\n");
+				log_msg(host_connect_msg, hostname, "", 0);
 
 				len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
 				socket_path = malloc(len);
 				snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
 				if (start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file) == -1) {
+					log_msg(host_disconnect_msg, hostname, "", 0);
 					end_connection(socket_path, hostname, http_port);
 					free(socket_path);
 					socket_path = NULL;
@@ -214,20 +228,19 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				for (j=0; host_labels[j]; j++) {
 					if(regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
-					hl_range(host_labels[j]->name, HL_LABEL, 0, 0);
-					printf("\n");
+
+					log_msg(label_exec_begin_msg, hostname, host_labels[j]->name, 0);
 
 					if (tty_opt)
 						exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
 					else
 						exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
 
+					log_msg(label_exec_end_msg, hostname, host_labels[j]->name, exit_code);
+
 					if ((stop_on_err_opt) && exit_code != 0) {
 						apply_default(op.interpreter, host_labels[j]->options.interpreter, INTERPRETER);
-						snprintf(buf, sizeof(buf), "%s exited with code %d", op.interpreter, exit_code);
-						hl_range(buf, HL_ERROR, 0, 0);
-						printf("\n");
-
+						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, exit_code);
 						goto exit;
 					}
 
@@ -241,6 +254,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 exit:
 				if (socket_path) {
+					log_msg(host_disconnect_msg, hostname, "", stop_on_err_opt ? exit_code : 0);
 					end_connection(socket_path, hostname, http_port);
 					free(socket_path);
 					socket_path = NULL;
@@ -492,5 +506,5 @@ format_http_log(char *output, size_t len) {
 	}
 	printf("%s", output_start);
 	if (output[len-1] != '\n')
-			printf(" ...\n");
+		printf(" ...\n");
 }
