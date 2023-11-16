@@ -247,21 +247,21 @@ end
 # Custom Logging
 
 try 'Log start message' do
-  cmd = "./log_msg '== Starting on %h at %T %% =='"
+  cmd = "./log_msg '== Starting on %h at %T =='"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
-  eq out.gsub(/[0-9]/, '0'), <<~RESULT
-  == Starting on localhost at 0000-00-00 00:00:00 % ==
+  eq out.gsub(/[0-9]/, '0').sub(/[+-][0]{4} /, '+0100 '), <<~RESULT
+  == Starting on localhost at 0000-00-00 00:00:00+0100 ==
   RESULT
   eq status.success?, true
 end
 
-try 'Log run message' do
-  cmd = "./log_msg '== Running %l at %T =='"
+try 'Log exit code and other characters' do
+  cmd = "./log_msg '== Running %l %% (%e) =='"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
-  eq out.gsub(/[0-9]/, '0'), <<~RESULT
-  == Running network at 0000-00-00 00:00:00 ==
+  eq out, <<~RESULT
+  == Running network % (2) ==
   RESULT
   eq status.success?, true
 end

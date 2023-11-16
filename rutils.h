@@ -23,4 +23,4 @@ int create_dir(const char *dir);
 void install_if_new(const char *src, const char *dst);
 void hl_range(const char *s, const char *color, unsigned so, unsigned eo);
 char *format_option(Options *op, const char *option);
-void log_msg(char *template, char *hostname, char *label_name);
+void log_msg(char *template, char *hostname, char *label_name, int exit_code);

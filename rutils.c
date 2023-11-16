@@ -136,10 +136,10 @@ format_option(Options *op, const char *option) {
  */
 
 void
-log_msg(char *template, char *hostname, char *label_name) {
+log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 	char *p;
 	char buf[_POSIX2_LINE_MAX];
-	char tmstr[24];
+	char tmstr[64];
 	int index = 0;
 	time_t tv;
 	struct tm *tm;
@@ -148,10 +148,16 @@ log_msg(char *template, char *hostname, char *label_name) {
 	tv = time(NULL);
 	tm = localtime(&tv);
 
+	if (template == NULL)
+		return;
+
 	while (p[0] != '\0') {
 		if (p[0] == '%') {
 			p++;
 			switch (p[0]) {
+				case 'e':
+					index += snprintf(buf+index, sizeof(buf)-index, "%d", exit_code);
+					break;
 				case 'h':
 					index += strlcpy(buf+index, hostname, sizeof(buf)-index);
 					break;
@@ -159,7 +165,7 @@ log_msg(char *template, char *hostname, char *label_name) {
 					index += strlcpy(buf+index, label_name, sizeof(buf)-index);
 					break;
 				case 'T':
-					strftime(tmstr, sizeof(tmstr), "%F %H:%M:%S", tm);
+					strftime(tmstr, sizeof(tmstr), LOG_TIMESTAMP_FORMAT, tm);
 					index += strlcpy(buf+index, tmstr, sizeof(buf)-index);
 					break;
 				case '%':

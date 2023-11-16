@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	log_msg(argv[1], "localhost", "network");
+	log_msg(argv[1], "localhost", "network", 2);
 
 	return 0;
 }
