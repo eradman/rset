@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 17, 2023
+.Dd November 18, 2023
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -77,6 +77,36 @@ Execute labels matching the specified regex.
 By default only labels beginning with [0-9a-z] are evaluated.
 .El
 .Sh ENVIRONMENT
+Status messages for each stage of execution may be customized by setting
+.Ev RSET_HOST_CONNECT ,
+.Ev RSET_LABEL_EXEC_BEGIN ,
+.Ev RSET_LABEL_EXEC_END ,
+.Ev RSET_LABEL_EXEC_ERROR ,
+and
+.Ev RSET_HOST_DISCONNECT .
+.Pp
+Setting
+.Ev RSET_HOST_CONNECT
+disables the default status messages and is the only required variable.
+These have no effect in conjunction with the
+.Fl n
+flag.
+The following variables are interpolated:
+.Pp
+.Bl -tag -compact -width 4n
+.It \%%e
+exit code
+.It \%%l
+label name
+.It \%%h
+hostname
+.It \%%T
+rfc-3339 timestamp
+.It \%%%
+literal
+.Ql %
+.El
+.Pp
 Execution on the remote host sets the following environment variables:
 .Bl -tag -width "RSET_ENVIRON"
 .It Ev INSTALL_URL
