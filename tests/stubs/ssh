@@ -1,3 +1,18 @@
 #!/bin/sh
 
-echo "ssh" "$@"
+# normalize and repeat stdin
+/usr/bin/awk '{
+	sub(/^# renv/, "renv");
+	sub(/rset_env_[0-9a-zA-Z]{6}/, "rset_env_XXXXXX");
+	print }'
+
+# echo command line, quoting arguments with spaces
+/usr/bin/awk 'BEGIN {
+	printf "ssh"
+	for (i=1; i<ARGC; i++) {
+			if (index(ARGV[i], " "))
+			printf " \047" ARGV[i] "\047"
+		else
+			printf " " ARGV[i]
+	}
+	printf "\n" }' "$@"

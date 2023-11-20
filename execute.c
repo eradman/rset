@@ -296,8 +296,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 
 	array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
 	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
-        "-C " REPLICATED_DIRECTORY " ./ | "
-	   "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
+	    "-C " REPLICATED_DIRECTORY " ./ | "
+	    "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
 	    paths, socket_path, host_name, http_port);
 	if (system(cmd) != 0) {
 		warn("transfer failed for " REPLICATED_DIRECTORY);
@@ -339,7 +339,7 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	close(fd);
 
 	snprintf(cmd, PATH_MAX,
-	    "cat %s %s | renv | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env'",
+	    "renv %s %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env'",
 	    op.environment_file, tmp_src, socket_path, host_name, http_port);
 	if (system(cmd) != 0) {
 		warn("unable to read %s", op.environment_file);

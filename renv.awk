@@ -7,6 +7,11 @@
 # release: ${release}
 
 BEGIN {
+	if (ENVIRON["ECHO_ARGS"]) {
+		printf "# renv"
+		for (i=1; i<ARGC; i++) { printf " " ARGV[i] }
+		printf "\n"
+	}
 	pattern="^[_A-Za-z0-9]+=\".+\"$"
 }
 # elide subshells and escape sequences

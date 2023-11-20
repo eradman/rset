@@ -114,33 +114,34 @@ try 'Start an ssh session' do
   eq status.success?, true
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
-    ssh -S /tmp/test_rset_socket 10.0.0.99 mkdir /tmp/rset_staging_6000
+    ssh -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_staging_6000'
+    tar -cf - -C _rutils ./
     ssh -q -S /tmp/test_rset_socket 10.0.0.99 tar -xf - -C /tmp/rset_staging_6000
   RESULT
 end
 
 try 'Execute commands over ssh using a pipe' do
   cmd = './ssh_command P 10.0.0.98'
-  out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
-  # local stub prints to stderr, remote on stdout
-  eq err.sub(/_[0-9a-zA-Z]{6}/, '_XXXXXX'), "cat /dev/null /tmp/rset_env_XXXXXX\n"
+  out, err, status = Open3.capture3({ 'ECHO_ARGS' => '1', 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
+  eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    ssh -q -S /tmp/test_rset_socket 10.0.0.98 cat > /tmp/rset_staging_6000/final.env
-    ssh -T -S /tmp/test_rset_socket 10.0.0.98  sh -a -c "cd /tmp/rset_staging_6000; . ./final.env; SD='/tmp/rset_staging_6000' INSTALL_URL='http://127.0.0.1:6000'; exec /bin/sh"
+    renv /dev/null /tmp/rset_env_XXXXXX
+    ssh -q -S /tmp/test_rset_socket 10.0.0.98 'cat > /tmp/rset_staging_6000/final.env'
+    ssh -T -S /tmp/test_rset_socket 10.0.0.98 ' sh -a -c "cd /tmp/rset_staging_6000; . ./final.env; SD='/tmp/rset_staging_6000' INSTALL_URL='http://127.0.0.1:6000'; exec /bin/sh"'
   RESULT
 end
 
 try 'Execute commands over ssh using a tty' do
   cmd = './ssh_command T 10.0.0.99'
-  out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
-  # local stub prints to stderr, remote on stdout
-  eq err.sub(/_[0-9a-zA-Z]{6}/, '_XXXXXX'), "cat /dev/null /tmp/rset_env_XXXXXX\n"
+  out, err, status = Open3.capture3({ 'ECHO_ARGS' => '1', 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
+  eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    ssh -q -S /tmp/test_rset_socket 10.0.0.99 cat > /tmp/rset_staging_6000/final.env
-    ssh -T -S /tmp/test_rset_socket 10.0.0.99 cat > /tmp/rset_staging_6000/_script
-    ssh -t -S /tmp/test_rset_socket 10.0.0.99  sh -a -c "cd /tmp/rset_staging_6000; . ./final.env; SD='/tmp/rset_staging_6000' INSTALL_URL='http://127.0.0.1:6000'; exec /bin/sh /tmp/rset_staging_6000/_script"
+    renv /dev/null /tmp/rset_env_XXXXXX
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_staging_6000/final.env'
+    ssh -T -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_staging_6000/_script'
+    ssh -t -S /tmp/test_rset_socket 10.0.0.99 ' sh -a -c "cd /tmp/rset_staging_6000; . ./final.env; SD='/tmp/rset_staging_6000' INSTALL_URL='http://127.0.0.1:6000'; exec /bin/sh /tmp/rset_staging_6000/_script"'
   RESULT
 end
 
@@ -250,8 +251,8 @@ try 'Log start message' do
   cmd = "./log_msg '== Starting on %h at %T =='"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
-  eq out.gsub(/[0-9]/, '0').sub(/[+-][0]{4} /, '+0100 '), <<~RESULT
-  == Starting on localhost at 0000-00-00 00:00:00+0100 ==
+  eq out.gsub(/[0-9]/, '0').sub(/[+-]{1}0{4} /, '+0100 '), <<~RESULT
+    == Starting on localhost at 0000-00-00 00:00:00+0100 ==
   RESULT
   eq status.success?, true
 end
@@ -261,7 +262,7 @@ try 'Log exit code and other characters' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
-  == Running network % (2) ==
+    == Running network % (2) ==
   RESULT
   eq status.success?, true
 end
@@ -273,8 +274,8 @@ try 'Simple hostlist' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
-  (1)
-  web12.dev
+    (1)
+    web12.dev
   RESULT
   eq status.success?, true
 end
@@ -284,11 +285,11 @@ try 'Expand hostlist' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
-  (4)
-  web8.dev
-  web9.dev
-  web10.dev
-  web11.dev
+    (4)
+    web8.dev
+    web9.dev
+    web10.dev
+    web11.dev
   RESULT
   eq status.success?, true
 end
@@ -298,9 +299,9 @@ try 'Expand hostlist of IP addresses' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
-  (2)
-  172.16.1.2
-  172.16.2.2
+    (2)
+    172.16.1.2
+    172.16.2.2
   RESULT
   eq status.success?, true
 end
@@ -326,7 +327,6 @@ try 'Invalid hostlist range' do
   eq out, ''
   eq status.success?, false
 end
-
 
 # Dry Run
 
