@@ -186,7 +186,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 	char *host_connect_msg = HL_HOST "%h" HL_RESET;
 	char *label_exec_begin_msg = HL_LABEL "%l" HL_RESET;
-	char *label_exec_end_msg = HL_LABEL "%l" HL_RESET;
+	char *label_exec_end_msg = 0;
 	char *host_disconnect_msg = 0;
 	char *label_exec_error_msg = HL_ERROR "%l exited with code %e" HL_RESET;
 

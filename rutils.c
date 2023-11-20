@@ -148,7 +148,7 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 	tv = time(NULL);
 	tm = localtime(&tv);
 
-	if (template == NULL)
+	if (!template)
 		return;
 
 	while (p[0] != '\0') {
