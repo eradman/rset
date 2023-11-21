@@ -1,7 +1,4 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
-
-ENV["GEM_HOME"] ||= ".gem"
+ENV['GEM_HOME'] ||= '.gem'
 Gem.paths = ENV
 
 require 'bundler/inline'
@@ -113,7 +110,7 @@ try 'Install a binary file from a remote URL to the staging area' do
 end
 
 is_busybox = ENV['SHELL'] == '/bin/ash'
-try 'Install a file from a remote URL containing special characters', (is_busybox) do
+try 'Install a file from a remote URL containing special characters', is_busybox do
   fn = "test-!@()_+$#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"

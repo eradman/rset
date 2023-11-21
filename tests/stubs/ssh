@@ -10,7 +10,7 @@
 /usr/bin/awk 'BEGIN {
 	printf "ssh"
 	for (i=1; i<ARGC; i++) {
-			if (index(ARGV[i], " "))
+		if (index(ARGV[i], " "))
 			printf " \047" ARGV[i] "\047"
 		else
 			printf " " ARGV[i]

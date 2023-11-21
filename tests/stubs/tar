@@ -1,3 +1,9 @@
 #!/bin/sh
 
-echo "tar" "$@"
+# echo command line, normalize platform-specific arguments
+/usr/bin/awk 'BEGIN {
+	printf "tar"
+	for (i=1; i<ARGC; i++)
+		if (ARGV[i] != "--no-xattrs")
+			printf " " ARGV[i]
+	printf "\n" }' "$@"

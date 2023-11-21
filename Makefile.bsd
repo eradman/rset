@@ -36,12 +36,9 @@ miniquark: ${QUARK_COMPONENTS:=.h} ${QUARK_OBJS}
 	sed -e 's/$${release}/${RELEASE}/' $< > $@
 	@chmod +x $@
 
-labelgrep: labelgrep.awk
-	sed -e 's/$${release}/${RELEASE}/' labelgrep.awk > labelgrep
-	@chmod +x $@
-
-renv: renv.awk
-	sed -e 's/$${release}/${RELEASE}/' renv.awk > renv
+.SUFFIXES: .awk
+.awk:
+	sed -e 's/$${release}/${RELEASE}/' $< > $@
 	@chmod +x $@
 
 install: ${PROGS}
@@ -50,8 +47,8 @@ install: ${PROGS}
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man5
 	install -m 644 labelgrep.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 miniquark.1 ${DESTDIR}${MANPREFIX}/man1
-	install -m 644 renv.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 pln.5 ${DESTDIR}${MANPREFIX}/man5
+	install -m 644 renv.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rinstall.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rset.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 rsub.1 ${DESTDIR}${MANPREFIX}/man1
@@ -64,9 +61,9 @@ install: ${PROGS}
 
 uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man1/labelgrep.1
-	rm ${DESTDIR}${MANPREFIX}/man1/rinstall.1
 	rm ${DESTDIR}${MANPREFIX}/man1/miniquark.1
 	rm ${DESTDIR}${MANPREFIX}/man1/renv.1
+	rm ${DESTDIR}${MANPREFIX}/man1/rinstall.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rset.1
 	rm ${DESTDIR}${MANPREFIX}/man1/rsub.1
 	rm ${DESTDIR}${MANPREFIX}/man5/pln.5

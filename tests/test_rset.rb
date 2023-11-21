@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 require 'open3'
 require 'tempfile'
 require 'socket'
@@ -71,9 +69,9 @@ end
 try 'Capture output of a command' do
   cmd = "./cmd_pipe_stdout head -n1 #{__FILE__}"
   out, err, status = Open3.capture3(cmd)
-  eq err, "output_size: 20\nstrlen: 20\n"
+  eq err, "output_size: 16\nstrlen: 16\n"
   eq status.success?, true
-  eq out, "#!/usr/bin/env ruby\n"
+  eq out, "require 'open3'\n"
 end
 
 try 'Capture multi-line output from a command' do
