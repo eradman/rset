@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 4, 2023
+.Dd November 21, 2023
 .Dt RENV 1
 .Os
 .Sh NAME
@@ -21,16 +21,17 @@
 .Nd normalize environment variables
 .Sh SYNOPSIS
 .Nm renv
+.Ar file ...
 .Sh DESCRIPTION
 Filter environment variables in a format suitable for
 .Xr sh 1 .
 Only lines defining variable names using the characters
 .Bq _a-zA-Z0-9
 with a value in double-quotes are emitted.
-More than one entry may be specified on each line
+More than one entry may be specified on each line, and the value may be empty.
 .Pp
 .Dl A="one"
-.Dl B="two" C="three"
+.Dl B="two" C="three" D=""
 .Sh LITERALS
 Escape sequences starting with
 .Sq \e ,
@@ -41,10 +42,11 @@ are not permitted.
 .Ql \&$$
 expands to a single dollar sign.
 .Sh EXAMPLES
-Print valid environment variables
+Print environment variables in a normalized format
 .Pp
-.Dl $ renv < default.env
+.Dl $ renv final.env
 .Sh SEE ALSO
 .Xr rset 1
 .Sh CAVEATS
 Tabs and multiple spaces are converted to into a single space.
+Consecutive double-quotes are also collapsed.

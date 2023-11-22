@@ -67,12 +67,13 @@ try 'Filter malformed lines' do
   input = <<~'IN'
     SD="$PWD"  
     DS=""
-    X="width" Y=height Z="height"
+    X=""width"" Y=height Z="height"
   IN
   out, err, status = Open3.capture3(cmd, stdin_data: input)
   eq err, ''
   eq out, <<~OUT
     SD="$PWD"
+    DS=""
     X="width"
   OUT
   eq status.success?, true
