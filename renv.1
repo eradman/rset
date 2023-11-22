@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 21, 2023
+.Dd November 22, 2023
 .Dt RENV 1
 .Os
 .Sh NAME
@@ -22,6 +22,8 @@
 .Sh SYNOPSIS
 .Nm renv
 .Ar file ...
+.Nm renv
+.Ar name=value Op file
 .Sh DESCRIPTION
 Filter environment variables in a format suitable for
 .Xr sh 1 .
@@ -32,6 +34,14 @@ More than one entry may be specified on each line, and the value may be empty.
 .Pp
 .Dl A="one"
 .Dl B="two" C="three" D=""
+.Pp
+If the first argument is formatted using
+.Ql name=value
+.Nm
+quote the value and append it to a file.
+If no file is specified,
+.Pa $SD/local.env
+is used.
 .Sh LITERALS
 Escape sequences starting with
 .Sq \e ,
@@ -45,6 +55,10 @@ expands to a single dollar sign.
 Print environment variables in a normalized format
 .Pp
 .Dl $ renv final.env
+.Pp
+Save the status code of the last command
+.Pp
+.Dl $ renv LAST_EXITSTATUS=$? local.env
 .Sh SEE ALSO
 .Xr rset 1
 .Sh CAVEATS

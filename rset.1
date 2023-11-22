@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 18, 2023
+.Dd November 22, 2023
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -112,13 +112,20 @@ Execution on the remote host sets the following environment variables:
 .It Ev INSTALL_URL
 Used by
 .Xr rinstall 1
-for fetching conent from
+for fetching content from
 .Pa _sources .
 .It Ev SD
 Staging directory where
 .Nm
 unpacks utilities and configuration files.
 .El
+.Pp
+Environment state may set for the duration of the ssh session
+using
+.Xr renv 1
+using
+.Ql name="value"
+as the first argument.
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from
 .Pa routes.pln ,
@@ -140,7 +147,7 @@ file:
 .Ss \&environment=
 Space separated list of environment variables.
 Only values matching the pattern
-.Ql key="value"
+.Ql name="value"
 are added to the environment on the remote host.
 .Ss \&environment_file=
 Path to a file which defines environment variables validated by
