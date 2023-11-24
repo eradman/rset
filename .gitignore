@@ -11,6 +11,7 @@ tests/args
 tests/cmd_pipe_stdin
 tests/cmd_pipe_stdout
 tests/copyfile
+tests/format_env
 tests/getsocket
 tests/hostlist
 tests/log_msg

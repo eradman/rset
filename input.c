@@ -311,8 +311,8 @@ read_label(char *line, Label *label) {
  */
 void
 read_option(char *text, Options *op) {
+	char *content;
 	char *k, *v;
-	int fd;
 
 	k = text;
 	strsep(&text, "=");
@@ -323,13 +323,15 @@ read_option(char *text, Options *op) {
 		strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "local_interpreter") == 0)
 		strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
-	else if (strcmp(k, "environment") == 0)
+	else if (strcmp(k, "environment") == 0) {
 		strlcpy(op->environment, v, PLN_OPTION_SIZE);
+		free(env_split_lines(op->environment, op->environment));
+	}
 	else if (strcmp(k, "environment_file") == 0) {
 		if (strlcpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
-			if ((fd = open(op->environment_file, O_RDONLY)) == -1)
-				err(1, "%s: %s", yyfn, op->environment_file);
-			close(fd);
+			content = read_environment_file(op->environment_file);
+			free(env_split_lines(content, op->environment_file));
+			free(content);
 		}
 	}
 	else {
@@ -451,4 +453,62 @@ expand_numeric_range(char **argv, char *input, int max_elements) {
 	}
 	argv[hostcount] = NULL;
 	return hostcount;
+}
+
+/*
+ * env_split_lines - convert space delimited name="value" pairs to lines
+ */
+
+char *
+env_split_lines(const char *s, const char *option_value) {
+	char *new;
+	char *p;
+	int count = 0;
+	size_t len;
+
+	len = strlen(s);
+	new = malloc(len+2);
+	memcpy(new, s, len);
+
+	/* add trailing newline */
+	if (len > 0)
+		new[len++] = '\n';
+	new[len] = '\0';
+
+	p = new;
+	while ((p = strchr(p, '"')) != NULL) {
+		p++;
+		/* expect a pair of delimiters */
+		if ((++count % 2 == 0) && (p[0] == ' '))
+			p[0] = '\n';
+	}
+
+	if (count % 2 == 1)
+		errx(1, "no closing quote: %s", option_value);
+
+	return new;
+}
+
+/*
+ * read_environment_file - basic validation
+ */
+
+char *
+read_environment_file(const char *environment_file) {
+	char *buf;
+	int fd;
+	size_t len;
+
+	buf = malloc(MAX_ENVIRONMENT);
+
+	if ((fd = open(environment_file, O_RDONLY)) == -1)
+		err(1, "%s: %s", yyfn, environment_file);
+
+	len = read(fd, buf, MAX_ENVIRONMENT);
+	if (len == MAX_ENVIRONMENT)
+		errx(1, "environment file %s exceeds %dkB", environment_file, MAX_ENVIRONMENT/1024);
+
+	close(fd);
+	buf[len] = '\0';
+	return buf;
 }

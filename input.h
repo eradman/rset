@@ -26,6 +26,8 @@
 #define PLN_MAX_PATHS 64
 #define PLN_MAX_ALIASES 100
 
+#define MAX_ENVIRONMENT 20 * 1024
+
 typedef struct {
 	char execute_with[PLN_OPTION_SIZE];
 	char interpreter[PLN_OPTION_SIZE];
@@ -64,5 +66,7 @@ char* ltrim(char *s, int c);
 void read_label(char *line, Label *label);
 void read_option(char *text, Options *op);
 int expand_numeric_range(char **argv, char *input, int max_elements);
+char *env_split_lines(const char *s, const char *source);
+char *read_environment_file(const char *environment_file);
 
 #endif /* _RSET_INPUT_H_ */

@@ -4,6 +4,7 @@ OBJS += args
 OBJS += cmd_pipe_stdin
 OBJS += cmd_pipe_stdout
 OBJS += copyfile
+OBJS += format_env
 OBJS += getsocket
 OBJS += hostlist
 OBJS += log_msg

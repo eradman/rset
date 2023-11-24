@@ -34,6 +34,7 @@
 #include "missing/compat.h"
 #include "config.h"
 #include "execute.h"
+#include "input.h"
 
 #define BLOCK_SIZE 512
 
@@ -312,7 +313,7 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	int fd;
 	char cmd[PATH_MAX];
 	char tmp_src[128];
-	size_t len;
+	char *environment_lines;
 	Options op;
 	static char environment_set[PLN_OPTION_SIZE] = "";
 	static char environment_file_set[PLN_OPTION_SIZE] = "";
@@ -328,15 +329,16 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 		return 0;
 
 	strlcpy(host_name_set, host_name, PLN_OPTION_SIZE);
-	len = strlcpy(environment_set, op.environment, PLN_OPTION_SIZE);
+	strlcpy(environment_set, op.environment, PLN_OPTION_SIZE);
 	strlcpy(environment_file_set, op.environment_file, PLN_OPTION_SIZE);
 
 	strlcpy(tmp_src, "/tmp/rset_env_XXXXXX", sizeof tmp_src);
 	if ((fd = mkstemp(tmp_src)) == -1)
 		err(1, "mkstemp");
-	write(fd, environment_set, len);
-	write(fd, "\n", 1);
+	environment_lines = env_split_lines(environment_set, environment_set);
+	write(fd, environment_lines, strlen(environment_lines));
 	close(fd);
+	free(environment_lines);
 
 	snprintf(cmd, PATH_MAX,
 	    "renv %s %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env'",
