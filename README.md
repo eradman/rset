@@ -5,9 +5,9 @@ Remote Staging Execution Tool
 instructions embedded in the [pln(5)] files. Any interpreter capable of running
 scripts read over a pipe may be specified.
 
-The bundled utilities [rinstall(1)] and [rsub(1)] provide an easy means of
-installing and modifying configuration files, and capabilities are added by
-writing utility scripts which are sent along with configuration data.
+The bundled utilities [renv(1)], [rinstall(1)] and [rsub(1)] provide an easy
+means of installing and modifying configuration files, and capabilities are
+added by writing utility scripts which are sent along with configuration data.
 
 Source Installation - BSD, Mac OS, and Linux
 --------------------------------------------
@@ -28,9 +28,11 @@ or to install locally
 Running Tests
 -------------
 
-Ruby 2.4 is required
-
     make test
+
+Alternatively set a specific version of `ruby`
+
+    make test RUBY=/usr/local/bin/ruby32
 
 Examples
 --------
@@ -59,7 +61,8 @@ Notification of new releases are provided by an
 [Atom feed](https://github.com/eradman/rset/releases.atom),
 and release history is covered in the [NEWS](NEWS) file.
 
-[rset(1)]: http://scriptedconfiguration.org/man/rset.1.html
 [pln(5)]: http://scriptedconfiguration.org/man/pln.5.html
+[renv(1)]: http://scriptedconfiguration.org/man/renv.1.html
 [rinstall(1)]: http://scriptedconfiguration.org/man/rinstall.1.html
+[rset(1)]: http://scriptedconfiguration.org/man/rset.1.html
 [rsub(1)]: http://scriptedconfiguration.org/man/rsub.1.html
