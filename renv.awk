@@ -4,9 +4,9 @@
 
 # release: ${release}
 
-function echo(s) {
-	sub(/="$/, "=\"\"", s)
-	print s
+function err(s) {
+	print "renv: " s ": " $0 > "/dev/stderr"
+	exit 1
 }
 
 BEGIN {
@@ -26,36 +26,25 @@ BEGIN {
 		system(sd "/renv <<EOF >> " dst "\n" kv[1] "=\"" kv[2] "\"\nEOF")
 		exit
 	}
-
-	pattern="^[_A-Za-z0-9]+=\""
 }
-# elide subshells and escape sequences
 /\\|\$\(|`/ {
+	err("subshells not permitted")
+}
+# empty line or comment
+/^$|^#/ {
 	next
 }
-$0~pattern {
-	pos=0
+/^[_A-Za-z0-9]+="/ {
+	# erase quotes
+	gsub(/"/, "")
 
 	# collapse extra spaces and expand literals
 	gsub(/[ \t]+/, " ")
 	gsub(/\$\$/, "\\$")
+	sub(/ $/, "")
 
-	# collapse repeating quotes
-	gsub(/""/, "\"")
-
-	# force non-greedy pattern matching
-	len=index($0, "\" ")
-	while (len > 0) {
-		remaining=substr($0, pos)
-		sub(/^ /, "", remaining)
-		len=index(remaining, "\" ")
-		if (len > 0)
-			echo(substr($0, pos+1, len))
-		pos = pos + len + 1
-	}
-
-	# single-line match
-	match(substr($0, pos), pattern)
-	if (RLENGTH > 0)
-		echo(substr($0, pos))
+	len=index($0, "=")
+	print substr($0, 0, len) "\"" substr($0, len+1) "\""
+	next
 }
+{ err("unknown pattern") }

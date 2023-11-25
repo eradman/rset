@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 22, 2023
+.Dd November 25, 2023
 .Dt RENV 1
 .Os
 .Sh NAME
@@ -23,25 +23,25 @@
 .Nm renv
 .Ar file ...
 .Nm renv
-.Ar name=value Op file
+.Ar name="value" Op file
 .Sh DESCRIPTION
 Filter environment variables in a format suitable for
 .Xr sh 1 .
 Only lines defining variable names using the characters
 .Bq _a-zA-Z0-9
 with a value in double-quotes are emitted.
-More than one entry may be specified on each line, and the value may be empty.
+Values may also be empty.
 .Pp
 .Dl A="one"
-.Dl B="two" C="three" D=""
+.Dl B="two"
+.Dl D=""
 .Pp
-If the first argument is formatted using
+If the first argument is in the format
 .Ql name=value
 .Nm
-quote the value and append it to a file.
-If no file is specified,
-.Pa $SD/local.env
-is used.
+will store and environment for reference in subsequent labels.
+By default entries are appended to
+.Pa $SD/local.env .
 .Sh LITERALS
 Escape sequences starting with
 .Sq \e ,
@@ -58,9 +58,13 @@ Print environment variables in a normalized format
 .Pp
 Save the status code of the last command
 .Pp
-.Dl $ renv LAST_EXITSTATUS=$? local.env
+.Dl $ renv LAST_EXITSTATUS="$?"
 .Sh SEE ALSO
 .Xr rset 1
 .Sh CAVEATS
 Tabs and multiple spaces are converted to into a single space.
-Consecutive double-quotes are also collapsed.
+There is no provision for embedding literal double-quotes.
+.Pp
+.Nm
+must be found in the current working directory or in the path defined by
+.Ev SD .
