@@ -341,8 +341,8 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	free(environment_lines);
 
 	snprintf(cmd, PATH_MAX,
-	    "renv %s %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env'",
-	    op.environment_file, tmp_src, socket_path, host_name, http_port);
+	    "renv %s %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env; touch " REMOTE_TMP_PATH "/local.env'",
+	    op.environment_file, tmp_src, socket_path, host_name, http_port, http_port);
 	if (system(cmd) != 0) {
 		warn("unable to read %s", op.environment_file);
 		return -1;
@@ -367,7 +367,8 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./final.env; SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
+	    "cd " REMOTE_TMP_PATH "; . ./final.env; . ./local.env; "
+	    "SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
 	    op.execute_with, http_port, http_port, op.interpreter);
 
 	/* construct ssh command */
@@ -403,7 +404,8 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./final.env; SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s "
+	    "cd " REMOTE_TMP_PATH "; . ./final.env; . ./local.env; "
+	    "SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s "
 	    REMOTE_SCRIPT_PATH "\"",
 	    op.execute_with, http_port, http_port, op.interpreter, http_port);
 

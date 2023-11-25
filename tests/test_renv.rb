@@ -1,4 +1,5 @@
 require 'open3'
+require 'tempfile'
 
 # Test Utilities
 
@@ -6,7 +7,7 @@ require 'open3'
 @test_description = 0
 
 # Setup
-
+@systmp = Dir.mktmpdir
 def try(descr)
   start = Time.now
   @tests += 1
@@ -15,6 +16,9 @@ def try(descr)
   delta = format('%.3f', (Time.now - start))
   delta = "\e[37m#{delta}\e[39m"
   puts "#{delta}: #{descr}"
+end
+at_exit do
+  FileUtils.remove_dir @systmp
 end
 
 def eq(result, expected)
@@ -65,7 +69,7 @@ end
 try 'Filter malformed lines' do
   cmd = '../renv'
   input = <<~'IN'
-    SD="$PWD"  
+    SD=""$PWD""  
     DS=""
     X=""width"" Y=height Z="height"
   IN
@@ -90,4 +94,22 @@ try 'Escape literals' do
     SD="\$PWD"
   OUT
   eq status.success?, true
+end
+
+try 'Save environment variable' do
+  dst = "#{@systmp}/local.env"
+  cmd = "../renv xyz=123 #{dst}"
+  out, err, status = Open3.capture3({ 'SD' => '..' }, cmd)
+  eq err, ''
+  eq out, ''
+  eq status.success?, true
+  cmd = "../renv HTDOCS='/var/www/htdocs' #{dst}"
+  out, err, status = Open3.capture3({ 'SD' => '..' }, cmd)
+  eq err, ''
+  eq out, ''
+  eq status.success?, true
+  eq File.read(dst), <<~LOCALENV
+    xyz="123"
+    HTDOCS="/var/www/htdocs"
+  LOCALENV
 end

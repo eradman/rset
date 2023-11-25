@@ -16,6 +16,17 @@ BEGIN {
 		printf "\n"
 	}
 
+	# save arguments
+	if (ARGV[1] ~ /[_A-Za-z0-9]+=/) {
+		dst = ARGV[2]
+		sd = ENVIRON["SD"]
+		if (!sd) sd = "."
+		if (!dst) dst = sd "/local.env"
+		split(ARGV[1], kv, "=")
+		system(sd "/renv <<EOF >> " dst "\n" kv[1] "=\"" kv[2] "\"\nEOF")
+		exit
+	}
+
 	pattern="^[_A-Za-z0-9]+=\""
 }
 # elide subshells and escape sequences

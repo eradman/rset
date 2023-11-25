@@ -80,7 +80,7 @@ main(int argc, char *argv[])
 	int i;
 	int rv;
 	char *hostnames[ARG_MAX/8];
-	char *rinstall_bin, *rsub_bin;
+	char *renv_bin, *rinstall_bin, *rsub_bin;
 	char routes_realpath[PATH_MAX];
 	regex_t label_reg;
 	struct sigaction act;
@@ -97,7 +97,7 @@ main(int argc, char *argv[])
 
 	set_options(argc, argv, hostnames);
 
-	if (findprog("renv") == 0)
+	if ((renv_bin = findprog("renv")) == 0)
 		not_found("renv");
 	if ((rinstall_bin = findprog("rinstall")) == 0)
 		not_found("rinstall");
@@ -117,6 +117,7 @@ main(int argc, char *argv[])
 
 	if (!dryrun_opt) {
 		/* Auto-upgrade utilities and verify path */
+		install_if_new(renv_bin, REPLICATED_DIRECTORY "/renv");
 		install_if_new(rinstall_bin, REPLICATED_DIRECTORY "/rinstall");
 		install_if_new(rsub_bin, REPLICATED_DIRECTORY "/rsub");
 		create_dir(PUBLIC_DIRECTORY);
