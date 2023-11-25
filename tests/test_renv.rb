@@ -35,9 +35,10 @@ try 'Filter environment variables' do
   cmd = '../renv'
   input = <<~IN
     # default.env
-    set -e
     SD="$PWD"
-    X="width"   Y="height" Z="depth"
+    X="width"
+    Y="height"
+
   IN
   out, err, status = Open3.capture3(cmd, stdin_data: input)
   eq err, ''
@@ -45,9 +46,19 @@ try 'Filter environment variables' do
     SD="$PWD"
     X="width"
     Y="height"
-    Z="depth"
   OUT
   eq status.success?, true
+end
+
+try 'Handle unknown variable name' do
+  cmd = '../renv'
+  input = <<~'IN'
+    ~TMP="/tmp"
+  IN
+  out, err, status = Open3.capture3(cmd, stdin_data: input)
+  eq err, %(renv: unknown pattern: ~TMP="/tmp"\n)
+  eq out, ''
+  eq status.success?, false
 end
 
 try 'Disallow shell subsitution' do
@@ -59,14 +70,12 @@ try 'Disallow shell subsitution' do
     SD4="\$PWD"
   IN
   out, err, status = Open3.capture3(cmd, stdin_data: input)
-  eq err, ''
-  eq out, <<~OUT
-    SD1="$PWD"
-  OUT
-  eq status.success?, true
+  eq err, %(renv: subshells not permitted: SD2="`pwd`"\n)
+  eq out, %(SD1="$PWD"\n)
+  eq status.success?, false
 end
 
-try 'Filter malformed lines' do
+try 'Quote malformed lines' do
   cmd = '../renv'
   input = <<~'IN'
     SD=""$PWD""  
@@ -78,7 +87,7 @@ try 'Filter malformed lines' do
   eq out, <<~OUT
     SD="$PWD"
     DS=""
-    X="width"
+    X="width Y=height Z=height"
   OUT
   eq status.success?, true
 end
