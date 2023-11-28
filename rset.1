@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 22, 2023
+.Dd November 28, 2023
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -22,6 +22,7 @@
 .Sh SYNOPSIS
 .Nm rset
 .Op Fl entv
+.Op Fl E Ar environment
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
 .Op Fl l Ar option_name
@@ -51,6 +52,9 @@ Allow TTY input by copying the content of each label to the remote host instead
 of opening a pipe to the interpreter.
 .It Fl v
 Print the HTTP log messages after each label is executed.
+.It Fl E
+Set one or more environment variables using the format
+.Sq name="value" ... .
 .It Fl F
 Specify a
 .Pa config
@@ -124,7 +128,7 @@ Environment state may set for the duration of the ssh session
 using
 .Xr renv 1
 using
-.Ql name="value"
+.Ql name=value
 as the first argument.
 .Sh FILES
 Available hosts and the pathnames to labeled scripts to run are read from
