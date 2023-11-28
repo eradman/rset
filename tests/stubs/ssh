@@ -2,7 +2,6 @@
 
 # normalize and repeat stdin
 /usr/bin/awk '{
-	sub(/^# renv/, "renv");
 	sub(/rset_env_[0-9a-zA-Z]{6}/, "rset_env_XXXXXX");
 	print }'
 

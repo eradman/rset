@@ -9,7 +9,17 @@ require 'securerandom'
 
 # Setup
 @systmp = Dir.mktmpdir
-at_exit { FileUtils.remove_dir @systmp }
+@renv = "#{Dir.pwd}/stubs/renv"
+File.write @renv, <<~STUB
+  #!/bin/sh
+  echo renv $*
+STUB
+FileUtils.chmod 0o755, @renv
+
+at_exit do
+  FileUtils.remove_dir @systmp
+  File.unlink @renv
+end
 
 ENV['PATH'] = "#{Dir.pwd}/../:#{ENV['PATH']}"
 
@@ -120,7 +130,7 @@ end
 
 try 'Execute commands over ssh using a pipe' do
   cmd = './ssh_command P 10.0.0.98'
-  out, err, status = Open3.capture3({ 'ECHO_ARGS' => '1', 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
+  out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
@@ -132,7 +142,7 @@ end
 
 try 'Execute commands over ssh using a tty' do
   cmd = './ssh_command T 10.0.0.99'
-  out, err, status = Open3.capture3({ 'ECHO_ARGS' => '1', 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
+  out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
@@ -268,7 +278,7 @@ end
 # Environment
 
 try 'Format environment option on separate lines' do
-  cmd = %(./format_env 'first="one" second="two"')
+  cmd = %(./format_env N 'first="one" second="two"')
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -279,11 +289,30 @@ try 'Format environment option on separate lines' do
 end
 
 try 'No closing quote' do
-  cmd = %(./format_env 'first="one" second="two')
+  cmd = %(./format_env N 'first="one" second="two')
   out, err, status = Open3.capture3(cmd)
   eq err, %(format_env: no closing quote: first="one" second="two\n)
   eq out, ''
   eq status.exitstatus, 1
+end
+
+try 'Format environment and verify with renv' do
+  cmd = %(./format_env V 'first="one" second="two"')
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out, <<~RESULT
+    first="one"
+    second="two"
+  RESULT
+  eq status.success?, true
+end
+
+try 'Format environment and fail verifications with renv' do
+  cmd = %(./format_env V 'HOSTNAME=')
+  out, err, status = Open3.capture3(cmd)
+  eq err, "renv: unknown pattern: HOSTNAME=\n"
+  eq out, ''
+  eq status.success?, false
 end
 
 # Hostlists

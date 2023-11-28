@@ -325,12 +325,12 @@ read_option(char *text, Options *op) {
 		strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "environment") == 0) {
 		strlcpy(op->environment, v, PLN_OPTION_SIZE);
-		free(env_split_lines(op->environment, op->environment));
+		free(env_split_lines(op->environment, op->environment, 1));
 	}
 	else if (strcmp(k, "environment_file") == 0) {
 		if (strlcpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
 			content = read_environment_file(op->environment_file);
-			free(env_split_lines(content, op->environment_file));
+			free(env_split_lines(content, op->environment_file, 1));
 			free(content);
 		}
 	}
@@ -456,14 +456,15 @@ expand_numeric_range(char **argv, char *input, int max_elements) {
 }
 
 /*
- * env_split_lines - convert space delimited name="value" pairs to lines
+ * env_split_lines - translate space delimited name="value" to lines
+ *                   optionally pipe to renv(1)
  */
 
 char *
-env_split_lines(const char *s, const char *option_value) {
-	char *new;
-	char *p;
+env_split_lines(const char *s, const char *option_value, int verify) {
 	int count = 0;
+	char *argv[8];
+	char *new, *p;
 	size_t len;
 
 	len = strlen(s);
@@ -485,6 +486,12 @@ env_split_lines(const char *s, const char *option_value) {
 
 	if (count % 2 == 1)
 		errx(1, "no closing quote: %s", option_value);
+
+	if ((len > 0) && verify) {
+		(void) append(argv, 0, "renv", "-", "-q", NULL);
+		if (cmd_pipe_stdin(argv, new, len) != 0)
+			exit(1);
+	}
 
 	return new;
 }

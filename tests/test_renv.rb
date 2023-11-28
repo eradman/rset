@@ -105,6 +105,18 @@ try 'Escape literals' do
   eq status.success?, true
 end
 
+try 'Print only environment errors' do
+  cmd = '../renv - -q'
+  input = <<~'IN'
+    SD="$$PWD"
+    DS=
+  IN
+  out, err, status = Open3.capture3(cmd, stdin_data: input)
+  eq err, "renv: unknown pattern: DS=\n"
+  eq out, ''
+  eq status.exitstatus, 1
+end
+
 try 'Save environment variable' do
   dst = "#{@systmp}/local.env"
   cmd = "../renv xyz=123 #{dst}"

@@ -335,7 +335,7 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	strlcpy(tmp_src, "/tmp/rset_env_XXXXXX", sizeof tmp_src);
 	if ((fd = mkstemp(tmp_src)) == -1)
 		err(1, "mkstemp");
-	environment_lines = env_split_lines(environment_set, environment_set);
+	environment_lines = env_split_lines(environment_set, environment_set, 0);
 	write(fd, environment_lines, strlen(environment_lines));
 	close(fd);
 	free(environment_lines);

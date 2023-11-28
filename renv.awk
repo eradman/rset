@@ -10,10 +10,11 @@ function err(s) {
 }
 
 BEGIN {
-	if (ENVIRON["ECHO_ARGS"]) {
-		printf "# renv"
-		for (i=1; i<ARGC; i++) { printf " " ARGV[i] }
-		printf "\n"
+	for (i=1; i<ARGC; i++) {
+		if (ARGV[i] == "-q") {
+			ARGV[i] = ""
+			quiet=1
+		}
 	}
 
 	# save arguments
@@ -26,6 +27,7 @@ BEGIN {
 		system(sd "/renv <<EOF >> " dst "\n" kv[1] "=\"" kv[2] "\"\nEOF")
 		exit
 	}
+
 }
 /\\|\$\(|`/ {
 	err("subshells not permitted")
@@ -44,7 +46,8 @@ BEGIN {
 	sub(/ $/, "")
 
 	len=index($0, "=")
-	print substr($0, 0, len) "\"" substr($0, len+1) "\""
+	if (!quiet)
+		print substr($0, 0, len) "\"" substr($0, len+1) "\""
 	next
 }
 { err("unknown pattern") }

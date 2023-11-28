@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 25, 2023
+.Dd November 27, 2023
 .Dt RENV 1
 .Os
 .Sh NAME
@@ -22,6 +22,7 @@
 .Sh SYNOPSIS
 .Nm renv
 .Ar file ...
+.Op Fl q
 .Nm renv
 .Ar name="value" Op file
 .Sh DESCRIPTION
@@ -42,6 +43,12 @@ If the first argument is in the format
 will store and environment for reference in subsequent labels.
 By default entries are appended to
 .Pa $SD/local.env .
+.Pp
+Optional arguments are as follows:
+.Bl -tag -width Ds
+.It Fl q
+Validate only, do not print lines.
+.El
 .Sh LITERALS
 Escape sequences starting with
 .Sq \e ,
