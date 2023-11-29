@@ -60,6 +60,7 @@ int verbose_opt;
 int stop_on_err_opt;
 char *list_option_name;
 char *sshconfig_file;
+char *env_override;
 char *label_pattern = DEFAULT_LABEL_PATTERN;
 char *routes_file = ROUTES_FILE;
 
@@ -233,9 +234,9 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					log_msg(label_exec_begin_msg, hostname, host_labels[j]->name, 0);
 
 					if (tty_opt)
-						exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port);
+						exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port, env_override);
 					else
-						exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port);
+						exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port, env_override);
 
 					log_msg(label_exec_end_msg, hostname, host_labels[j]->name, exit_code);
 
@@ -342,8 +343,8 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-entv] [-F sshconfig_file] [-f routes_file] "
-	    "[-l option_name] [-x label_pattern] hostname ...\n");
+	fprintf(stderr, "usage: rset [-entv] [-E environment] [-F sshconfig_file] "
+	    "[-f routes_file] [-l option_name] [-x label_pattern] hostname ...\n");
 	exit(1);
 }
 
@@ -356,7 +357,7 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 
 	bzero(&op, sizeof op);
 
-	while ((ch = getopt(argc, argv, "entvF:f:l:x:")) != -1) {
+	while ((ch = getopt(argc, argv, "entvE:F:f:l:x:")) != -1) {
 		switch (ch) {
 		case 'e':
 			stop_on_err_opt = 1;
@@ -369,6 +370,10 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 			break;
 		case 'v':
 			verbose_opt = 1;
+			break;
+		case 'E':
+			env_override = argv[optind-1];
+			free(env_split_lines(env_override, env_override, 1));
 			break;
 		case 'F':
 			sshconfig_file = argv[optind-1];

@@ -300,6 +300,7 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	    "-C " REPLICATED_DIRECTORY " ./ | "
 	    "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
 	    paths, socket_path, host_name, http_port);
+
 	if (system(cmd) != 0) {
 		warn("transfer failed for " REPLICATED_DIRECTORY);
 		return -1;
@@ -309,7 +310,7 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 }
 
 int
-update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port) {
+update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
 	int fd;
 	char cmd[PATH_MAX];
 	char tmp_src[128];
@@ -335,16 +336,24 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	strlcpy(tmp_src, "/tmp/rset_env_XXXXXX", sizeof tmp_src);
 	if ((fd = mkstemp(tmp_src)) == -1)
 		err(1, "mkstemp");
+
 	environment_lines = env_split_lines(environment_set, environment_set, 0);
 	write(fd, environment_lines, strlen(environment_lines));
-	close(fd);
 	free(environment_lines);
+
+	if (env_override) {
+		environment_lines = env_split_lines(env_override, env_override, 0);
+		write(fd, environment_lines, strlen(environment_lines));
+		free(environment_lines);
+	}
+
+	close(fd);
 
 	snprintf(cmd, PATH_MAX,
 	    "renv %s %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env; touch " REMOTE_TMP_PATH "/local.env'",
 	    op.environment_file, tmp_src, socket_path, host_name, http_port, http_port);
 	if (system(cmd) != 0) {
-		warn("unable to read %s", op.environment_file);
+		warn("transfer failed for " REPLICATED_DIRECTORY);
 		return -1;
 	}
 	unlink(tmp_src);
@@ -353,14 +362,14 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 }
 
 int
-ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port) {
+ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
 	int argc;
 	char cmd[PATH_MAX];
 	char *argv[32];
 	Options op;
 
 	/* setup environment file */
-	update_environment_file(host_name, socket_path, host_label, http_port);
+	update_environment_file(host_name, socket_path, host_label, http_port, env_override);
 
 	/* construct command to execute on remote host  */
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
@@ -380,14 +389,14 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 }
 
 int
-ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port) {
+ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
 	int argc;
 	char cmd[PATH_MAX];
 	char *argv[32];
 	Options op;
 
 	/* setup environment file */
-	update_environment_file(host_name, socket_path, host_label, http_port);
+	update_environment_file(host_name, socket_path, host_label, http_port, env_override);
 
 	/* copy the contents of the script */
 	snprintf(cmd, sizeof(cmd), "cat > " REMOTE_SCRIPT_PATH,
