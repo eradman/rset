@@ -69,8 +69,7 @@ try 'Run rinstall with no arguments' do
   _, err, status = Open3.capture3(cmd)
   eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
      "release: 0.0\n" \
-     "usage: rinstall [-m mode] [-o owner]\n" \
-     "                source target\n"
+     "usage: rinstall [-m mode] [-o owner] source [target]\n"
   eq status.success?, false
 end
 
@@ -82,13 +81,28 @@ try 'Install a file from a remote URL to the staging area' do
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/x/y/#{fn}"
   File.open(src, 'w') { |f| f.write('123') }
-  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 /x/y/#{fn} #{dst}"
+  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 x/y/#{fn} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
   eq err, ''
   eq status.success?, true
   eq '123', File.read(dst)
   eq File.stat(dst).mode.to_s(8), '100644'
+end
+
+try 'Stage the file by fetching over HTTP when no target is defined' do
+  FileUtils.mkdir_p "#{@wwwtmp}/x/y"
+  fn = "test_#{@tests}.txt"
+  dst = "#{@systmp}/x/y/#{fn}"
+  src = "#{@wwwtmp}/x/y/#{fn}"
+  ENV['SD'] = @systmp.to_s
+  File.open(src, 'w') { |f| f.write('123') }
+  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall x/y/#{fn}"
+  out, err, status = Open3.capture3(cmd, chdir: @systmp)
+  eq out, "rinstall: fetched #{dst}\n"
+  eq err, ''
+  eq status.exitstatus, 0
+  eq '123', File.read(dst)
 end
 
 try 'Install a binary file from a remote URL to the staging area' do
@@ -101,8 +115,8 @@ try 'Install a binary file from a remote URL to the staging area' do
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall getsocket_#{@tests} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, ''
-  eq out.sub(/(Binary files|Files) /, '').sub(/_[0-9a-zA-Z]{6} differ/, '_XXXXXX'),
-     "#{@systmp}/copyfile_#{@tests} and getsocket_#{@tests}_XXXXXX\n"
+  eq out.sub(/(Binary files|Files) /, ''),
+     "#{@systmp}/copyfile_#{@tests} and getsocket_#{@tests} differ\n"
   eq status.exitstatus, 0
   # 'copyfile' was replaced with 'getsocket'
   eq Digest::MD5.hexdigest(File.read('getsocket')),
@@ -113,9 +127,9 @@ is_busybox = ENV['SHELL'] == '/bin/ash'
 try 'Install a file from a remote URL containing special characters', is_busybox do
   fn = "test-!@()_+$#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
-  src = "#{@wwwtmp}/#{fn}"
+  src = "#{@wwwtmp}/x/#{fn}"
   File.open(src, 'w') { |f| f.write('123') }
-  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 '#{fn}' '#{dst}'"
+  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 'x/#{fn}' '#{dst}'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
   eq err, ''
@@ -205,6 +219,17 @@ try 'Ensure that a relative target cannot be used' do
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq status.exitstatus, 1
   eq err, "rinstall: #{fn} is not an absolute path\n"
+  eq out, ''
+  eq File.exist?(dst), false
+end
+
+try 'Ensure that in case of fetching, an absolute source cannot be used' do
+  fn = "test_#{@tests}.txt"
+  dst = "#{@systmp}/#{fn}"
+  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall /bogus.txt #{dst}"
+  out, err, status = Open3.capture3(cmd, chdir: @systmp)
+  eq status.exitstatus, 1
+  eq err, "rinstall: absolute path not permitted when fetching over HTTP: /bogus.txt\n"
   eq out, ''
   eq File.exist?(dst), false
 end
