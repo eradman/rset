@@ -95,10 +95,9 @@ try 'Stage the file by fetching over HTTP when no target is defined' do
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/x/y/#{fn}"
   src = "#{@wwwtmp}/x/y/#{fn}"
-  ENV['SD'] = @systmp.to_s
   File.open(src, 'w') { |f| f.write('123') }
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall x/y/#{fn}"
-  out, err, status = Open3.capture3(cmd, chdir: @systmp)
+  out, err, status = Open3.capture3({ 'SD' => @systmp.to_s }, cmd, chdir: @systmp)
   eq out, "rinstall: fetched #{dst}\n"
   eq err, ''
   eq status.exitstatus, 0
