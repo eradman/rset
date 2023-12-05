@@ -1,0 +1,14 @@
+Style/HashSyntax:
+  EnforcedStyle: no_mixed_keys
+
+Metrics/MethodLength:
+  Max: 12
+
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+Layout/SpaceAroundEqualsInParameterDefault:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false

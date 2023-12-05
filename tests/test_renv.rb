@@ -77,11 +77,13 @@ end
 
 try 'Quote malformed lines' do
   cmd = '../renv'
+  # rubocop:disable Layout/TrailingWhitespace
   input = <<~'IN'
     SD=""$PWD""  
     DS=""
     X=""width"" Y=height Z="height"
   IN
+  # rubocop:enable Layout/TrailingWhitespace
   out, err, status = Open3.capture3(cmd, stdin_data: input)
   eq err, ''
   eq out, <<~OUT
