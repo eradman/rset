@@ -10,7 +10,7 @@ unset http_proxy
 
 usage() {
 	>&2 echo "release: ${release}"
-	>&2 echo "usage: rinstall [-m mode] [-o owner] source [target]"
+	>&2 echo "usage: rinstall [-m mode] [-o owner:group] source [target]"
 	exit 1
 }
 

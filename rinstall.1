@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd December 3, 2023
+.Dd December 7, 2023
 .Dt RINSTALL 1
 .Os
 .Sh NAME
@@ -21,68 +21,56 @@
 .Nd fetch and install scripts from local or http source
 .Sh SYNOPSIS
 .Nm rinstall
-.Op Fl o Ar owner:group
 .Op Fl m Ar mode
-.Ar source
-.Ar target
-.Nm rinstall
 .Op Fl o Ar owner:group
-.Op Fl m Ar mode
 .Ar source
-.Ar directory
-.Nm rinstall
-.Op Fl o Ar owner:group
-.Op Fl m Ar mode
-.Ar source
+.Op Ar target
 .Sh DESCRIPTION
 .Nm
 is shipped to remote machines by
 .Xr rset 1
 to provide a standard method of installing files made available over HTTP, or
-from the current working directory if it already exists.
+from the current working directory for files already staged.
 .Pp
 The
 .Ar target
-should be defined by an absolute path.
+must be absolute path, and is created if it does not exist.
 If the
 .Ar target
-does not exist it is created.
-If it exists but is not the same as
-.Ar source
+exists but is not the same as
+.Ar source ,
 then
 .Xr diff 1
-is called to display the difference before the
-.Ar target
-is updated.
+is used to display the difference before it is updated.
+.Pp
 If the
 .Ar target
 is omitted, the
 .Ar source
-is placed in the staging directory, preserving a relative path.
+is placed in the staging directory defined by the
+.Ev SD
+environment variable.
+.Pp
+.Nm
+always checks for a
+local copy of the
+.Ar source
+before attempting to fetch a file from the location defined by the environment
+variable
+.Ev INSTALL_URL .
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
-.It Fl o
-Owner and/or group to set.
-This argument is passed to
-.Xr chown 8 .
 .It Fl m
 Mode to set when a file is updated.
 This argument is passed to
 .Xr chmod 1 .
+.It Fl o
+Owner and/or group to set.
+This argument is passed to
+.Xr chown 8 .
 .El
-.Sh ENVIRONMENT
-The
-.Ar source
-argument is a relative path that is appended to
-the environment variable
-.Ev INSTALL_URL .
-If
-.Ar target
-is not defined, files are stored relative to the staging directory
-defined by the
-.Ev SD
-environment variable.
+.Pp
 .Sh EXIT STATUS
 The
 .Nm
@@ -98,3 +86,12 @@ Unknown Operating System
 .It 3
 Unable to fetch requested file
 .El
+.Sh EXAMPLES
+Install configuration file and set permissions
+.Pp
+.Dl $SD/rinstall -m 644 -o www:www resolv.conf /var/www/etc/
+.Pp
+Fetch latest copy of sources and extract
+.Pp
+.Dl $SD/rinstall wodpress.tar.gz
+.Dl tar -xzf $SD/wordpress.tar.gz -C /var/www
