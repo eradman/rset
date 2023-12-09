@@ -13,12 +13,12 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 28, 2023
+.Dd December 8, 2023
 .Dt RSUB 1
 .Os
 .Sh NAME
 .Nm rsub
-.Nd substitute lines in a file or append if not found
+.Nd substitute lines or block of text
 .Sh SYNOPSIS
 .Nm rsub
 .Op Fl A
@@ -42,7 +42,7 @@ and
 .Fl l ,
 while the content for a text block is provided on STDIN.
 .Pp
-The arguments for line subsitution are as follows:
+The arguments for line substitution are as follows:
 .Bl -tag -width Ds
 .It Fl A
 Append line if the pattern is not found.
@@ -73,6 +73,16 @@ Incorrect parameters
 .It Li 3
 File not found
 .El
+.Sh EXAMPLES
+Ensure a single configuration parameter is set
+.Pp
+.Dl $SD./rsub -r '^AllowTcpForwarding .+' -l 'AllowTcpForwarding yes' /etc/ssh/sshd_config
+.Pp
+Update a managed block of text
+.Pp
+.Dl $SD/rsub /etc/fstab <<-CONF
+.Dl /dev/ada0p1  /vm  ufs  rw  0  0
+.Dl CONF
 .Sh SEE ALSO
 .Xr awk 1 ,
 .Xr rinstall 1
