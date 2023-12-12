@@ -1,8 +1,6 @@
 #!/usr/bin/awk -f
 # A pattern searcher for the pln(5) format used by rset(1)
 # Displays the source file, label name, and contents that match
-#
-# 2019 Eric Radman <ericshane@eradman.com>
 
 function hl_label(s) { return "\033[36m"s"\033[0m" } # cyan
 function hl_ln(s) { return "\033[33m"s"\033[0m" }    # yellow
@@ -12,7 +10,7 @@ BEGIN {
 	pattern=ARGV[1]; ARGV[1]=""
 	if (ARGC < 3) {
 		print "release: ${release}" > "/dev/stderr"
-		print "usage: labelgrep pattern file.pln [...]" > "/dev/stderr"
+		print "usage: labelgrep pattern file [file ...]" > "/dev/stderr"
 		exit 1
 	}
 	prev_label=""
