@@ -62,13 +62,13 @@ try 'Handle input containing special characters' do
   fn = "test ~!@()_+ #{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   File.open(dst, 'w') { |f| f.write("a = 2\nb = 3\n") }
-  cmd = "#{Dir.pwd}/../rsub -r 'a = [0-9]' -l 'a = 5' '#{dst}'"
+  cmd = "#{Dir.pwd}/../rsub -r 'a = [0-9]' -l 'a &= 5' '#{dst}'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, ''
   eq out.gsub(/[-+]{3}(.*)\n/, ''),
      "@@ -1,2 +1,2 @@\n" \
      "-a = 2\n" \
-     "+a = 5\n" \
+     "+a &= 5\n" \
      " b = 3\n"
   eq status.success?, true
 end
