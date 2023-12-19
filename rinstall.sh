@@ -10,16 +10,18 @@ unset http_proxy
 
 usage() {
 	>&2 echo "release: ${release}"
-	>&2 echo "usage: rinstall [-m mode] [-o owner:group] source [target]"
+	>&2 echo "usage: rinstall [-m mode] [-o owner:group] [-x] source [target]"
 	exit 1
 }
 
 trap '' HUP
 
-while getopts m:o: arg; do
+NODIFF=0
+while getopts m:o:x: arg; do
 	case "$arg" in
 		o) OWNER="$OPTARG" ;;
 		m) MODE="$OPTARG" ;;
+		x) NODIFF=1 ;;
 		?) usage ;;
 	esac
 done
@@ -119,7 +121,9 @@ if [ -e "$target" ]; then
 			echo "rinstall: fetched $target"
 		}
 	else
-		diff -U 2 "$target" "$source" && create=0 || create=2
+		if [ ${NODIFF} -eq 0 ]; then
+			diff -U 2 "$target" "$source" && create=0 || create=2
+		fi
 	fi
 else
 	create=1

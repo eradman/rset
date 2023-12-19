@@ -1,5 +1,6 @@
 .\"
 .\" Copyright (c) 2018 Eric Radman <ericshane@eradman.com>
+.\" Copyright (c) 2021 Vasil Sarafov <vasil@sarafov.net>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -18,11 +19,18 @@
 .Os
 .Sh NAME
 .Nm rinstall
-.Nd fetch and install scripts from local or http source
+.Nd fetch and install scripts from local dirs or http sources
 .Sh SYNOPSIS
 .Nm rinstall
-.Op Fl m Ar mode
 .Op Fl o Ar owner:group
+.Op Fl m Ar mode
+.Op Fl x
+.Ar source
+.Ar target
+.Nm rinstall
+.Op Fl o Ar owner:group
+.Op Fl m Ar mode
+.Op Fl x
 .Ar source
 .Op Ar target
 .Sh DESCRIPTION
@@ -38,10 +46,13 @@ must be absolute path, and is created if it does not exist.
 If the
 .Ar target
 exists but is not the same as
-.Ar source ,
-then
+.Ar source , and the
+.Fl x
+flag is not activated,
 .Xr diff 1
-is used to display the difference before it is updated.
+is called to display the difference before the
+.Ar target
+is updated.
 .Pp
 If the
 .Ar target
@@ -59,18 +70,32 @@ before attempting to fetch a file from the location defined by the environment
 variable
 .Ev INSTALL_URL .
 .Pp
+.Nm
+is inspired by
+.Xr install 1
+found on Linux and *BSD systems.
+Under the hood
+.Nm
+calls
+.Xr chmod 1
+and
+.Xr chown 8 .
+.Pp
 The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl m
-Mode to set when a file is updated.
+Mode to set when the file is updated.
 This argument is passed to
 .Xr chmod 1 .
 .It Fl o
 Owner and/or group to set.
 This argument is passed to
 .Xr chown 8 .
+.It Fl x
+Do not call
+.Xr diff 1
+to display the differences.
 .El
-.Pp
 .Sh EXIT STATUS
 The
 .Nm
