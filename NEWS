@@ -1,5 +1,22 @@
 = Release History
 
+== 2.9: December 22, 2023
+
+ - Add flag '-E' for overriding remote environment variables
+ - rset(1)/renv(1) extended to store session-level state using name="value"
+   arguments
+ - renv(1) improved error handling, one variable per line
+ - Immediately raise errors and abort if environment or environment_file options
+   contain syntax errors
+ - rinstall(1) downloads sources to the staging directory without a temporary
+   file to avoid duplication
+ - rinstall(1) prioritize curl with fallback to wget on Linux
+ - rinstall(1) recreates file path when fetching over HTTP
+ - rinstall(1) allows empty files to be installed
+ - Only support '-l' flag with dry-run
+ - New custom log format for each stage of execution defined by environment
+   variables
+
 == 2.8: November 13, 2023
 
  - No longer set ROUTE_LABEL, and LABEL on remote host

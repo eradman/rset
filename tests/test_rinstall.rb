@@ -69,7 +69,7 @@ try 'Run rinstall with no arguments' do
   _, err, status = Open3.capture3(cmd)
   eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
      "release: 0.0\n" \
-     "usage: rinstall [-m mode] [-o owner] source [target]\n"
+     "usage: rinstall [-m mode] [-o owner:group] source [target]\n"
   eq status.success?, false
 end
 
