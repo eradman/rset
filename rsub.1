@@ -75,13 +75,16 @@ File not found
 .El
 .Sh EXAMPLES
 Ensure a single configuration parameter is set
-.Pp
-.Dl $SD./rsub -r '^AllowTcpForwarding .+' -l 'AllowTcpForwarding yes' /etc/ssh/sshd_config
+.Bd -literal -offset indent
+$SD/rsub -r '^AllowTcpForwarding .+' -l 'AllowTcpForwarding yes' \e
+	/etc/ssh/sshd_config
+.Ed
 .Pp
 Update a managed block of text
-.Pp
-.Dl $SD/rsub /etc/fstab <<-CONF
-.Dl /dev/ada0p1  /vm  ufs  rw  0  0
+.Bd -literal -offset indent
+$SD/rsub /etc/fstab <<-CONF
+/dev/ada0p1  /vm  ufs  rw  0  0
+.Ed
 .Dl CONF
 .Sh SEE ALSO
 .Xr awk 1 ,
