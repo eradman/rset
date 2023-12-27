@@ -17,11 +17,6 @@ copy_mk() {
 	echo "+ $cmd"; $cmd
 }
 
-link_deps() {
-	cmd="ln -sf ../missing tests/missing"
-	echo "+ $cmd"; $cmd
-}
-
 while [ $# -gt 0 ]; do
 	case $1 in
 		-h) usage ;;
@@ -33,11 +28,9 @@ done
 case "${TARGET_OS:-`uname`}" in
 	Darwin)
 		copy_mk macos;
-		link_deps
 		;;
 	Linux)
 		copy_mk linux;
-		link_deps
 		;;
 	*)
 		copy_mk bsd
