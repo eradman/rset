@@ -55,9 +55,11 @@ if test -z "$line_regex$line_text"; then
 	    ' "$target" > $source
 	rm ${source}_b
 else
-	awk -v n=$append -v a="$line_regex" -v b="$line_text" \
-	    '{ n+=sub(a, b)}; {print}; END {if (n==0) print b}' \
-	    "$target" > $source
+	awk -v n=$append -v a="$line_regex" -v b="$line_text" '
+	    BEGIN { gsub("&", "\\\\&", b) }
+	    { n+=sub(a, b); print }
+	    END { if (n==0) print b }
+	    ' "$target" > $source
 fi
 
 test -e "$target" && diff -U 2 "$target" $source || {
