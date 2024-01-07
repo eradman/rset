@@ -296,10 +296,10 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		return -1;
 
 	array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
-	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
-	    "-C " REPLICATED_DIRECTORY " ./ | "
-	    "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
-	    paths, socket_path, host_name, http_port);
+	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - " REPLICATED_DIRECTORY " %s "
+	    "| ssh -q -S %s %s 'tar -xf - -C " REMOTE_TMP_PATH "; cd "
+	    REMOTE_TMP_PATH "; find " REPLICATED_DIRECTORY " -type f -exec ln {} . \\;'",
+	    paths, socket_path, host_name, http_port, http_port);
 
 	if (system(cmd) != 0) {
 		warn("transfer failed for " REPLICATED_DIRECTORY);
