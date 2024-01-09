@@ -115,29 +115,33 @@ try 'Locate an executable in the current path' do
   eq out, "/bin/sh\n"
 end
 
-try 'Start an ssh session' do
+try 'Start ssh session' do
   cmd = './ssh_command S 10.0.0.99'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
+    mkdir /tmp/rset_staging_6000
+    cp -r _rutils/* /tmp/rset_staging_6000
+    touch /tmp/rset_staging_6000/local.env
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
-    ssh -S /tmp/test_rset_socket 10.0.0.99 mkdir /tmp/rset_staging_6000
-    tar -cf - -C _rutils ./
-    ssh -q -S /tmp/test_rset_socket 10.0.0.99 tar -xf - -C /tmp/rset_staging_6000
+    tar -cf - -C /tmp rset_staging_6000
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'tar -xf - -C /tmp'
   RESULT
 end
 
-try 'Start an ssh session with exported paths' do
+try 'Start ssh session with exported paths' do
   cmd = './ssh_command S 10.0.0.99 "input expected"'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
+    mkdir /tmp/rset_staging_6000
+    cp -r _rutils/* input expected /tmp/rset_staging_6000
+    touch /tmp/rset_staging_6000/local.env
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
-    ssh -S /tmp/test_rset_socket 10.0.0.99 mkdir /tmp/rset_staging_6000
-    tar -cf - input expected -C _rutils ./
-    ssh -q -S /tmp/test_rset_socket 10.0.0.99 tar -xf - -C /tmp/rset_staging_6000
+    tar -cf - -C /tmp rset_staging_6000
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'tar -xf - -C /tmp'
   RESULT
 end
 
@@ -173,6 +177,7 @@ try 'End an ssh session' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
+    rm -rf /tmp/rset_staging_6000
     ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_staging_6000
     ssh -q -S /tmp/test_rset_socket -O exit 10.0.0.99
   RESULT

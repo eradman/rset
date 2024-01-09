@@ -31,7 +31,7 @@
 #include "rutils.h"
 
 /*
- * Mimic dirname(3) on OpenBSD which does not modify it's input
+ * Mimic dirname(3) except do not modify input
  */
 char *
 xdirname(const char *path) {
@@ -39,6 +39,17 @@ xdirname(const char *path) {
 
 	strlcpy(dname, path, sizeof(dname));
 	return dirname(dname);
+}
+
+/*
+ * Mimic basename(3) except do not modify input
+ */
+char *
+xbasename(const char *path) {
+	static char dname[PATH_MAX];
+
+	strlcpy(dname, path, sizeof(dname));
+	return basename(dname);
 }
 
 /*

@@ -34,6 +34,7 @@
 #include "missing/compat.h"
 #include "config.h"
 #include "execute.h"
+#include "rutils.h"
 #include "input.h"
 
 #define BLOCK_SIZE 512
@@ -272,6 +273,7 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	char port_forwarding[64];
 	char paths[2048];
 	char *argv[32];
+	char *sd[3];
 	char **path;
 	struct stat sb;
 
@@ -281,6 +283,21 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		if (stat(*path, &sb) == -1)
 			err(1, "%s: unable to stat '%s'", route_label->name, *path);
 		path++;
+	}
+
+	/* set up local staging area */
+	sd[0] = stagedir(http_port);
+	sd[1] = xdirname(sd[0]);
+	sd[2] = xbasename(sd[0]);
+
+	array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
+	snprintf(cmd, PATH_MAX,
+	    "mkdir %s; cp -r _rutils/* %s %s; touch %s/local.env;",
+	    sd[0], paths, sd[0], sd[0]);
+
+	if (system(cmd) != 0) {
+		warn("failed to stage files");
+		return -1;
 	}
 
 	/* construct command to execute on remote host  */
@@ -304,15 +321,9 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	if (run(argv) == 255)
 		return -1;
 
-	append(argv, 0, "ssh", "-S", socket_path, host_name, "mkdir", stagedir(http_port), NULL);
-	if (run(argv) != 0)
-		return -1;
-
-	array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
-	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
-	    "-C " REPLICATED_DIRECTORY " ./ | "
-	    "exec ssh -q -S %s %s tar -xf - -C %s",
-	    paths, socket_path, host_name, stagedir(http_port));
+	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - -C %s %s | "
+	    "ssh -q -S %s %s 'tar -xf - -C %s'",
+	    sd[1], sd[2], socket_path, host_name, sd[1]);
 
 	if (system(cmd) != 0) {
 		warn("transfer failed for " REPLICATED_DIRECTORY);
@@ -446,7 +457,11 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 	if(access(socket_path, F_OK) == -1)
 		return;
 
-	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port) , NULL);
+	append(argv, 0, "rm", "-rf", stagedir(http_port) , NULL);
+	if (run(argv) != 0)
+		warn("local tmp dir");
+
+	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port), NULL);
 	if (run(argv) != 0)
 		warn("remote tmp dir");
 
