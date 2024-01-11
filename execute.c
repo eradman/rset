@@ -39,6 +39,21 @@
 #define BLOCK_SIZE 512
 
 /*
+ * stagedir - return string containing temporary path
+ */
+char *
+stagedir(int http_port) {
+	static char path[PATH_MAX];
+	static int port = 0;
+
+	if (http_port != port) {
+		snprintf(path, sizeof path, REMOTE_TMP_PATH, http_port);
+		port = http_port;
+	}
+	return path;
+}
+
+/*
  * append - add a list of arguments to an array
  */
 int
@@ -254,7 +269,6 @@ int
 start_connection(char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config) {
 	int argc;
 	char cmd[PATH_MAX];
-	char tmp_path[64];
 	char port_forwarding[64];
 	char paths[2048];
 	char *argv[32];
@@ -290,16 +304,15 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	if (run(argv) == 255)
 		return -1;
 
-	snprintf(tmp_path, sizeof(tmp_path), "mkdir " REMOTE_TMP_PATH, http_port);
-	append(argv, 0, "ssh", "-S", socket_path, host_name, tmp_path, NULL);
+	append(argv, 0, "ssh", "-S", socket_path, host_name, "mkdir", stagedir(http_port), NULL);
 	if (run(argv) != 0)
 		return -1;
 
 	array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
 	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
 	    "-C " REPLICATED_DIRECTORY " ./ | "
-	    "exec ssh -q -S %s %s tar -xf - -C " REMOTE_TMP_PATH,
-	    paths, socket_path, host_name, http_port);
+	    "exec ssh -q -S %s %s tar -xf - -C %s",
+	    paths, socket_path, host_name, stagedir(http_port));
 
 	if (system(cmd) != 0) {
 		warn("transfer failed for " REPLICATED_DIRECTORY);
@@ -350,8 +363,9 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	close(fd);
 
 	snprintf(cmd, PATH_MAX,
-	    "renv %s %s | ssh -q -S %s %s 'cat > " REMOTE_TMP_PATH "/final.env; touch " REMOTE_TMP_PATH "/local.env'",
-	    op.environment_file, tmp_src, socket_path, host_name, http_port, http_port);
+	    "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
+	    op.environment_file, tmp_src, socket_path, host_name,
+	    stagedir(http_port), stagedir(http_port));
 	if (system(cmd) != 0) {
 		warn("transfer failed for " REPLICATED_DIRECTORY);
 		return -1;
@@ -376,9 +390,9 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./final.env; . ./local.env; "
-	    "SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
-	    op.execute_with, http_port, http_port, op.interpreter);
+	    "cd %s; . ./final.env; . ./local.env; "
+	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
+	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter);
 
 	/* construct ssh command */
 	argc = 0;
@@ -399,8 +413,8 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	update_environment_file(host_name, socket_path, host_label, http_port, env_override);
 
 	/* copy the contents of the script */
-	snprintf(cmd, sizeof(cmd), "cat > " REMOTE_SCRIPT_PATH,
-	    http_port);
+	snprintf(cmd, sizeof(cmd), "cat > %s/_script",
+	    stagedir(http_port));
 	/* construct ssh command */
 	argc = 0;
 	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
@@ -413,10 +427,9 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd " REMOTE_TMP_PATH "; . ./final.env; . ./local.env; "
-	    "SD='" REMOTE_TMP_PATH "' INSTALL_URL='" INSTALL_URL "'; exec %s "
-	    REMOTE_SCRIPT_PATH "\"",
-	    op.execute_with, http_port, http_port, op.interpreter, http_port);
+	    "cd %s; . ./final.env; . ./local.env; "
+	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s %s/_script\"",
+	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter, stagedir(http_port));
 
 	/* construct ssh command */
 	argc = 0;
@@ -428,14 +441,12 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 
 void
 end_connection(char *socket_path, char *host_name, int http_port) {
-	char tmp_path[64];
 	char *argv[32];
 
 	if(access(socket_path, F_OK) == -1)
 		return;
 
-	snprintf(tmp_path, sizeof(tmp_path), REMOTE_TMP_PATH, http_port);
-	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", tmp_path , NULL);
+	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port) , NULL);
 	if (run(argv) != 0)
 		warn("remote tmp dir");
 

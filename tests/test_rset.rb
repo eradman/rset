@@ -122,7 +122,7 @@ try 'Start an ssh session' do
   eq status.success?, true
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
-    ssh -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_staging_6000'
+    ssh -S /tmp/test_rset_socket 10.0.0.99 mkdir /tmp/rset_staging_6000
     tar -cf - -C _rutils ./
     ssh -q -S /tmp/test_rset_socket 10.0.0.99 tar -xf - -C /tmp/rset_staging_6000
   RESULT
@@ -135,7 +135,7 @@ try 'Start an ssh session with exported paths' do
   eq status.success?, true
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
-    ssh -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_staging_6000'
+    ssh -S /tmp/test_rset_socket 10.0.0.99 mkdir /tmp/rset_staging_6000
     tar -cf - input expected -C _rutils ./
     ssh -q -S /tmp/test_rset_socket 10.0.0.99 tar -xf - -C /tmp/rset_staging_6000
   RESULT

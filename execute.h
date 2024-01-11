@@ -20,6 +20,7 @@
 
 /* forwards */
 
+char *stagedir(int http_port);
 int append(char *argv[], int argc, char *arg, ...);
 int run(char *const argv[]);
 char *cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size);

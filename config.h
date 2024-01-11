@@ -4,7 +4,6 @@
 
 /* templates */
 #define REMOTE_TMP_PATH "/tmp/rset_staging_%d"
-#define REMOTE_SCRIPT_PATH "/tmp/rset_staging_%d/_script"
 #define LOCAL_SOCKET_PATH "/tmp/rset_control_%s"
 #define LOG_TIMESTAMP_FORMAT "%F %T%z"
 
