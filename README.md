@@ -2,12 +2,12 @@ Remote Staging Execution Tool
 =============================
 
 [rset(1)] operates by staging files on a remote system, then executing
-instructions embedded in the [pln(5)] files. Any interpreter capable of running
-scripts read over a pipe may be specified.
+instructions embedded in the [pln(5)] files. Configuration may be written in any
+interpreter capable of running input from a pipe.
 
-The bundled utilities [renv(1)], [rinstall(1)] and [rsub(1)] provide an easy
-means of installing and modifying configuration files, and capabilities are
-added by writing utility scripts which are sent along with configuration data.
+The bundled utilities [renv(1)], [rinstall(1)] and [rsub(1)] provide standard
+means of installing and modifying configuration files. Capabilities are added by
+writing utility scripts which are sent along with configuration data.
 
 Source Installation - BSD, Mac OS, and Linux
 --------------------------------------------
@@ -27,6 +27,8 @@ or to install locally
 
 Running Tests
 -------------
+
+The test suite depends on `ruby` and `bundler`.
 
     make test
 
