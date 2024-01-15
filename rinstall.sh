@@ -2,98 +2,171 @@
 # A helper utility for rset(1)
 # Install files from the local staging area or a remote URL
 
-ret=1
-fetched=0
-samedir=0
-: ${INSTALL_URL:=http://localhost:6000}
-unset http_proxy
+set_defaults() {
+	ret=1			# global exit status. See man rinstall(1) for details
+	fetched=0		# it's set to 1 when source was fetched via HTTP
+	samedir=0		# it's set to 1 when target is $SD (Staging Directory)
+	source_local=0	# if source is defined with an absolute path, it's local
+	owner=""
+	mode=""
+	alt_location=""
+	: ${INSTALL_URL:=http://localhost:6000}
+	: ${RINSTALL_DIFF_ARGS:="-U 2"}
+}
+
+main() {
+	set_defaults
+	parse_args "$@"
+	init
+	set_source_target_vars "$arg_src" "$arg_dst"
+
+	# If source doesn't exist then it hasn't been found on a local file system
+	# (with an absolute path) and in the current directory, which in normal
+	# case is $SD
+	if [ ! -f "$source" ]; then
+		if [ $source_local -eq 1 ]; then
+			>&2 echo "rinstall: source has an absolute path and hasn't been found"
+			exit 1
+		fi
+		# If it hasn't been found in $SD specifically, try to download it.
+		# And if the download stage doesn't get the source, the script
+		# will fail in there
+		[ -f "$SD/$source" ] || download_source
+	fi
+
+	# Source file exists at this point.
+	# Check the difference between source and target
+	check_diff_source_target
+
+	# Install a file only if source and target are different
+	install_target
+
+	# Target file exists at this point
+	# Try to change an owner and/or permissions but do not fail
+	set_mode_owner
+
+	exit $ret
+}
 
 usage() {
 	>&2 echo "release: ${release}"
-	>&2 echo "usage: rinstall [-m mode] [-o owner:group] source [target]"
+	>&2 echo -e "usage: rinstall [-a alt_location] [-m mode] [-o owner:group] source [target]"
 	exit 1
 }
 
-trap '' HUP
-
-while getopts m:o: arg; do
-	case "$arg" in
-		o) OWNER="$OPTARG" ;;
-		m) MODE="$OPTARG" ;;
-		?) usage ;;
-	esac
-done
-shift $(($OPTIND - 1))
-[ $# -eq 1 -o $# -eq 2 ] || usage
-
-source="$1"
-spath="$(dirname $source)"
-
-if [ -z "$2" ]; then
-	# ensure the source is a relative path by removing leading slashes
-	srpath="$(echo "$spath" | sed 's|^/*||')"
-
-	[ -n "$SD" ] || {
+init() {
+	if [ -z "$SD" ]; then
 		>&2 echo "rinstall: staging directory \$SD is not defined"
 		exit 1
-	}
-
-	# prepare a relative path for the target
-	[ -d "$SD/$srpath" ] || mkdir -p "$SD/$srpath" || {
-		>&2 echo "rinstall: could not create a relative path: $srpath"
-		exit 1
-	}
-
-	if [ "$srpath" = "." ]; then
-		target="$SD/$(basename "$source")"
-	else
-		target="$SD/$srpath/$(basename "$source")"
 	fi
-	samedir=1
-elif [ -d "$2" ]; then
-	target="$2/$(basename "$source")"
-else
-	target="$2"
-fi
+	if ! check_absolute_path "$SD"; then
+		>&2 echo "rinstall: $SD is not an absolute path"
+		exit 1
+	fi
 
-case $(dirname "$target") in
-	/*) ;;
-	*)
+	unset http_proxy
+	trap '' HUP
+}
+
+parse_args() {
+	while getopts m:o:a: arg; do
+		case "$arg" in
+			o) owner="$OPTARG" ;;
+			m) mode="$OPTARG" ;;
+			a) alt_location="$OPTARG" ;;
+			?) usage ;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	[ $# -eq 1 -o $# -eq 2 ] || usage
+	arg_src="$1"
+	arg_dst="$2"
+}
+
+set_source_target_vars() {
+	# source can reside on a local file system (defined with absolute path) or
+	# remote (defined with a relative path)
+	source="$1"
+	src_path="$(dirname $source)"
+
+	if [ -z "$2" ]; then
+		# target isn't defined, thus source is installed in $SD
+
+		# ensure the source has a relative path by removing leading slashes
+		src_rel_path="$(echo "$src_path" | sed 's|^/*||')"
+
+		# prepare a relative path for the target in $SD
+		[ -d "$SD/$src_rel_path" ] || mkdir -p "$SD/$src_rel_path" || {
+			>&2 echo "rinstall: could not create a relative path: $SD/$src_rel_path"
+			exit 1
+		}
+
+		if [ "$src_rel_path" = "." ]; then
+			target="$SD/$(basename "$source")"
+		else
+			target="$SD/$src_rel_path/$(basename "$source")"
+		fi
+		samedir=1
+	elif [ -d "$2" ]; then
+		target="$2/$(basename "$source")"
+	else
+		target="$2"
+	fi
+
+	if ! check_absolute_path "$target"; then
 		>&2 echo "rinstall: $target is not an absolute path"
 		exit 1
-		;;
-esac
+	fi
 
-# If a source file doesn't exist, try to download it
-if [ ! -f "$source" ]; then
-	# The source file doesn't exist at this point and it shouldn't be
-	# an absolute path in this case
-	case $spath in
-		/*)
-			>&2 echo "rinstall: absolute path not permitted when fetching over HTTP: $source"
-			exit 1
-			;;
-		*)	;;
-	esac
+	if check_absolute_path "$src_path"; then
+		source_local=1
+	fi
+}
+
+download_source() {
+	# The source file doesn't exist on a local file system, thus it's remote
+	# and it shouldn't be defined with an absolute path in this case
+	if check_absolute_path "$src_path"; then
+		>&2 echo "rinstall: absolute path is not allowed for HTTP fetch: $source"
+		exit 1
+	fi
 
 	# reconstruct the source's relative path
-	[ -d "$spath" ] || mkdir -p "$spath" || {
-		>&2 echo "rinstall: could not create a relative path: $spath"
+	[ -d "$SD/$src_path" ] || mkdir -p "$SD/$src_path" || {
+		>&2 echo "rinstall: could not create a relative path: $SD/$src_path"
 		exit 1
 	}
 
+	fetch_file "$INSTALL_URL/$source"
+	if [ $? -ne 0 ]; then
+		if [ -n "$alt_location" ]; then
+			echo "rinstall: using alternate source: $alt_location"
+			fetch_file "$alt_location"
+			[ $? -eq 0 ] || {
+				>&2 echo "rinstall: unable to fetch $alt_location"
+				exit 3
+			}
+		else
+			>&2 echo "rinstall: unable to fetch $INSTALL_URL/$source"
+			exit 3
+		fi
+	fi
+	fetched=1
+}
+
+fetch_file() {
 	case $(uname) in
 		OpenBSD|NetBSD)
-			ftp -o "$source" -n "$INSTALL_URL/$source"
+			ftp -o "$SD/$source" -n "$1"
 			;;
 		FreeBSD|DragonFly)
-			fetch -qo "$source" "$INSTALL_URL/$source"
+			fetch -qo "$SD/$source" "$1"
 			;;
 		Linux|Darwin|SunOS)
 			if command -pv curl > /dev/null; then
-				curl -fsSLo "$source" "$INSTALL_URL/$source"
+				curl -fsLo "$SD/$source" "$1"
 			else
-				wget -qO "$source" "$INSTALL_URL/$source"
+				wget -qO "$SD/$source" "$1"
 			fi
 			;;
 		*)
@@ -101,44 +174,80 @@ if [ ! -f "$source" ]; then
 			exit 2
 			;;
 	esac
+	return $?
+}
 
-	[ $? -eq 0 ] || {
-		>&2 echo "rinstall: unable to fetch $INSTALL_URL/$source"
-		exit 3
-	}
-	fetched=1
-fi
-
-# Source file exists at this point
-# create: 0 - files are the same, 1 - a new file,  2 - files are different
-if [ -e "$target" ]; then
-	if [ $samedir -eq 1 ]; then
-		create=0
-		[ $fetched -eq 0 ] || {
-			ret=0
-			echo "rinstall: fetched $target"
-		}
+check_diff_source_target() {
+	# Set the 'create' flag:
+	#    0 - files are the same
+	#    1 - a new file
+	#    2 - files are different
+	
+	# if source was fetched, then it's located in $SD,
+	# otherwise it's on a local file system
+	if [ $fetched -eq 1 -o $source_local -eq 0 ]; then
+		src_file="$SD/$source"
 	else
-		diff -U 2 "$target" "$source" && create=0 || create=2
+		src_file="$source"
 	fi
-else
-	create=1
-fi
+	
+	if [ -e "$target" ]; then
+		if [ $samedir -eq 1 ]; then
+			create=0
+			[ $fetched -eq 0 ] || {
+				ret=0
+				echo "rinstall: fetched $target"
+			}
+		else
+			if output="$(diff $RINSTALL_DIFF_ARGS "$target" "$src_file" 2>&1)"
+			then
+				create=0
+			else
+				case $? in
+					1)  create=2
+						[ -z "$output" ] || echo "$output"
+						;;
+					*)  >&2 echo "rinstall: $output"
+						exit 1
+						;;
+				esac
+			fi
+		fi
+	else
+		create=1
+	fi
+}
 
-# Copy file only if source and target are different
-if [ $create -ne 0 ]; then
-	cp "$source" "$target" && ret=0 || {
-		>&2 echo "rinstall: could not copy $source into $target"
-		exit 1
-	}
-	[ $create -eq 1 ] && echo "rinstall: created $target" || :
-fi
+install_target() {
+	if [ $create -ne 0 ]; then
+		cp "$src_file" "$target" && ret=0 || {
+			>&2 echo "rinstall: could not copy $src_file into $target"
+			exit 1
+		}
+		if [ $create -eq 1 ]; then
+			echo "rinstall: created $target"
+		fi
+	fi
+}
 
-# Target file exists at this point
-# Try to change an owner and/or permissions but do not fail
-[ -z "$OWNER" ] || chown $OWNER "$target" || :
-[ -z "$MODE" ] || chmod $MODE "$target" || :
+set_mode_owner() {
+	if [ -n "$owner" ]; then
+		chown $owner "$target"
+	fi
+	if [ -n "$mode" ]; then
+		chmod $mode "$target"
+	fi
+}
 
-exit $ret
+check_absolute_path() {
+	case $(dirname "$1") in
+		/*) return 0
+			;;
+		*)  return 1
+			;;
+	esac
+}
+
+main "$@"
 
 # vim:noexpandtab:syntax=sh:ts=4

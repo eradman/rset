@@ -21,6 +21,7 @@
 .Nd fetch and install scripts from local or http source
 .Sh SYNOPSIS
 .Nm rinstall
+.Op Fl a Ar URL
 .Op Fl m Ar mode
 .Op Fl o Ar owner:group
 .Ar source
@@ -34,7 +35,7 @@ from the current working directory for files already staged.
 .Pp
 The
 .Ar target
-must be absolute path, and is created if it does not exist.
+must be an absolute path, and is created if it does not exist.
 If the
 .Ar target
 exists but is not the same as
@@ -50,10 +51,20 @@ is omitted, the
 is placed in the staging directory defined by the
 .Ev SD
 environment variable.
+The source may be defined with either an absolute or relative path.
+An absolute path points to a file on a local file system on the remote side.
+Although, if the source is defined with a relative path, then
+.Nm
+first checks if the source already exists in the
+.Ev SD
+and then tries to fetch it from the HTTP resource defined by
+.Ev INSTALL_URL
+or the
+.Fl a
+option.
 .Pp
 .Nm
-always checks for a
-local copy of the
+always checks for a local copy of the
 .Ar source
 before attempting to fetch a file from the location defined by the environment
 variable
@@ -61,6 +72,8 @@ variable
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.It Fl a
+URL to an alternative file location.
 .It Fl m
 Mode to set when a file is updated.
 This argument is passed to
@@ -68,9 +81,16 @@ This argument is passed to
 .It Fl o
 Owner and/or group to set.
 This argument is passed to
-.Xr chown 8 .
+.Xr chown 1 .
 .El
-.Pp
+.Sh ENVIRONMENT
+.Bl -tag -width Ds
+.It Ev RINSTALL_DIFF_ARGS
+Arguments for
+.Xr diff 1
+tool.
+Default is "-U 2"
+.El
 .Sh EXIT STATUS
 The
 .Nm
@@ -95,3 +115,9 @@ Fetch latest copy of sources and extract
 .Pp
 .Dl $SD/rinstall wodpress.tar.gz
 .Dl tar -xzf $SD/wordpress.tar.gz -C /var/www
+.Pp
+Fetch a file from an alternative location and store it in the Staging Directory
+under tools/sys/ if it's not already there and it's not available at
+$INSTALL_URL/tools/sys/sometool.tgz
+.Pp
+.Dl $SD/rinstall -a https://example.org/files/tool.tar.gz tools/sys/sometool.tgz

@@ -19,6 +19,7 @@ require 'digest/md5'
 
 # Setup
 @systmp = Dir.mktmpdir
+ENV['SD'] ||= @systmp.to_s
 @wwwtmp = Dir.mktmpdir
 http_port = `./getsocket`.chomp
 @install_url = "http://127.0.0.1:#{http_port}"
@@ -69,7 +70,7 @@ try 'Run rinstall with no arguments' do
   _, err, status = Open3.capture3(cmd)
   eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
      "release: 0.0\n" \
-     "usage: rinstall [-m mode] [-o owner:group] source [target]\n"
+     "usage: rinstall [-a alt_location] [-m mode] [-o owner:group] source [target]\n"
   eq status.success?, false
 end
 
@@ -115,7 +116,7 @@ try 'Install a binary file from a remote URL to the staging area' do
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, ''
   eq out.sub(/(Binary files|Files) /, ''),
-     "#{@systmp}/copyfile_#{@tests} and getsocket_#{@tests} differ\n"
+     "#{@systmp}/copyfile_#{@tests} and #{@systmp}/getsocket_#{@tests} differ\n"
   eq status.exitstatus, 0
   # 'copyfile' was replaced with 'getsocket'
   eq Digest::MD5.hexdigest(File.read('getsocket')),
@@ -228,7 +229,7 @@ try 'Ensure that in case of fetching, an absolute source cannot be used' do
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall /bogus.txt #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq status.exitstatus, 1
-  eq err, "rinstall: absolute path not permitted when fetching over HTTP: /bogus.txt\n"
+  eq err, "rinstall: source has an absolute path and hasn't been found\n"
   eq out, ''
   eq File.exist?(dst), false
 end
