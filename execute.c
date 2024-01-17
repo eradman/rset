@@ -304,21 +304,27 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	if (run(argv) == 255)
 		return -1;
 
-	append(argv, 0, "ssh", "-S", socket_path, host_name, "mkdir", stagedir(http_port), NULL);
-	if (run(argv) != 0)
-		return -1;
-
-	array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
-	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
-	    "-C " REPLICATED_DIRECTORY " ./ | "
-	    "exec ssh -q -S %s %s tar -xf - -C %s",
-	    paths, socket_path, host_name, stagedir(http_port));
+	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
+	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
+	    socket_path, host_name, stagedir(http_port), stagedir(http_port));
 
 	if (system(cmd) != 0) {
 		warn("transfer failed for " REPLICATED_DIRECTORY);
 		return -1;
 	}
 
+	if (*route_label->export_paths) {
+		array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
+
+		snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
+		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
+		    paths, socket_path, host_name, stagedir(http_port));
+
+		if (system(cmd) != 0) {
+			warn("transfer failed for %s", paths);
+			return -1;
+		}
+	}
 	return 0;
 }
 
