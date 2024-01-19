@@ -11,10 +11,7 @@ case `uname` in
 	FreeBSD|DragonFly)
 		fetch -q -o $dst $src_url
 		;;
-	Linux)
-		wget -q -O $dst $src_url
-		;;
-	Darwin|SunOS|*)
+	*)
 		curl -f -s -o $dst $src_url
 		;;
 esac

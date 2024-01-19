@@ -50,7 +50,7 @@ main() {
 
 usage() {
 	>&2 echo "release: ${release}"
-	>&2 echo -e "usage: rinstall [-a alt_location] [-m mode] [-o owner:group] source [target]"
+	>&2 echo "usage: rinstall [-a alt_location] [-m mode] [-o owner:group] source [target]"
 	exit 1
 }
 
