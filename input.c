@@ -289,17 +289,22 @@ ltrim(char *s, int c) {
  */
 void
 read_label(char *line, Label *label) {
+	int len;
+
 	line[strlen(line)-1] = '\0';
 	strlcpy(label->name, strsep(&line, ":"), PLN_LABEL_SIZE);
 
 	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES, ",");
 	if (label->n_aliases == PLN_MAX_ALIASES)
-		errx(1, "a maximum %d aliases may be specified for label '%s'", PLN_MAX_ALIASES-2, label->name);
+		errx(1, "> %d aliases specified for label '%s'", PLN_MAX_ALIASES-2, label->name);
 
 	if (label->n_aliases == 1)
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
-	str_to_array(label->export_paths, strdup(ltrim(line, ' ')), PLN_MAX_PATHS, " ");
+	len = str_to_array(label->export_paths, strdup(ltrim(line, ' ')), PLN_MAX_PATHS, " ");
+	if (len == PLN_MAX_PATHS)
+		errx(1, "> %d export paths specified for label '%s'", PLN_MAX_PATHS-1, label->name);
+
 	memcpy(&label->options, &current_options, sizeof(current_options));
 
 	label->content_size = 0;

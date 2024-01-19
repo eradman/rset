@@ -16,10 +16,10 @@ RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o
 all: rset.o test
 
 rset.o: ${RSET_LIBS}
-	${LD} -r ${RSET_LIBS} -o $@
+	${LD} -r ${RSET_LIBS} -o $@ ${LDFLAGS}
 
 .c: rset.o ${RSET_LIBS}
-	${CC} ${CFLAGS} $< rset.o ${LDFLAGS} -o $@
+	${CC} ${CFLAGS} $< rset.o -o $@ ${LDFLAGS}
 
 test: ${OBJS}
 	@${RUBY} test_renv.rb

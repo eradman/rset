@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 {
 	int i, j, l;
 	char *mode;
-	char paths[1024];
+	char path_repr[PLN_LABEL_SIZE];
 	Options *options;
 
 	if (argc != 3) usage();
@@ -59,12 +59,12 @@ int main(int argc, char *argv[])
 
 		route_labels = host_labels;
 		for (i=0; route_labels[i]; i++) {
-			array_to_str(route_labels[i]->export_paths, paths, sizeof(paths), " ");
+			array_to_str(route_labels[i]->export_paths, path_repr, sizeof(path_repr), " ");
 			read_host_labels(route_labels[i]);
 			printf("%s, content_size: %d\n",
 			    route_labels[i]->name, route_labels[i]->content_size);
 			printf("%s, option: %s\n",
-			    route_labels[i]->name, paths);
+			    route_labels[i]->name, path_repr);
 		}
 		for (j=0; host_labels[j]; j++) {
 			printf("%s, content_size: %d\n", host_labels[j]->name, host_labels[j]->content_size);

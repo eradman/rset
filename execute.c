@@ -270,7 +270,7 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	int argc;
 	char cmd[PATH_MAX];
 	char port_forwarding[64];
-	char paths[2048];
+	char path_repr[PLN_LABEL_SIZE];
 	char *argv[32];
 	char **path;
 	struct stat sb;
@@ -313,15 +313,16 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		return -1;
 	}
 
-	if (*route_label->export_paths) {
-		array_to_str(route_label->export_paths, paths, sizeof(paths), " ");
+	path = route_label->export_paths;
+	if (path && *path) {
+		array_to_str(route_label->export_paths, path_repr, sizeof(path_repr), " ");
 
 		snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
 		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
-		    paths, socket_path, host_name, stagedir(http_port));
+		    path_repr, socket_path, host_name, stagedir(http_port));
 
 		if (system(cmd) != 0) {
-			warn("transfer failed for %s", paths);
+			warn("transfer failed for %s", path_repr);
 			return -1;
 		}
 	}

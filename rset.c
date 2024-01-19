@@ -280,7 +280,7 @@ static int
 dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	int i, j, k, l;
 	char buf[_POSIX2_LINE_MAX];
-	char paths[PLN_LABEL_SIZE];
+	char path_repr[PLN_LABEL_SIZE];
 	regmatch_t regmatch;
 
 	for (i=0; route_labels[i]; i++) {
@@ -296,8 +296,8 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				if (list_option_name) {
 						snprintf(buf, sizeof(buf), "%-20s", hostname);
 						hl_range(buf, HL_HOST, 0, strlen(hostname));
-						array_to_str(route_labels[i]->export_paths, paths, sizeof(paths), " ");
-						printf("  %s\n", paths);
+						array_to_str(route_labels[i]->export_paths, path_repr, sizeof(path_repr), " ");
+						printf("  %s\n", path_repr);
 				}
 				else {
 					hl_range(hostname, HL_HOST, 0, strlen(hostname));
