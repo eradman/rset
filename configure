@@ -1,5 +1,18 @@
 #!/bin/sh
 
+test_libc_features() {
+	CFLAGS="-D_GNU_SOURCE"
+	: ${CC:=cc}
+	2>/dev/null $CC -xc $CFLAGS - <<-EOF
+	#include <string.h>
+	int main(void) {
+		char dst[4];
+		strlcpy(dst, "1234", sizeof dst);
+		return 0;
+	}
+	EOF
+}
+
 usage() {
 	cat <<-HELP
 	Usage: configure [-h]
@@ -30,7 +43,7 @@ case "${TARGET_OS:-`uname`}" in
 		copy_mk macos;
 		;;
 	Linux)
-		copy_mk linux;
+		test_libc_features && copy_mk linux || copy_mk linux-compat
 		;;
 	*)
 		copy_mk bsd

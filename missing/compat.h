@@ -1,6 +1,6 @@
 /* compat.h */
 
-#if defined(_LINUX_PORT) && defined(__GLIBC__)
+#if defined(_LINUX_PORT)
 size_t strlcpy(char *dst, const char *src, size_t dsize);
 size_t strlcat(char *dst, const char *src, size_t dsize);
 #endif
