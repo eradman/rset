@@ -20,9 +20,9 @@ void usage() {
 
 int main(int argc, char *argv[])
 {
-	int verify;
 	char *env;
 	char *mode;
+	int verify = 0;
 
 	if (argc != 3)
 		usage();

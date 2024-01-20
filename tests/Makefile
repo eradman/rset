@@ -1,5 +1,4 @@
 RUBY = ruby
-CFLAGS = -I..
 OBJS += args
 OBJS += cmd_pipe_stdin
 OBJS += cmd_pipe_stdout
@@ -19,7 +18,7 @@ rset.o: ${RSET_LIBS}
 	${LD} -r ${RSET_LIBS} -o $@ ${LDFLAGS}
 
 .c: rset.o ${RSET_LIBS}
-	${CC} ${CFLAGS} $< rset.o -o $@ ${LDFLAGS}
+	${CC} -I.. ${CFLAGS} $< rset.o -o $@ ${LDFLAGS}
 
 test: ${OBJS}
 	@${RUBY} test_renv.rb

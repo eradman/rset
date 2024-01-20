@@ -17,7 +17,6 @@ Options current_options;
 int main(int argc, char *argv[])
 {
 	int error_code;
-	int fd;
 	int output_size;
 	char *output;
 

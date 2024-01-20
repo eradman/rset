@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 {
 	int fd;
 	size_t len;
-	char *command, *buf;
+	char *buf;
 	char *cmd_argv[16];
 
 	if (argc != 2) {
