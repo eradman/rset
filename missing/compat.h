@@ -3,6 +3,7 @@
 #if defined(_LINUX_PORT)
 size_t strlcpy(char *dst, const char *src, size_t dsize);
 size_t strlcat(char *dst, const char *src, size_t dsize);
+unsigned int arc4random(void);
 #endif
 
 #if defined(_MACOS_PORT) || defined(_LINUX_PORT)

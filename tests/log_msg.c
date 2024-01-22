@@ -13,10 +13,13 @@ Options current_options;
 
 int main(int argc, char **argv)
 {
-	if (argc != 2) {
-		fprintf(stderr, "usage: ./log template\n");
+	if (argc < 2) {
+		fprintf(stderr, "usage: ./log template [S]\n");
 		return 1;
 	}
+
+	if ((argc == 3) && (argv[2][0] == 'S'))
+		generate_session_id();
 
 	log_msg(argv[1], "localhost", "network", 2);
 

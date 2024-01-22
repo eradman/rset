@@ -45,8 +45,7 @@ static void compare_argv_routes(char *hostnames[], Label **route_labels);
 static int execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg);
 static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 
-/* globals used by input.h */
-
+/* globals from input.h */
 FILE* yyin;
 char* yyfn;
 int n_labels;
@@ -54,6 +53,7 @@ Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
 Options current_options;
 
+/* globals */
 int dryrun_opt;
 int tty_opt;
 int verbose_opt;
@@ -214,6 +214,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				else
 					continue;
 
+				generate_session_id();
 				log_msg(host_connect_msg, hostname, "", 0);
 
 				len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
