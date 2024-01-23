@@ -270,22 +270,34 @@ end
 # Custom Logging
 
 try 'Log start message' do
-  cmd = "./log_msg '== Starting on %h at %T =='"
+  cmd = "./log_msg '%s == Starting on %h at %T =='"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out.gsub(/[0-9]/, '0').sub(/[+-]{1}0{4} /, '+0100 '), <<~RESULT
-    == Starting on localhost at 0000-00-00 00:00:00+0100 ==
+    00000000 == Starting on localhost at 0000-00-00 00:00:00+0100 ==
   RESULT
   eq status.success?, true
 end
 
 try 'Log exit code and other characters' do
-  cmd = "./log_msg '== Running %l %% (%e) =='"
+  cmd = "./log_msg '%s == Running %l %% (%e) =='"
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
-    == Running network % (2) ==
+    00000000 == Running network % (2) ==
   RESULT
+  eq status.success?, true
+end
+
+try 'Ensure session IDs are unique' do
+  cmd = ""
+  6.times { cmd += "./log_msg '%s' S;" }
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out.split.uniq.length, 6
+  out.each_line do |line|
+    eq line.sub(/[0-9a-f]{8}/, 'ffffffff'), "ffffffff\n"
+  end
   eq status.success?, true
 end
 

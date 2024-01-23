@@ -14,10 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <inttypes.h>
+
 #include "input.h"
 
 /* forwards */
 
+unsigned generate_session_id();
 char *xdirname(const char *path);
 int create_dir(const char *dir);
 void install_if_new(const char *src, const char *dst);

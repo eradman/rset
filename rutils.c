@@ -30,6 +30,17 @@
 #include "config.h"
 #include "rutils.h"
 
+unsigned session_id;
+
+/*
+ * Update global session ID before starting a new SSH session
+ */
+unsigned
+generate_session_id() {
+	while ((session_id = arc4random()) == 0);
+	return session_id;
+}
+
 /*
  * Mimic dirname(3) on OpenBSD which does not modify it's input
  */
@@ -163,6 +174,9 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 					break;
 				case 'l':
 					index += strlcpy(buf+index, label_name, sizeof(buf)-index);
+					break;
+				case 's':
+					index += snprintf(buf+index, sizeof(buf)-index, "%08"PRIx32, session_id);
 					break;
 				case 'T':
 					strftime(tmstr, sizeof(tmstr), LOG_TIMESTAMP_FORMAT, tm);

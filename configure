@@ -5,9 +5,12 @@ test_libc_features() {
 	: ${CC:=cc}
 	2>/dev/null $CC -xc $CFLAGS - <<-EOF
 	#include <string.h>
+	#include <stdlib.h>
 	int main(void) {
 		char dst[4];
+		unsigned rnd;
 		strlcpy(dst, "1234", sizeof dst);
+		rnd = arc4random();
 		return 0;
 	}
 	EOF
