@@ -186,7 +186,7 @@ try 'Run rset with no arguments' do
   _, err, status = Open3.capture3(cmd)
   eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'), <<~USAGE
     release: 0.0
-    usage: rset [-entv] [-E environment] [-F sshconfig_file] [-f routes_file] [-l option_name] [-x label_pattern] hostname ...
+    usage: rset [-entv] [-E environment] [-F sshconfig_file] [-f routes_file] [-x label_pattern] hostname ...
   USAGE
   eq status.success?, false
 end
@@ -231,7 +231,7 @@ try 'Report an unknown syntax' do
   fn = "#{@systmp}/routes.pln"
   FileUtils.mkdir_p("#{@systmp}/_sources")
   File.open(fn, 'w') { |f| f.write("php\n") }
-  cmd = "#{Dir.pwd}/../rset -l interpreter -n localhost"
+  cmd = "#{Dir.pwd}/../rset -n localhost"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown symbol at line 1: 'php'\n"
   eq status.success?, false
@@ -260,7 +260,7 @@ end
 try 'Report an unknown option' do
   fn = "#{@systmp}/routes.pln"
   File.open(fn, 'w') { |f| f.write("username=radman\n") }
-  cmd = "#{Dir.pwd}/../rset -n -l interpreter 't[42'"
+  cmd = "#{Dir.pwd}/../rset -n 't[42'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown option 'username=radman'\n"
   eq status.success?, false
@@ -406,7 +406,7 @@ end
 
 try 'Show matching routes and hosts' do
   out, err, status = nil
-  cmd = "#{Dir.pwd}/../rset -l interpreter -n t460s"
+  cmd = "#{Dir.pwd}/../rset -n t460s"
   Dir.chdir('input') do
     FileUtils.mkdir_p('_sources')
     out, err, status = Open3.capture3(cmd)

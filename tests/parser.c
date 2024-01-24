@@ -28,7 +28,6 @@ int main(int argc, char *argv[])
 	int i, j, l;
 	char *mode;
 	char path_repr[PLN_LABEL_SIZE];
-	Options *options;
 
 	if (argc != 3) usage();
 	mode = argv[1];
@@ -68,12 +67,6 @@ int main(int argc, char *argv[])
 		}
 		for (j=0; host_labels[j]; j++) {
 			printf("%s, content_size: %d\n", host_labels[j]->name, host_labels[j]->content_size);
-			options = &host_labels[j]->options;
-			printf("%s, %s\n", host_labels[j]->name, format_option(options, "environment"));
-			printf("%s, %s\n", host_labels[j]->name, format_option(options, "environment_file"));
-			printf("%s, %s\n", host_labels[j]->name, format_option(options, "interpreter"));
-			printf("%s, %s\n", host_labels[j]->name, format_option(options, "local_interpreter"));
-			printf("%s, %s\n", host_labels[j]->name, format_option(options, "execute_with"));
 		}
 		break;
 	default:
