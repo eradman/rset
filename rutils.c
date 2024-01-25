@@ -116,33 +116,6 @@ hl_range(const char *s, const char *color, unsigned so, unsigned eo) {
 }
 
 /*
- * format_option - return the value of an option
- */
-
-char *
-format_option(Options *op, const char *option) {
-	static char buf[PLN_LABEL_SIZE];
-
-	strlcpy(buf, option, sizeof buf);
-	strlcat(buf, "=", sizeof buf);
-
-	if (strcmp(option, "environment") == 0)
-		strlcat(buf, op->environment, sizeof buf);
-	else if (strcmp(option, "environment_file") == 0)
-		strlcat(buf, op->environment_file, sizeof buf);
-	else if (strcmp(option, "interpreter") == 0)
-		strlcat(buf, op->interpreter, sizeof buf);
-	else if (strcmp(option, "local_interpreter") == 0)
-		strlcat(buf, op->local_interpreter, sizeof buf);
-	else if (strcmp(option, "execute_with") == 0)
-		strlcat(buf, op->execute_with, sizeof buf);
-	else
-		buf[0] = '\0';
-
-	return buf;
-}
-
-/*
  * log_msg - write log message and interpolate variables
  */
 
