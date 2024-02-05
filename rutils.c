@@ -41,6 +41,11 @@ generate_session_id() {
 	return session_id;
 }
 
+unsigned
+current_session_id() {
+	return session_id;
+}
+
 /*
  * Mimic dirname(3) on OpenBSD which does not modify it's input
  */

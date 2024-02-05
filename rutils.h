@@ -21,6 +21,7 @@
 /* forwards */
 
 unsigned generate_session_id();
+unsigned current_session_id();
 char *xdirname(const char *path);
 int create_dir(const char *dir);
 void install_if_new(const char *src, const char *dst);
