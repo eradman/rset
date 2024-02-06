@@ -47,16 +47,14 @@ typedef struct Label {
 	struct Label **labels;
 } Label;
 
-extern FILE* yyin;
-extern char* yyfn;
-extern int n_labels;
 extern Label **route_labels;    /* parent */
 extern Label **host_labels;     /* child */
 extern Options current_options;
 
 /* forwards */
 
-void yylex();
+void read_pln(const char *fn);
+void parse_pln();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
 int array_to_str(char *argv[], char *output, int max_length, const char *delim);

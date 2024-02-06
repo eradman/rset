@@ -7,9 +7,6 @@
 #include "rutils.h"
 
 /* globals */
-FILE* yyin;
-char* yyfn;
-int n_labels;
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
 Options current_options;
@@ -28,17 +25,15 @@ int main(int argc, char *argv[])
 	int i, j, l;
 	char *mode;
 	char path_repr[PLN_LABEL_SIZE];
+	FILE* yyin;
+	char* yyfn;
 
 	if (argc != 3) usage();
 	mode = argv[1];
 	yyfn = argv[2];
 
-	n_labels = 0;
 	host_labels = alloc_labels();
-	yyin = fopen(yyfn, "r");
-	if (!yyin)
-		perror(yyfn);
-	yylex();
+	read_pln(yyfn);
 
 	switch (mode[0]) {
 	case 'H':

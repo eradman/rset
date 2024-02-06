@@ -32,17 +32,27 @@
 
 /* globals */
 
-extern FILE* yyin;
-extern char* yyfn;
-extern int n_labels;
 extern Label **route_labels;    /* parent */
 extern Label **host_labels;     /* child */
 extern Options current_options;
 
+int n_labels;
+FILE* yyin;
+const char* yyfn;
 Label *lp;
 
 void
-yylex() {
+read_pln(const char *fn) {
+	yyfn = fn;
+	yyin = fopen(fn, "r");
+	if (!yyin)
+		err(1, "%s", fn);
+	parse_pln();
+	fclose(yyin);
+}
+
+void
+parse_pln() {
 	int content_allocation = 0;
 	int error_code;
 	int j;
@@ -217,7 +227,7 @@ read_host_labels(Label *route_label) {
 		yyin = fopen(line, "r");
 		if (!yyin)
 			err(1, "%s", line);
-		yylex();
+		parse_pln();
 		fclose(yyin);
 		line = next_line+1;
 

@@ -46,9 +46,6 @@ static int execute_remote(char *hostnames[], Label **route_labels, regex_t *labe
 static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 
 /* globals from input.h */
-FILE* yyin;
-char* yyfn;
-int n_labels;
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
 Options current_options;
@@ -130,15 +127,9 @@ main(int argc, char *argv[])
 		err(1, "pledge");
 
 	/* parse route labels */
-	n_labels = 0;
 	route_labels = alloc_labels();
 	host_labels = route_labels;
-	yyfn = routes_file;
-	yyin = fopen(routes_file, "r");
-	if (!yyin)
-		err(1, "%s", routes_file);
-	yylex();
-	fclose(yyin);
+	read_pln(routes_file);
 
 	if ((rv = regcomp(&label_reg, label_pattern, REG_EXTENDED)) != 0) {
 		regerror(rv, &label_reg, buf, sizeof(buf));
