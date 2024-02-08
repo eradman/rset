@@ -1,6 +1,7 @@
+require 'json'
 require 'open3'
-require 'tempfile'
 require 'socket'
+require 'tempfile'
 require 'securerandom'
 
 # Test Utilities
@@ -79,9 +80,9 @@ end
 try 'Capture output of a command' do
   cmd = "./cmd_pipe_stdout head -n1 #{__FILE__}"
   out, err, status = Open3.capture3(cmd)
-  eq err, "output_size: 16\nstrlen: 16\n"
+  eq err, "output_size: 15\nstrlen: 15\n"
   eq status.success?, true
-  eq out, "require 'open3'\n"
+  eq out, "require 'json'\n"
 end
 
 try 'Capture multi-line output from a command' do
@@ -193,28 +194,13 @@ end
 
 # Parse Progressive Label Notation (pass)
 
-try 'Parse a label file' do
-  cmd = './parser H input/t460s.pln'
-  out, err, status = Open3.capture3(cmd)
-  eq err, ''
-  eq out, File.read('expected/t460s.out')
-  eq status.success?, true
-end
-
-try 'Parse a routes file' do
-  cmd = './parser H input/routes.pln'
-  out, err, status = Open3.capture3(cmd)
-  eq out, File.read('expected/routes.out')
-  eq err, ''
-  eq status.success?, true
-end
-
 try 'Recursively parse routes and hosts' do
-  cmd = './parser R input/routes.pln'
+  cmd = './parser input/routes.pln'
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq status.success?, true
   eq out, File.read('expected/recursive.out')
+  JSON.load(out)
 end
 
 try 'Format and run a command line' do
@@ -240,7 +226,7 @@ end
 
 try 'Detect local execution that does not emit a newline' do
   pln = 'input/local_exec_out_01.pln'
-  cmd = "./parser H #{pln}"
+  cmd = "./parser #{pln}"
   out, err, status = Open3.capture3(cmd)
   eq err, "#{pln}: output of local execution for the label 'two' must end with a newline\n"
   eq out, ''

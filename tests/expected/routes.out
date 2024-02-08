@@ -1,7 +1,0 @@
-[0] t460s -> t460s localhost
-common/openbsd.pln
-t460s.pln
-.
-[1] relay{1..3}.local -> relay1.local relay2.local relay3.local
-common/openbsd.pln
-.
