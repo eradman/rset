@@ -49,7 +49,6 @@ typedef struct Label {
 
 extern Label **route_labels;    /* parent */
 extern Label **host_labels;     /* child */
-extern Options current_options;
 
 /* forwards */
 

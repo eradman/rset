@@ -34,7 +34,6 @@
 #include "input.h"
 
 /* forwards */
-
 static void handle_exit(int sig);
 static void usage();
 static void set_options(int argc, char *argv[], char *hostnames[]);
@@ -48,7 +47,6 @@ static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 /* globals from input.h */
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
-Options current_options;
 
 /* globals */
 int dryrun_opt;
@@ -81,7 +79,6 @@ main(int argc, char *argv[])
 	char routes_realpath[PATH_MAX];
 	regex_t label_reg;
 	struct sigaction act;
-	Options toplevel_options;
 
 	/* terminate SSH connection if a signal is caught */
 	act.sa_flags = 0;
@@ -137,11 +134,8 @@ main(int argc, char *argv[])
 	}
 
 	/* parse pln files for each host */
-	for (i=0; route_labels[i]; i++) {
-		memcpy(&toplevel_options, &current_options, sizeof(toplevel_options));
+	for (i=0; route_labels[i]; i++)
 		read_host_labels(route_labels[i]);
-		memcpy(&current_options, &toplevel_options, sizeof(current_options));
-	}
 
 	/* ensure hostnames are valid */
 	compare_argv_routes(hostnames, route_labels);

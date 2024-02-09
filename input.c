@@ -30,16 +30,16 @@
 #define LABELS_MAX 100
 #define BUFSIZE 4096
 
-/* globals */
-
+/* globals from input.h */
 extern Label **route_labels;    /* parent */
 extern Label **host_labels;     /* child */
-extern Options current_options;
 
-int n_labels;
+/* globals */
 FILE* yyin;
-const char* yyfn;
 Label *lp;
+Options current_options;
+const char* yyfn;
+int n_labels;
 
 void
 read_pln(const char *fn) {
@@ -221,8 +221,7 @@ read_host_labels(Label *route_label) {
 		*next_line = '\0';
 
 		/* inherit option state from the routes file */
-		memcpy(&current_options, &route_label->options,
-		    sizeof(current_options));
+		memcpy(&current_options, &route_label->options, sizeof(current_options));
 		yyfn = line; /* for error message */
 		yyin = fopen(line, "r");
 		if (!yyin)

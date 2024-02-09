@@ -14,7 +14,6 @@ char * array_to_json(char *argv[]);
 /* globals */
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
-Options current_options;
 
 int main(int argc, char *argv[]) {
 	int i, j;

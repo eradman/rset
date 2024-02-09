@@ -6,7 +6,6 @@
 /* globals */
 Label **route_labels;    /* parent */
 Label **host_labels;     /* child */
-Options current_options;
 
 void usage();
 
