@@ -1,14 +1,13 @@
 # a comment
 
-interpreter=/bin/ksh -x
 local_interpreter=/bin/sh -e
-environment=WORKDIR="$PWD" http_proxy="http://192.168.2.6:3128"
+environment=WORKDIR="$PWD" http_proxy="http://192.168.3.2:3128"
 
 common packages:
 {
 	echo "MIRROR=http://cdn.openbsd.org/pub/OpenBSD"
 }
-	pkg_add rsync-- ruby%2.6
+	pkg_add rsync-- ruby%3.2
 	echo "inet 172.16.0.1/16" > /etc/hostname.vether0
 	echo "add vether0" > /etc/hostname.bridge0
 	
@@ -16,6 +15,8 @@ common packages:
 	fake label:
 	# comment
 	EOF
+
+interpreter=/bin/ksh -x
 
 desktop:
 	pkg_add hermit-font vim--gtk2

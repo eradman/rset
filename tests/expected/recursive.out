@@ -17,9 +17,9 @@
       {"common packages": {
         "content_size": 210,
         "options": {
-          "environment": "WORKDIR=\"$PWD\" http_proxy=\"http://192.168.2.6:3128\"",
+          "environment": "WORKDIR=\"$PWD\" http_proxy=\"http://192.168.3.2:3128\"",
           "environment_file": "",
-          "interpreter": "/bin/ksh -x",
+          "interpreter": "",
           "local_interpreter": "/bin/sh -e",
           "execute_with": "doas"
         }}
@@ -27,7 +27,7 @@
       {"desktop": {
         "content_size": 30,
         "options": {
-          "environment": "WORKDIR=\"$PWD\" http_proxy=\"http://192.168.2.6:3128\"",
+          "environment": "WORKDIR=\"$PWD\" http_proxy=\"http://192.168.3.2:3128\"",
           "environment_file": "",
           "interpreter": "/bin/ksh -x",
           "local_interpreter": "/bin/sh -e",

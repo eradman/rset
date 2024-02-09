@@ -208,7 +208,18 @@ try 'Format and run a command line' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq status.success?, true
-  eq out, File.read('expected/args.out')
+  eq out, <<~RESULT
+  ssh -fnNT -R 6000:localhost:65321 -S /tmp/rset_control_172.16.0.5 -M 172.16.0.5
+  0: echo
+  1: ssh
+  2: -fnNT
+  3: -R
+  4: 6000:localhost:65321
+  5: -S
+  6: /tmp/rset_control_172.16.0.5
+  7: -M
+  8: 172.16.0.5
+  RESULT
 end
 
 # Parse Progressive Label Notation (fail)
@@ -225,7 +236,7 @@ try 'Report an unknown syntax' do
 end
 
 try 'Detect local execution that does not emit a newline' do
-  pln = 'input/local_exec_out_01.pln'
+  pln = 'input/local_exec.pln'
   cmd = "./parser #{pln}"
   out, err, status = Open3.capture3(cmd)
   eq err, "#{pln}: output of local execution for the label 'two' must end with a newline\n"

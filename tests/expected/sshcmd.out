@@ -1,2 +1,0 @@
-exec ssh -S /tmp/my_socket  -T eradman.com  'sh -c "cd /tmp/rset_staging_3330; LABEL=/etc/resolv.conf INSTALL_URL=http://localhost:6000 exec /bin/sh"'
-exec ssh -S /tmp/my_socket -v -T -l eradman eradman.com doas 'sh -c "cd /tmp/rset_staging_3331; LABEL=/etc/resolv.conf INSTALL_URL=http://localhost:6000 exec /bin/ksh -x"'
