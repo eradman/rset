@@ -199,7 +199,7 @@ try 'Recursively parse routes and hosts' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq status.success?, true
-  eq out, File.read('expected/recursive.out')
+  eq out, File.read('expected/recursive.json')
   JSON.load(out)
 end
 

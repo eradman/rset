@@ -1,10 +1,10 @@
 [
-  {"t460s": {
+  {
     "aliases": ["t460s", "localhost"],
     "export_paths": ["t460s/", "common/"],
-    "content_size": 29,
     "labels": [
-      {"chroot": {
+      {
+        "name": "chroot",
         "content_size": 146,
         "options": {
           "environment": "",
@@ -12,9 +12,10 @@
           "interpreter": "",
           "local_interpreter": "",
           "execute_with": "doas"
-        }}
+        }
       },
-      {"common packages": {
+      {
+        "name": "common packages",
         "content_size": 210,
         "options": {
           "environment": "WORKDIR=\"$PWD\" http_proxy=\"http://192.168.3.2:3128\"",
@@ -22,9 +23,10 @@
           "interpreter": "",
           "local_interpreter": "/bin/sh -e",
           "execute_with": "doas"
-        }}
+        }
       },
-      {"desktop": {
+      {
+        "name": "desktop",
         "content_size": 30,
         "options": {
           "environment": "WORKDIR=\"$PWD\" http_proxy=\"http://192.168.3.2:3128\"",
@@ -32,16 +34,16 @@
           "interpreter": "/bin/ksh -x",
           "local_interpreter": "/bin/sh -e",
           "execute_with": "doas"
-        }}
+        }
       }
     ]
-  }},
-  {"relay{1..3}.local": {
+  },
+  {
     "aliases": ["relay1.local", "relay2.local", "relay3.local"],
     "export_paths": ["common/"],
-    "content_size": 19,
     "labels": [
-      {"chroot": {
+      {
+        "name": "chroot",
         "content_size": 146,
         "options": {
           "environment": "",
@@ -49,8 +51,8 @@
           "interpreter": "",
           "local_interpreter": "",
           "execute_with": "doas"
-        }}
+        }
       }
     ]
-  }}
+  }
 ]

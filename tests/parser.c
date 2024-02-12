@@ -35,15 +35,15 @@ int main(int argc, char *argv[]) {
 		read_host_labels(route_labels[i]);
 
 		if (i > 0) printf(",\n");
-		indent(1); printf("{\"%s\": {\n", route_labels[i]->name);
+		indent(1); printf("{\n");
 		indent(2); printf("\"aliases\": %s,\n", array_to_json(route_labels[i]->aliases));
 		indent(2); printf("\"export_paths\": %s,\n", array_to_json(route_labels[i]->export_paths));
-		indent(2); printf("\"content_size\": %d,\n", route_labels[i]->content_size);
 
 		indent(2); printf("\"labels\": [\n");
 		for (j=0; host_labels[j]; j++) {
 			if (j > 0) printf(",\n");
-			indent(3); printf("{\"%s\": {\n",  host_labels[j]->name);
+			indent(3); printf("{\n");
+			indent(4); printf("\"name\": \"%s\",\n",  host_labels[j]->name);
 			indent(4); printf("\"content_size\": %d,\n", host_labels[j]->content_size);
 			indent(4); printf("\"options\": {\n");
 			indent(5); printf("\"environment\": \"%s\",\n", quote(host_labels[j]->options.environment));
@@ -51,12 +51,12 @@ int main(int argc, char *argv[]) {
 			indent(5); printf("\"interpreter\": \"%s\",\n", host_labels[j]->options.interpreter);
 			indent(5); printf("\"local_interpreter\": \"%s\",\n", host_labels[j]->options.local_interpreter);
 			indent(5); printf("\"execute_with\": \"%s\"\n", host_labels[j]->options.execute_with);
-			indent(4); printf("}}\n");
+			indent(4); printf("}\n");
 			indent(3); printf("}");
 		}
 		printf("\n");
 		indent(2); printf("]\n");
-		indent(1); printf("}}");
+		indent(1); printf("}");
 	}
 	printf("\n]\n");
 
