@@ -171,6 +171,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	Options op;
 
 	char *host_connect_msg = HL_HOST "%h" HL_RESET;
+	char *host_connect_fail = HL_ERROR "%h initialization failed" HL_RESET;
 	char *label_exec_begin_msg = HL_LABEL "%l" HL_RESET;
 	char *label_exec_end_msg = 0;
 	char *host_disconnect_msg = 0;
@@ -182,6 +183,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	/* custom log format */
 	if (getenv("RSET_HOST_CONNECT")) {
 		host_connect_msg = getenv("RSET_HOST_CONNECT");
+		host_connect_fail = getenv("RSET_HOST_CONNECT_FAIL");
 		label_exec_begin_msg = getenv("RSET_LABEL_EXEC_BEGIN");
 		label_exec_end_msg = getenv("RSET_LABEL_EXEC_END");
 		label_exec_error_msg = getenv("RSET_LABEL_EXEC_ERROR");
@@ -206,7 +208,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
 				if (start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file) == -1) {
-					log_msg(host_disconnect_msg, hostname, "", 0);
+					log_msg(host_connect_fail, hostname, "", 0);
 					end_connection(socket_path, hostname, http_port);
 					free(socket_path);
 					socket_path = NULL;

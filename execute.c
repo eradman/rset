@@ -308,11 +308,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
 	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
 	    socket_path, host_name, stagedir(http_port), stagedir(http_port));
-
-	if (system(cmd) != 0) {
-		warn("transfer failed for " REPLICATED_DIRECTORY);
+	if (system(cmd) != 0)
 		return -1;
-	}
 
 	path = route_label->export_paths;
 	if (path && *path) {
@@ -322,10 +319,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
 		    path_repr, socket_path, host_name, stagedir(http_port));
 
-		if (system(cmd) != 0) {
-			warn("transfer failed for %s", path_repr);
+		if (system(cmd) != 0)
 			return -1;
-		}
 	}
 	return 0;
 }
@@ -375,10 +370,8 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	    "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
 	    op.environment_file, tmp_src, socket_path, host_name,
 	    stagedir(http_port), stagedir(http_port));
-	if (system(cmd) != 0) {
-		warn("transfer failed for " REPLICATED_DIRECTORY);
+	if (system(cmd) != 0)
 		return -1;
-	}
 	unlink(tmp_src);
 
 	return 0;
