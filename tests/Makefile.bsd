@@ -18,7 +18,7 @@ rset.o: ${RSET_LIBS}
 	${LD} -r ${RSET_LIBS} -o $@ ${LDFLAGS}
 
 .c: rset.o ${RSET_LIBS}
-	${CC} -I.. ${CFLAGS} $< rset.o -o $@ ${LDFLAGS}
+	${CC} -I.. ${CFLAGS} ${CPPFLAGS} $< rset.o -o $@ ${LDFLAGS}
 
 test: ${OBJS}
 	@${RUBY} test_renv.rb

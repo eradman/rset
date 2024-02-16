@@ -82,6 +82,7 @@ clean:
 	make -C tests clean
 
 distclean:
+	rm -f tests/Makefile
 	rm -f Makefile
 
 .PHONY: all clean distclean install test uninstall

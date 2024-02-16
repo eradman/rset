@@ -33,6 +33,11 @@ copy_mk() {
 	echo "+ $cmd"; $cmd
 }
 
+copy_tests_mk() {
+	cmd="cp tests/Makefile.$1 tests/Makefile"
+	echo "+ $cmd"; $cmd
+}
+
 while [ $# -gt 0 ]; do
 	case $1 in
 		-h) usage ;;
@@ -43,12 +48,17 @@ done
 
 case "${TARGET_OS:-`uname`}" in
 	Darwin)
-		copy_mk macos;
+		copy_mk macos
+		copy_tests_mk bsd
 		;;
 	Linux)
 		test_libc_features && copy_mk linux || copy_mk linux-compat
+		copy_tests_mk linux
 		;;
 	*)
 		copy_mk bsd
+		copy_tests_mk bsd
 		;;
 esac
+
+# vim:noexpandtab:syntax=sh:ts=4

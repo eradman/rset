@@ -1,0 +1,3 @@
+CPPFLAGS += -D_GNU_SOURCE -D_LINUX_PORT
+
+include Makefile.bsd
