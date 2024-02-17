@@ -200,7 +200,7 @@ try 'Recursively parse routes and hosts' do
   eq err, ''
   eq status.success?, true
   eq out, File.read('expected/recursive.json')
-  JSON.load(out)
+  JSON.parse(out)
 end
 
 try 'Format and run a command line' do
@@ -209,16 +209,16 @@ try 'Format and run a command line' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-  ssh -fnNT -R 6000:localhost:65321 -S /tmp/rset_control_172.16.0.5 -M 172.16.0.5
-  0: echo
-  1: ssh
-  2: -fnNT
-  3: -R
-  4: 6000:localhost:65321
-  5: -S
-  6: /tmp/rset_control_172.16.0.5
-  7: -M
-  8: 172.16.0.5
+    ssh -fnNT -R 6000:localhost:65321 -S /tmp/rset_control_172.16.0.5 -M 172.16.0.5
+    0: echo
+    1: ssh
+    2: -fnNT
+    3: -R
+    4: 6000:localhost:65321
+    5: -S
+    6: /tmp/rset_control_172.16.0.5
+    7: -M
+    8: 172.16.0.5
   RESULT
 end
 
@@ -287,7 +287,7 @@ try 'Log exit code and other characters' do
 end
 
 try 'Ensure session IDs are unique' do
-  cmd = ""
+  cmd = ''
   6.times { cmd += "./log_msg '%s' S;" }
   out, err, status = Open3.capture3(cmd)
   eq err, ''

@@ -73,9 +73,10 @@ main(int argc, char *argv[])
 	char buf[_POSIX2_LINE_MAX];
 	int fd;
 	int i;
+	int ret;
 	int rv;
-	char *hostnames[ARG_MAX/8];
 	char *renv_bin, *rinstall_bin, *rsub_bin;
+	char **hostnames;
 	char routes_realpath[PATH_MAX];
 	regex_t label_reg;
 	struct sigaction act;
@@ -89,6 +90,7 @@ main(int argc, char *argv[])
 	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
 		err(1, "Failed to set SIGTERM handler");
 
+	hostnames = calloc(sizeof(char*), argc);
 	set_options(argc, argv, hostnames);
 
 	if ((renv_bin = findprog("renv")) == 0)
@@ -141,8 +143,11 @@ main(int argc, char *argv[])
 	compare_argv_routes(hostnames, route_labels);
 
 	/* main loop */
-	if (dryrun_opt)
-		return dry_run(hostnames, route_labels, &label_reg);
+	if (dryrun_opt) {
+		ret = dry_run(hostnames, route_labels, &label_reg);
+		free(hostnames);
+		return ret;
+	}
 
 	if (verify_ssh_agent() != 0) {
 		printf("Try running:\n");
@@ -151,7 +156,9 @@ main(int argc, char *argv[])
 			printf("  ssh-add\n");
 		exit(1);
 	}
-	return execute_remote(hostnames, route_labels, &label_reg);
+	ret = execute_remote(hostnames, route_labels, &label_reg);
+	free(hostnames);
+	return ret;
 }
 
 /*
