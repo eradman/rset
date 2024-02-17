@@ -93,13 +93,13 @@ main(int argc, char *argv[])
 	while ((ch = getopt(argc, argv, "p:h:d:")) != -1) {
 		switch (ch) {
 		case 'd':
-			servedir = argv[optind-1];
+			servedir = optarg;
 			break;
 		case 'h':
-			s.host = argv[optind-1];
+			s.host = optarg;
 			break;
 		case 'p':
-			s.port = argv[optind-1];
+			s.port = optarg;
 			break;
 		default:
 			usage();

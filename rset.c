@@ -344,17 +344,17 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 			verbose_opt = 1;
 			break;
 		case 'E':
-			env_override = argv[optind-1];
+			env_override = optarg;
 			free(env_split_lines(env_override, env_override, 1));
 			break;
 		case 'F':
-			sshconfig_file = argv[optind-1];
+			sshconfig_file = optarg;
 			break;
 		case 'f':
-			routes_file = argv[optind-1];
+			routes_file = optarg;
 			break;
 		case 'x':
-			label_pattern = argv[optind-1];
+			label_pattern = optarg;
 			break;
 
 		default:
