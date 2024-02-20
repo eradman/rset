@@ -218,7 +218,8 @@ findprog(char *prog)
 	char *p, *pathcpy;
 	struct stat sbuf;
 
-	path = getenv("PATH");
+	if ((path = getenv("PATH")) == NULL)
+		errx(1, "PATH is not set");
 	if ((path = strdup(path)) == NULL)
 		err(1, "strdup");
 	pathcpy = path;
