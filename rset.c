@@ -112,6 +112,15 @@ main(int argc, char *argv[])
 	(void) close(fd);
 
 	if (!dryrun_opt) {
+		/* require ssh-agent */
+		if (verify_ssh_agent() != 0) {
+			printf("Try running:\n");
+				if (!getenv("SSH_AUTH_SOCK"))
+					printf("  eval `ssh-agent`\n");
+				printf("  ssh-add\n");
+			exit(1);
+		}
+
 		/* Auto-upgrade utilities and verify path */
 		install_if_new(renv_bin, REPLICATED_DIRECTORY "/renv");
 		install_if_new(rinstall_bin, REPLICATED_DIRECTORY "/rinstall");
@@ -149,13 +158,6 @@ main(int argc, char *argv[])
 		return ret;
 	}
 
-	if (verify_ssh_agent() != 0) {
-		printf("Try running:\n");
-			if (!getenv("SSH_AUTH_SOCK"))
-				printf("  eval `ssh-agent`\n");
-			printf("  ssh-add\n");
-		exit(1);
-	}
 	ret = execute_remote(hostnames, route_labels, &label_reg);
 	free(hostnames);
 	return ret;

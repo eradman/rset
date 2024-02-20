@@ -23,6 +23,7 @@ at_exit do
 end
 
 ENV['PATH'] = "#{Dir.pwd}/../:#{ENV['PATH']}"
+ENV.delete('SSH_AUTH_SOCK')
 
 def try(descr)
   start = Time.now
@@ -189,6 +190,20 @@ try 'Run rset with no arguments' do
     release: 0.0
     usage: rset [-entv] [-E environment] [-F sshconfig_file] [-f routes_file] [-x label_pattern] hostname ...
   USAGE
+  eq status.success?, false
+end
+
+# Preflight checks
+
+try 'Require ssh-agent' do
+  cmd = "#{Dir.pwd}/../rset localhost"
+  out, err, status = Open3.capture3(cmd, chdir: 'input')
+  eq out, <<~HELP
+    Try running:
+      eval `ssh-agent`
+      ssh-add
+  HELP
+  eq err.empty?, false
   eq status.success?, false
 end
 
