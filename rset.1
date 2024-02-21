@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 15, 2024
+.Dd February 20, 2024
 .Dt RSET 1
 .Os
 .Sh NAME
@@ -39,9 +39,9 @@ accepts one or more hostnames which match the labels in
 The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl e
-Stop executing if an error is encountered within a label.
+Exit immediately if any label returns non-zero exit status.
 .It Fl n
-Do not connect to remote hosts. May be comed with
+Do not connect to remote hosts. May be combined with
 .Fl x
 to highlight label names that match.
 Special text defined between { and } is still executed locally.
@@ -74,7 +74,7 @@ By default only labels beginning with [0-9a-z] are evaluated.
 .Sh ENVIRONMENT
 Status messages for each stage of execution may be customized by setting
 .Ev RSET_HOST_CONNECT ,
-.Ev RSET_HOST_CONNECT_FAIL ,
+.Ev RSET_HOST_CONNECT_ERROR ,
 .Ev RSET_LABEL_EXEC_BEGIN ,
 .Ev RSET_LABEL_EXEC_END ,
 .Ev RSET_LABEL_EXEC_ERROR ,
