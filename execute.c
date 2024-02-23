@@ -270,6 +270,7 @@ verify_ssh_agent() {
 int
 start_connection(char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config) {
 	int argc;
+	int ret;
 	char cmd[PATH_MAX];
 	char port_forwarding[64];
 	char path_repr[PLN_LABEL_SIZE];
@@ -293,7 +294,7 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		    "  fstat %s\n"
 		    "and remove the file if no process is listed.\n",
 		    host_name, socket_path);
-		return -1;
+		return 1;
 	}
 
 	argc = 0;
@@ -303,14 +304,14 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		(void) append(argv, argc, "-F", ssh_config, host_name, NULL);
 	else
 		(void) append(argv, argc, host_name, NULL);
-	if (run(argv) == 255)
-		return -1;
+	if ((ret = run(argv)) != 0)
+		return ret;
 
 	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
 	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
 	    socket_path, host_name, stagedir(http_port), stagedir(http_port));
-	if (system(cmd) != 0)
-		return -1;
+	if ((ret = system(cmd)) != 0)
+		return ret;
 
 	path = route_label->export_paths;
 	if (path && *path) {
@@ -320,8 +321,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
 		    path_repr, socket_path, host_name, stagedir(http_port));
 
-		if (system(cmd) != 0)
-			return -1;
+		if ((ret = system(cmd)) != 0)
+			return ret;
 	}
 	return 0;
 }
@@ -329,6 +330,7 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 int
 update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
 	int fd;
+	int ret;
 	char cmd[PATH_MAX];
 	char tmp_src[128];
 	char *environment_lines;
@@ -371,22 +373,24 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	    "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
 	    op.environment_file, tmp_src, socket_path, host_name,
 	    stagedir(http_port), stagedir(http_port));
-	if (system(cmd) != 0)
-		return -1;
+	ret = system(cmd);
 	unlink(tmp_src);
 
-	return 0;
+	return ret;
 }
 
 int
 ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
 	int argc;
+	int ret;
 	char cmd[PATH_MAX];
 	char *argv[32];
 	Options op;
 
 	/* setup environment file */
-	update_environment_file(host_name, socket_path, host_label, http_port, env_override);
+	ret = update_environment_file(host_name, socket_path, host_label, http_port, env_override);
+	if (ret != 0)
+		return ret;
 
 	/* construct command to execute on remote host  */
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
@@ -402,18 +406,22 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
 
 	(void) append(argv, argc, host_name, cmd, NULL);
-	return cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
+	ret = cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
+	return ret;
 }
 
 int
 ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
 	int argc;
+	int ret;
 	char cmd[PATH_MAX];
 	char *argv[32];
 	Options op;
 
 	/* setup environment file */
-	update_environment_file(host_name, socket_path, host_label, http_port, env_override);
+	ret = update_environment_file(host_name, socket_path, host_label, http_port, env_override);
+	if (ret != 0)
+		return ret;
 
 	/* copy the contents of the script */
 	snprintf(cmd, sizeof(cmd), "cat > %s/_script",
@@ -439,7 +447,8 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	argc = append(argv, argc, "ssh", "-t", "-S", socket_path, NULL);
 
 	(void) append(argv, argc, host_name, cmd, NULL);
-	return run(argv);
+	ret = run(argv);
+	return ret;
 }
 
 void

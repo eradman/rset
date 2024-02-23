@@ -173,14 +173,14 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	char httpd_log[32768];
 	int i, j, k, l;
 	int nr;
+	int ret;
 	int exit_code = 0;
 	int stdout_pipe[2];
 	size_t len;
 	regmatch_t regmatch;
-	Options op;
 
 	char *host_connect_msg = HL_HOST "%h" HL_RESET;
-	char *host_connect_fail = HL_ERROR "%h initialization failed" HL_RESET;
+	char *host_connect_error_msg = HL_ERROR "%h initialization error" HL_RESET;
 	char *label_exec_begin_msg = HL_LABEL "%l" HL_RESET;
 	char *label_exec_end_msg = 0;
 	char *host_disconnect_msg = 0;
@@ -192,7 +192,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	/* custom log format */
 	if (getenv("RSET_HOST_CONNECT")) {
 		host_connect_msg = getenv("RSET_HOST_CONNECT");
-		host_connect_fail = getenv("RSET_HOST_CONNECT_FAIL");
+		host_connect_error_msg = getenv("RSET_HOST_CONNECT_ERROR");
 		label_exec_begin_msg = getenv("RSET_LABEL_EXEC_BEGIN");
 		label_exec_end_msg = getenv("RSET_LABEL_EXEC_END");
 		label_exec_error_msg = getenv("RSET_LABEL_EXEC_ERROR");
@@ -216,8 +216,9 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				socket_path = malloc(len);
 				snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
-				if (start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file) == -1) {
-					log_msg(host_connect_fail, hostname, "", 0);
+				ret = start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file);
+				if (ret != 0) {
+					log_msg(host_connect_error_msg, hostname, "", ret);
 					end_connection(socket_path, hostname, http_port);
 					free(socket_path);
 					socket_path = NULL;
@@ -234,13 +235,16 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					else
 						exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port, env_override);
 
-					log_msg(label_exec_end_msg, hostname, host_labels[j]->name, exit_code);
-
-					if ((stop_on_err_opt) && exit_code != 0) {
-						apply_default(op.interpreter, host_labels[j]->options.interpreter, INTERPRETER);
+					if (stop_on_err_opt && (exit_code != 0)) {
 						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, exit_code);
 						goto exit;
 					}
+
+					/* ssh terminated, local interpreter could be executed */
+					if ((exit_code == 255) || (exit_code == 127))
+						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, exit_code);
+					else
+						log_msg(label_exec_end_msg, hostname, host_labels[j]->name, exit_code);
 
 					/* read output of web server */
 					nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
