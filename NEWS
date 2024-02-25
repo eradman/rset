@@ -1,5 +1,22 @@
 = Release History
 
+== 3.0: February 26, 2024
+
+ - Check for ssh-agent before updating _rutils
+ - Correct use of getopt(3) to allow compact flags
+ - Use RSET_HOST_CONNECT_ERROR to format failed connection or stagedir initialization
+ - Use RSET_LABEL_EXEC_ERROR if ssh(1) or sh(1) terminates during script execution
+ - Add log format variable '%s' for generated session ID
+ - Remove '-l' option
+ - Tests: use curl(1) on Linux
+ - Detect and use native strlcpy(3), strlcat(3), arc4random(3) on Linux
+ - Upload _rutils and exported paths in two steps for compatibility with busybox tar(1)
+ - rsub(1): escape ampersands found in '-l' argument
+ - rinstall(1): allow diff(1) behavior to be modified using RINSTALL_DIFF_ARGS
+ - rinstall(1): add '-a' option for defining an alternate source location
+ - rinstall(1): saving a file in $SD no longer depends the current directory
+ - rinstall(1): failure running diff(1) no longer reports "files are different"
+
 == 2.9: December 22, 2023
 
  - Add flag '-E' for overriding remote environment variables
