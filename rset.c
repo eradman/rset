@@ -115,9 +115,9 @@ main(int argc, char *argv[])
 		/* require ssh-agent */
 		if (verify_ssh_agent() != 0) {
 			printf("Try running:\n");
-				if (!getenv("SSH_AUTH_SOCK"))
-					printf("  eval `ssh-agent`\n");
-				printf("  ssh-add\n");
+			if (!getenv("SSH_AUTH_SOCK"))
+				printf("  eval `ssh-agent`\n");
+			printf("  ssh-add\n");
 			exit(1);
 		}
 
