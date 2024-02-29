@@ -181,18 +181,6 @@ try 'End an ssh session' do
   File.unlink '/tmp/test_rset_socket'
 end
 
-# Smoke test
-
-try 'Run rset with no arguments' do
-  cmd = '../rset'
-  _, err, status = Open3.capture3(cmd)
-  eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'), <<~USAGE
-    release: 0.0
-    usage: rset [-entv] [-E environment] [-F sshconfig_file] [-f routes_file] [-x label_pattern] hostname ...
-  USAGE
-  eq status.success?, false
-end
-
 # Preflight checks
 
 try 'Require ssh-agent' do

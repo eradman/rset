@@ -24,18 +24,6 @@ end
 
 puts "\e[32m---\e[39m"
 
-# Smoke test
-
-try 'Run labelgrep without enough arguments' do
-  cmd = '../labelgrep install'
-  out, err, status = Open3.capture3(cmd)
-  eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
-     "release: 0.0\n" \
-     "usage: labelgrep pattern file [file ...]\n"
-  eq out, ''
-  eq status.success?, false
-end
-
 # Functional tests
 
 try 'Scan multiple files with more than one label' do

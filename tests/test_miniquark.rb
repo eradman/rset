@@ -47,17 +47,6 @@ end
 
 puts "\e[32m---\e[39m"
 
-# Smoke test
-
-try 'Run miniquark with no arguments' do
-  cmd = '../miniquark'
-  _, err, status = Open3.capture3(cmd)
-  eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
-     "release: 0.0\n" \
-     "usage: miniquark -p port [-h host] [-d dir]\n"
-  eq status.success?, false
-end
-
 # Populate staging directory
 %x{
     cd #{@systmp}

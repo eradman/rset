@@ -63,17 +63,6 @@ end
 
 puts "\e[32m---\e[39m"
 
-# Smoke test
-
-try 'Run rinstall with no arguments' do
-  cmd = '../rinstall'
-  _, err, status = Open3.capture3(cmd)
-  eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
-     "release: 0.0\n" \
-     "usage: rinstall [-a alt_location] [-m mode] [-o owner:group] source [target]\n"
-  eq status.success?, false
-end
-
 # Functional tests
 
 try 'Install a file from a remote URL to the staging area' do

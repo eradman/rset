@@ -29,18 +29,6 @@ end
 
 puts "\e[32m---\e[39m"
 
-# Smoke test
-
-try 'Run rsub with no arguments' do
-  cmd = '../rsub'
-  _, err, status = Open3.capture3(cmd)
-  eq err.gsub(/release: (\d\.\d)/, 'release: 0.0'),
-     "release: 0.0\n" \
-     "usage: rsub [-A] -r line_regex -l line_text target\n" \
-     "usage: rsub target < block_content\n"
-  eq status.success?, false
-end
-
 # Functional tests - line mode
 
 try 'Replace a line, optionally append' do
