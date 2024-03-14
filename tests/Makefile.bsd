@@ -10,7 +10,9 @@ OBJS += log_msg
 OBJS += parser
 OBJS += ssh_command
 OBJS += which
-RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o
+OBJS += worker_argv
+OBJS += worker_exec
+RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o ../worker.o
 
 all: rset.o test
 
@@ -27,6 +29,7 @@ test: ${OBJS}
 	@${RUBY} test_rinstall.rb
 	@${RUBY} test_labelgrep.rb
 	@${RUBY} test_rset.rb
+	@${RUBY} test_rset_worker.rb
 
 clean:
 	rm -rf .gem

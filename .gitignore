@@ -4,6 +4,7 @@ compat.c
 labelgrep
 miniquark
 renv
+rexec-summary
 rinstall
 rset
 rsub
@@ -18,4 +19,6 @@ tests/log_msg
 tests/parser
 tests/ssh_command
 tests/which
+tests/worker_argv
+tests/worker_exec
 tests/.gem

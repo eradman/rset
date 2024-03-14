@@ -6,6 +6,7 @@
 #define REMOTE_TMP_PATH "/tmp/rset_staging_%d"
 #define LOCAL_SOCKET_PATH "/tmp/rset_control_%s"
 #define LOG_TIMESTAMP_FORMAT "%F %T%z"
+#define WORKER_TIMESTAMP_FORMAT "%F_%H%M%S"
 
 /* defaults */
 #define INSTALL_PORT 6000
@@ -21,6 +22,7 @@
 #define LOCAL_INTERPRETER "/bin/sh"
 #define ENVIRONMENT ""
 #define ENVIRONMENT_FILE "/dev/null"
+#define MAX_WORKERS 20
 
 /* colors */
 #define HL_REVERSE  "\x1b[7m"
