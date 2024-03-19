@@ -27,6 +27,15 @@
 .Op Fl f Ar routes_file
 .Op Fl x Ar label_pattern
 .Ar hostname ...
+.Nm rset
+.Op Fl ev
+.Op Fl E Ar environment
+.Op Fl F Ar sshconfig_file
+.Op Fl f Ar routes_file
+.Op Fl x Ar label_pattern
+.Fl o Ar log_directory
+.Fl p Ar workers
+.Ar hostname ...
 .Sh DESCRIPTION
 .Nm
 evaluates script fragments written in Progressive Label Notation
@@ -68,6 +77,17 @@ hostnames or IP addresses which are matched against
 .Ar hostname .
 The default is
 .Pa routes.pln .
+.It Fl o
+Log directory to use for background workers.
+Each log file is created for each worker using the format
+.Ql YYYY-MM-DD_HHMMSS.n .
+.It Fl p
+Parallel execution distributed across the specified number of workers.
+The log directory must also be specified using
+.Fl o .
+A summary of results is displayed using the
+.Pa rexec-summary
+script located in the search path.
 .It Fl x
 Execute labels matching the specified regex.
 By default only labels beginning with [0-9a-z] are evaluated.

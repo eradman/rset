@@ -2,7 +2,7 @@ PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
 RELEASE = 3.0
 
-RSET_COMPONENTS = rutils input execute
+RSET_COMPONENTS = rutils input execute worker
 RSET_OBJS = ${RSET_COMPONENTS:=.o} compat.o rset.o
 RSET_INC = ${RSET_COMPONENTS:=.h} config.h missing/compat.h
 
@@ -10,7 +10,7 @@ QUARK_COMPONENTS = sock http
 QUARK_OBJS = ${QUARK_COMPONENTS:=.o} compat.o miniquark.o
 QUARK_INC = ${QUARK_COMPONENTS:=.h} missing/compat.h
 
-PROGS = rset miniquark rinstall rsub labelgrep renv
+PROGS = rset miniquark rinstall rsub labelgrep renv rexec-summary
 
 all: ${PROGS}
 
@@ -55,6 +55,7 @@ install: ${PROGS}
 	install labelgrep ${DESTDIR}${PREFIX}/bin
 	install miniquark ${DESTDIR}${PREFIX}/bin
 	install renv ${DESTDIR}${PREFIX}/bin
+	install rexec-summary ${DESTDIR}${PREFIX}/bin
 	install rinstall ${DESTDIR}${PREFIX}/bin
 	install rset ${DESTDIR}${PREFIX}/bin
 	install rsub ${DESTDIR}${PREFIX}/bin
@@ -70,6 +71,7 @@ uninstall:
 	rm ${DESTDIR}${PREFIX}/bin/labelgrep
 	rm ${DESTDIR}${PREFIX}/bin/miniquark
 	rm ${DESTDIR}${PREFIX}/bin/renv
+	rm ${DESTDIR}${PREFIX}/bin/rexec-summary
 	rm ${DESTDIR}${PREFIX}/bin/rinstall
 	rm ${DESTDIR}${PREFIX}/bin/rset
 	rm ${DESTDIR}${PREFIX}/bin/rsub

@@ -32,6 +32,7 @@
 #include "rutils.h"
 #include "execute.h"
 #include "input.h"
+#include "worker.h"
 
 /* forwards */
 static void handle_exit(int sig);
@@ -53,8 +54,10 @@ int dryrun_opt;
 int tty_opt;
 int verbose_opt;
 int stop_on_err_opt;
+int n_parallel;
 char *sshconfig_file;
 char *env_override;
+char *log_directory;
 char *label_pattern = DEFAULT_LABEL_PATTERN;
 char *routes_file = ROUTES_FILE;
 
@@ -72,11 +75,15 @@ main(int argc, char *argv[])
 {
 	char buf[_POSIX2_LINE_MAX];
 	int fd;
-	int i;
+	int i, j;
 	int ret;
 	int rv;
+	int n_workers;
+	int worker_argc[MAX_WORKERS];
+	int worker_pid[MAX_WORKERS];
 	char *renv_bin, *rinstall_bin, *rsub_bin;
 	char **hostnames;
+	char **worker_argv[MAX_WORKERS];
 	char routes_realpath[PATH_MAX];
 	regex_t label_reg;
 	struct sigaction act;
@@ -128,12 +135,6 @@ main(int argc, char *argv[])
 		create_dir(PUBLIC_DIRECTORY);
 	}
 
-	/* select a port to communicate on */
-	http_port = get_socket();
-
-	if (pledge("stdio rpath proc exec unveil tmppath", NULL) == -1)
-		err(1, "pledge");
-
 	/* parse route labels */
 	route_labels = alloc_labels();
 	host_labels = route_labels;
@@ -150,6 +151,34 @@ main(int argc, char *argv[])
 
 	/* ensure hostnames are valid */
 	compare_argv_routes(hostnames, route_labels);
+
+	if (n_parallel > 0) {
+		n_workers = 0;
+		create_dir(log_directory);
+
+		/* distribute hostnames */
+		for (i=0; hostnames[i]; i++) {
+			j = i % n_parallel;
+			if (j+1 > n_workers) {
+				worker_argv[n_workers] = calloc(sizeof(char*), argc);
+				worker_argc[n_workers] = create_worker_argv(argv, worker_argv[n_workers]);
+				n_workers++;
+			}
+			worker_argv[j][worker_argc[j]++] = hostnames[i];
+		}
+
+		for (i=0; i < n_workers; i++)
+			worker_pid[i] = exec_worker(log_directory, i+1, worker_argv[i]);
+
+		rexec_summary(n_workers, worker_pid, log_directory);
+		exit(0);
+	}
+
+	/* select a port to communicate on */
+	http_port = get_socket();
+
+	if (pledge("stdio rpath proc exec unveil tmppath", NULL) == -1)
+		err(1, "pledge");
 
 	/* main loop */
 	if (dryrun_opt) {
@@ -328,8 +357,11 @@ handle_exit(int sig) {
 static void
 usage() {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: rset [-entv] [-E environment] [-F sshconfig_file] "
-	    "[-f routes_file] [-x label_pattern] hostname ...\n");
+	fprintf(stderr,
+	    "usage: rset [-entv] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
+	    "            [-x label_pattern] hostname ...\n"
+	    "       rset [-ev] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
+	    "            [-x label_pattern] -o log_directory -p workers hostname ...\n");
 	exit(1);
 }
 
@@ -337,12 +369,13 @@ static void
 set_options(int argc, char *argv[], char *hostnames[]) {
 	int i;
 	int ch;
+	const char *errstr;
 	opterr = 0;
 	Options op;
 
 	bzero(&op, sizeof op);
 
-	while ((ch = getopt(argc, argv, "entvE:F:f:x:")) != -1) {
+	while ((ch = getopt(argc, argv, "entvE:F:f:o:p:x:")) != -1) {
 		switch (ch) {
 		case 'e':
 			stop_on_err_opt = 1;
@@ -366,6 +399,14 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 		case 'f':
 			routes_file = optarg;
 			break;
+		case 'o':
+			log_directory = optarg;
+			break;
+		case 'p':
+			n_parallel = strtonum(optarg, 1, MAX_WORKERS, &errstr);
+			if (errstr != NULL)
+				errx(1, "number out of bounds %s: '%s'", errstr, argv[optind-1]);
+			break;
 		case 'x':
 			label_pattern = optarg;
 			break;
@@ -375,6 +416,14 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 		}
 	}
 	if (optind >= argc) usage();
+
+	if (n_parallel) {
+		if (dryrun_opt || tty_opt)
+			usage();
+	}
+
+	if ((log_directory == NULL) ^ (n_parallel == 0))
+		usage();
 
 	for (i=0; i < argc - optind; i++)
 		hostnames[i] = argv[optind+i];
