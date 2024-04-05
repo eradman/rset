@@ -3,10 +3,10 @@
 # Install files from the local staging area or a remote URL
 
 set_defaults() {
-	ret=1			# global exit status. See man rinstall(1) for details
-	fetched=0		# it's set to 1 when source was fetched via HTTP
-	samedir=0		# it's set to 1 when target is $SD (Staging Directory)
-	source_local=0	# if source is defined with an absolute path, it's local
+	ret=1           # global exit status
+	fetched=0       # set to 1 when source was fetched via HTTP
+	samedir=0       # set to 1 when target is $SD (Staging Directory)
+	source_local=0  # set to 1 if source is defined with an absolute path
 	owner=""
 	mode=""
 	alt_location=""
@@ -20,29 +20,25 @@ main() {
 	init
 	set_source_target_vars "$arg_src" "$arg_dst"
 
-	# If source doesn't exist then it hasn't been found on a local file system
-	# (with an absolute path) and in the current directory, which in normal
-	# case is $SD
+	# If source does not exist then it was not found on a local file system
+	# (with an absolute path) or in the current directory (normally $SD)
 	if [ ! -f "$source" ]; then
 		if [ $source_local -eq 1 ]; then
-			>&2 echo "rinstall: source has an absolute path and hasn't been found"
+			>&2 echo "rinstall: source is absolute path and does not exist"
 			exit 1
 		fi
-		# If it hasn't been found in $SD specifically, try to download it.
-		# And if the download stage doesn't get the source, the script
-		# will fail in there
+		# If file has not been staged, fetch over HTTP
+		# Fail if download fails
 		[ -f "$SD/$source" ] || download_source
 	fi
 
-	# Source file exists at this point.
-	# Check the difference between source and target
+	# Source file exists: check the difference between source and target
 	check_diff_source_target
 
 	# Install a file only if source and target are different
 	install_target
 
-	# Target file exists at this point
-	# Try to change an owner and/or permissions but do not fail
+	# Target file exists: try changing owner and/or permissions but do not fail
 	set_mode_owner
 
 	exit $ret
@@ -84,15 +80,15 @@ parse_args() {
 }
 
 set_source_target_vars() {
-	# source can reside on a local file system (defined with absolute path) or
-	# remote (defined with a relative path)
+	# Source can be a local file defined by absolute path or remote defined
+	# using a relative path
 	source="$1"
 	src_path="$(dirname $source)"
 
 	if [ -z "$2" ]; then
-		# target isn't defined, thus source is installed in $SD
+		# Target is not defined, try source located in $SD
 
-		# ensure the source has a relative path by removing leading slashes
+		# Ensure the source has a relative path by removing leading slashes
 		src_rel_path="$(echo "$src_path" | sed 's|^/*||')"
 
 		# prepare a relative path for the target in $SD
@@ -124,14 +120,14 @@ set_source_target_vars() {
 }
 
 download_source() {
-	# The source file doesn't exist on a local file system, thus it's remote
-	# and it shouldn't be defined with an absolute path in this case
+	# Source file does not exist on a local file system, thus it is remote
+	# and it should not be defined with an absolute path
 	if check_absolute_path "$src_path"; then
 		>&2 echo "rinstall: absolute path is not allowed for HTTP fetch: $source"
 		exit 1
 	fi
 
-	# reconstruct the source's relative path
+	# Reconstruct the source's relative path
 	[ -d "$SD/$src_path" ] || mkdir -p "$SD/$src_path" || {
 		>&2 echo "rinstall: could not create a relative path: $SD/$src_path"
 		exit 1
@@ -179,18 +175,18 @@ fetch_file() {
 
 check_diff_source_target() {
 	# Set the 'create' flag:
-	#    0 - files are the same
-	#    1 - a new file
-	#    2 - files are different
-	
-	# if source was fetched, then it's located in $SD,
-	# otherwise it's on a local file system
+	#   0 - files are the same
+	#   1 - a new file
+	#   2 - files are different
+
+	# If source was fetched, then the source is located in $SD, otherwise the
+	# source is on a local file system
 	if [ $fetched -eq 1 -o $source_local -eq 0 ]; then
 		src_file="$SD/$source"
 	else
 		src_file="$source"
 	fi
-	
+
 	if [ -e "$target" ]; then
 		if [ $samedir -eq 1 ]; then
 			create=0
