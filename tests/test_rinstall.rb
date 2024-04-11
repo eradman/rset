@@ -218,7 +218,7 @@ try 'Ensure that in case of fetching, an absolute source cannot be used' do
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall /bogus.txt #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq status.exitstatus, 1
-  eq err, "rinstall: source has an absolute path and hasn't been found\n"
+  eq err, "rinstall: source is absolute path and does not exist\n"
   eq out, ''
   eq File.exist?(dst), false
 end
