@@ -396,8 +396,8 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd %s; . ./final.env; . ./local.env; "
+	snprintf(cmd, sizeof(cmd), "%s sh -c \""
+	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
 	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter);
 
@@ -437,8 +437,8 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -a -c \""
-	    "cd %s; . ./final.env; . ./local.env; "
+	snprintf(cmd, sizeof(cmd), "%s sh -c \""
+	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s %s/_script\"",
 	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter, stagedir(http_port));
 
