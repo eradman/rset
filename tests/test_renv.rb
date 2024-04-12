@@ -52,7 +52,7 @@ end
 
 try 'Handle unknown variable name' do
   cmd = '../renv'
-  input = <<~'IN'
+  input = <<~IN
     ~TMP="/tmp"
   IN
   out, err, status = Open3.capture3(cmd, stdin_data: input)
@@ -78,7 +78,7 @@ end
 try 'Quote malformed lines' do
   cmd = '../renv'
   # rubocop:disable Layout/TrailingWhitespace
-  input = <<~'IN'
+  input = <<~IN
     SD=""$PWD""  
     DS=""
     X=""width"" Y=height Z="height"
@@ -96,7 +96,7 @@ end
 
 try 'Escape literals' do
   cmd = '../renv'
-  input = <<~'IN'
+  input = <<~IN
     SD="$$PWD"
   IN
   out, err, status = Open3.capture3(cmd, stdin_data: input)
@@ -109,7 +109,7 @@ end
 
 try 'Print only environment errors' do
   cmd = '../renv - -q'
-  input = <<~'IN'
+  input = <<~IN
     SD="$$PWD"
     DS=
   IN

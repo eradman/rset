@@ -70,7 +70,7 @@ try 'Install a file from a remote URL to the staging area' do
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/x/y/#{fn}"
-  File.open(src, 'w') { |f| f.write('123') }
+  File.write(src, '123')
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 x/y/#{fn} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
@@ -85,7 +85,7 @@ try 'Stage the file by fetching over HTTP when no target is defined' do
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/x/y/#{fn}"
   src = "#{@wwwtmp}/x/y/#{fn}"
-  File.open(src, 'w') { |f| f.write('123') }
+  File.write(src, '123')
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall x/y/#{fn}"
   out, err, status = Open3.capture3({ 'SD' => @systmp.to_s }, cmd, chdir: @systmp)
   eq out, "rinstall: fetched #{dst}\n"
@@ -117,7 +117,7 @@ try 'Install a file from a remote URL containing special characters', is_busybox
   fn = "test-!@()_+$#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/x/#{fn}"
-  File.open(src, 'w') { |f| f.write('123') }
+  File.write(src, '123')
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 'x/#{fn}' '#{dst}'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
@@ -133,7 +133,7 @@ try 'Fetch a file that does not exist' do
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall bogus.txt #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq status.exitstatus, 3
-  eq err.split(/\n/)[-1], "rinstall: unable to fetch #{@install_url}/bogus.txt"
+  eq err.split("\n")[-1], "rinstall: unable to fetch #{@install_url}/bogus.txt"
   eq out, ''
   eq File.exist?(dst), false
 end
@@ -142,7 +142,7 @@ try 'Install a file from the local staging directory' do
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"
-  File.open(src, 'w') { |f| f.write('456') }
+  File.write(src, '456')
   cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
@@ -155,7 +155,7 @@ try 'Install a file from the using a directory target' do
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"
-  File.open(src, 'w') { |f| f.write('456') }
+  File.write(src, '456')
   cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{@systmp}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
@@ -169,7 +169,7 @@ try 'No need to update a file' do
   dst = "#{@systmp}/#{@tests}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"
   Dir.mkdir "#{@systmp}/#{@tests}"
-  File.open(src, 'w') { |f| f.write("000\n123\n") }
+  File.write(src, "000\n123\n")
   File.open(dst, 'w') do |f|
     f.chmod(0o642)
     f.write("000\n123\n")
@@ -187,14 +187,14 @@ try 'Update a file' do
   dst = "#{@systmp}/#{@tests}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"
   Dir.mkdir "#{@systmp}/#{@tests}"
-  File.open(src, 'w') { |f| f.write("000\n123\n") }
-  File.open(dst, 'w') { |f| f.write("000\n111\n") }
+  File.write(src, "000\n123\n")
+  File.write(dst, "000\n111\n")
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 660 #{fn} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, ''
   eq out.gsub(/[-+]{3}(.*)\n/, ''),
-     "@@ -1,2 +1,2 @@\n" \
-     " 000\n" \
+     "@@ -1,2 +1,2 @@\n " \
+     "000\n" \
      "-111\n" \
      "+123\n"
   eq File.stat(dst).mode.to_s(8), '100660'

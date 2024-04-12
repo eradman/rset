@@ -1,4 +1,5 @@
 *.o
+*.lock
 Makefile
 compat.c
 labelgrep

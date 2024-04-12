@@ -12,7 +12,7 @@ at_exit do
   FileUtils.remove_dir @systmp
 end
 
-ENV['PATH'] = "#{Dir.pwd}/../:#{ENV['PATH']}"
+ENV['PATH'] = "#{Dir.pwd}/../:#{ENV.fetch('PATH', nil)}"
 
 def try(descr)
   start = Time.now

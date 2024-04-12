@@ -22,7 +22,7 @@ at_exit do
   File.unlink @renv
 end
 
-ENV['PATH'] = "#{Dir.pwd}/../:#{ENV['PATH']}"
+ENV['PATH'] = "#{Dir.pwd}/../:#{ENV.fetch('PATH', nil)}"
 ENV.delete('SSH_AUTH_SOCK')
 
 def try(descr)
@@ -98,7 +98,7 @@ try 'Capture a large chunk of text from a command' do
   tin = "#{@systmp}/random_text_in"
   tout = "#{@systmp}/random_text_out"
   random_s = SecureRandom.alphanumeric(32_768)
-  File.open(tin, 'w') { |f| f.write(random_s) }
+  File.write(tin, random_s)
   cmd = "./cmd_pipe_stdout /bin/cat #{tin} > #{tout}"
   _, err, status = Open3.capture3(cmd)
   eq err, "output_size: 32768\nstrlen: 32768\n"
@@ -230,7 +230,7 @@ end
 try 'Report an unknown syntax' do
   fn = "#{@systmp}/routes.pln"
   FileUtils.mkdir_p("#{@systmp}/_sources")
-  File.open(fn, 'w') { |f| f.write("php\n") }
+  File.write(fn, "php\n")
   cmd = "#{Dir.pwd}/../rset -n localhost"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown symbol at line 1: 'php'\n"
@@ -249,7 +249,7 @@ end
 
 try 'Report a bad regex' do
   fn = "#{@systmp}/routes.pln"
-  File.open(fn, 'w') { |f| f.write('') }
+  File.write(fn, '')
   cmd = "#{Dir.pwd}/../rset -n -x 't[42' localhost"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err[0..20], 'rset: bad expression:'
@@ -259,7 +259,7 @@ end
 
 try 'Report an unknown option' do
   fn = "#{@systmp}/routes.pln"
-  File.open(fn, 'w') { |f| f.write("username=radman\n") }
+  File.write(fn, "username=radman\n")
   cmd = "#{Dir.pwd}/../rset -n 't[42'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown option 'username=radman'\n"
