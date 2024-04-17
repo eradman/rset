@@ -406,7 +406,7 @@ end
 
 try 'Show matching routes and hosts' do
   out, err, status = nil
-  cmd = "#{Dir.pwd}/../rset -n t460s"
+  cmd = "#{Dir.pwd}/../rset -n localhost"
   Dir.chdir('input') do
     FileUtils.mkdir_p('_sources')
     out, err, status = Open3.capture3(cmd)

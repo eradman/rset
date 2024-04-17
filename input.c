@@ -154,7 +154,7 @@ parse_pln() {
 		}
 
 		/* label */
-		else if (strchr(line, ':')) {
+		else if (strchr(line, ':') ) {
 			host_labels[n_labels] = malloc(sizeof(Label));
 			host_labels[n_labels]->content = malloc(BUFSIZE);
 			content_allocation = BUFSIZE;
@@ -299,9 +299,13 @@ ltrim(char *s, int c) {
 void
 read_label(char *line, Label *label) {
 	int len;
+	char *export;
 
+	/* remove trailing newline and split on last ':' */
 	line[strlen(line)-1] = '\0';
-	strlcpy(label->name, strsep(&line, ":"), PLN_LABEL_SIZE);
+	export = strrchr(line, ':');
+	*export++ = '\0';
+	strlcpy(label->name, line, PLN_LABEL_SIZE);
 
 	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES, ",");
 	if (label->n_aliases == PLN_MAX_ALIASES)
@@ -310,7 +314,7 @@ read_label(char *line, Label *label) {
 	if (label->n_aliases == 1)
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
-	len = str_to_array(label->export_paths, strdup(ltrim(line, ' ')), PLN_MAX_PATHS, " ");
+	len = str_to_array(label->export_paths, strdup(ltrim(export, ' ')), PLN_MAX_PATHS, " ");
 	if (len == PLN_MAX_PATHS)
 		errx(1, "> %d export paths specified for label '%s'", PLN_MAX_PATHS-1, label->name);
 

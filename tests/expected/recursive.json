@@ -1,6 +1,6 @@
 [
   {
-    "aliases": ["t460s", "localhost"],
+    "aliases": ["localhost", "127.0.0.1", "::1"],
     "export_paths": ["t460s/", "common/"],
     "labels": [
       {
