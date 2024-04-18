@@ -14,8 +14,10 @@ void usage();
 void usage() {
 	fprintf(stderr, "usage:\n"
 	    "  ./ssh_command S hostname [export_paths]\n" /* Start session */
-	    "  ./ssh_command P hostname [env_override]\n" /* Remote Execution over a pipe */
+	    "  ./ssh_command P hostname [env_override]\n" /* Remote execution over a pipe */
 	    "  ./ssh_command T hostname [env_override]\n" /* Remote execution with TTY */
+	    "  ./ssh_command A hostname [export_paths]\n" /* Archive files */
+	    "  ./ssh_command R hostname [export_paths]\n" /* Resore files */
 	    "  ./ssh_command E hostname\n");              /* End session */
 	exit(1);
 }
@@ -52,6 +54,16 @@ int main(int argc, char *argv[])
 		if (argc == 4)
 			env_override = argv[3];
 		ssh_command_tty(host_name, socket_path, &host_label, http_port, env_override);
+		break;
+	case 'A':
+		if (argc == 4)
+			str_to_array(host_label.export_paths, strdup(argv[3]), PLN_MAX_PATHS, " ");
+		scp_archive(host_name, socket_path, &host_label, http_port, 1);
+		break;
+	case 'R':
+		if (argc == 4)
+			str_to_array(host_label.export_paths, strdup(argv[3]), PLN_MAX_PATHS, " ");
+		scp_archive(host_name, socket_path, &host_label, http_port, 0);
 		break;
 	case 'E':
 		end_connection(socket_path, host_name, http_port);

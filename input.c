@@ -207,7 +207,6 @@ alloc_labels() {
  */
 void
 read_host_labels(Label *route_label) {
-	int j;
 	char *line, *next_line;
 	char *content;
 
@@ -229,16 +228,6 @@ read_host_labels(Label *route_label) {
 		parse_pln();
 		fclose(yyin);
 		line = next_line+1;
-
-		/* unsupported options */
-		for (j=0; host_labels[j]; j++) {
-			if (*host_labels[j]->export_paths != NULL) {
-				fprintf(stderr, "%s: label validation error: '%s'\n"
-				    "      path export lists are only supported route files\n",
-				    yyfn, host_labels[j]->name);
-				exit(1);
-			}
-		}
 	}
 	free(content);
 }

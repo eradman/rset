@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# echo command line, quoting arguments with spaces
+/usr/bin/awk 'BEGIN {
+	printf "scp"
+	for (i=1; i<ARGC; i++) {
+		if (index(ARGV[i], " "))
+			printf " \047" ARGV[i] "\047"
+		else
+			printf " " ARGV[i]
+	}
+	printf "\n" }' "$@"

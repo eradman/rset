@@ -23,6 +23,7 @@
 unsigned generate_session_id();
 unsigned current_session_id();
 char *xdirname(const char *path);
+char *xbasename(const char *path);
 int create_dir(const char *dir);
 void install_if_new(const char *src, const char *dst);
 void hl_range(const char *s, const char *color, unsigned so, unsigned eo);

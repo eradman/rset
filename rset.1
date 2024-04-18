@@ -21,7 +21,7 @@
 .Nd remote staging and execution tool
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl entv
+.Op Fl AenRtv
 .Op Fl E Ar environment
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
@@ -47,6 +47,12 @@ accepts one or more hostnames which match the labels in
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds
+.It Fl A
+Download files listed in label export paths to the local
+.Pa _archive
+directory in the format
+.Sq hostname basename(filename) .
+Absolute paths are permitted, or paths relative to the staging directory.
 .It Fl e
 Exit immediately if any label returns non-zero exit status.
 .It Fl n
@@ -55,6 +61,12 @@ May be combined with
 .Fl x
 to highlight label names that match.
 Special text defined between { and } is still executed locally.
+.It Fl R
+Send files listed in label export paths from the local
+.Pa _archive
+directory.
+This is the reverse of
+.Fl A .
 .It Fl t
 Allow TTY input by copying the content of each label to the remote host instead
 of opening a pipe to the interpreter.
