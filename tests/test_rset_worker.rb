@@ -95,13 +95,13 @@ try 'Worker environment variables' do
   eq err, ''
   log_fn = out.strip
   lines = File.readlines(log_fn).select { |s| s.match '^RSET_' }
-  eq lines.join, <<~ENV
+  eq lines.sort.join, <<~ENV
     RSET_HOST_CONNECT=%s|%T|HOST_CONNECT|%h|
     RSET_HOST_CONNECT_ERROR=%s|%T|HOST_CONNECT_ERROR|%h|%e
+    RSET_HOST_DISCONNECT=%s|%T|HOST_DISCONNECT|%h|%e
     RSET_LABEL_EXEC_BEGIN=%s|%T|EXEC_BEGIN|%l|
     RSET_LABEL_EXEC_END=%s|%T|EXEC_END|%l|%e
     RSET_LABEL_EXEC_ERROR=%s|%T|EXEC_ERROR|%l|%e
-    RSET_HOST_DISCONNECT=%s|%T|HOST_DISCONNECT|%h|%e
   ENV
   File.unlink log_fn
 end
