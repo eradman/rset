@@ -197,6 +197,16 @@ Command for elevating privileges, such as
 .Xr doas 1
 and
 .Xr sudo 8 .
+.Sh SINGLE USE OPTIONS
+The following are effective only for the subsequent label:
+.Ss \&begin=
+Execute a script using the
+.Sq local_interpreter
+before the label is executed on the remote lost.
+.Ss \&end=
+Execute a script using the
+.Sq local_interpreter
+after the label is executed on the remote host.
 .Sh SEE ALSO
 .Xr miniquark 1 ,
 .Xr rinstall 1 ,

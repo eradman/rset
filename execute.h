@@ -35,5 +35,6 @@ int ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int 
 int ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override);
 int scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port, int direction);
 void end_connection(char *socket_path, char *host_name, int http_port);
+int local_exec(Label *host_label, char *cmd);
 
 void apply_default(char *option, const char *user_option, const char *default_option);

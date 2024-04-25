@@ -3,6 +3,8 @@
 local_interpreter=/bin/sh -e
 environment=WORKDIR="$PWD" http_proxy="http://192.168.3.2:3128"
 
+begin=[ -f .lock ] && false || touch .lock
+end=rm .lock
 common packages:
 {
 	echo "MIRROR=http://cdn.openbsd.org/pub/OpenBSD"

@@ -11,6 +11,7 @@
 void indent(int level);
 char *quote(char *str);
 char * array_to_json(char *argv[]);
+char * str_or_empty(char *s);
 
 /* globals */
 Label **route_labels;    /* parent */
@@ -51,7 +52,9 @@ int main(int argc, char *argv[]) {
 			indent(5); printf("\"environment_file\": \"%s\",\n", host_labels[j]->options.environment_file);
 			indent(5); printf("\"interpreter\": \"%s\",\n", host_labels[j]->options.interpreter);
 			indent(5); printf("\"local_interpreter\": \"%s\",\n", host_labels[j]->options.local_interpreter);
-			indent(5); printf("\"execute_with\": \"%s\"\n", host_labels[j]->options.execute_with);
+			indent(5); printf("\"execute_with\": \"%s\",\n", host_labels[j]->options.execute_with);
+			indent(5); printf("\"begin\": \"%s\",\n", str_or_empty(host_labels[j]->options.begin));
+			indent(5); printf("\"end\": \"%s\"\n", str_or_empty(host_labels[j]->options.end));
 			indent(4); printf("}\n");
 			indent(3); printf("}");
 		}
@@ -93,6 +96,13 @@ array_to_json(char *argv[]) {
 	count += strlcpy(p+count, "]", size-count);
 	outputstring[count] = '\0';
 	return outputstring;
+}
+
+char *
+str_or_empty(char *s) {
+	if (s)
+		return s;
+	return "";
 }
 
 char *

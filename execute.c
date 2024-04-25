@@ -501,6 +501,23 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 		warn("exec ssh -O exit");
 }
 
+/* local execution */
+
+int
+local_exec(Label *host_label, char *cmd) {
+	char *argv[4];
+	size_t len;
+	Options op;
+	int ret = 0;
+
+	if ((cmd) && (len = strlen(cmd)) > 0) {
+		apply_default(op.local_interpreter, host_label->options.interpreter, INTERPRETER);
+		(void) append(argv, 0, op.local_interpreter, NULL);
+		ret = cmd_pipe_stdin(argv, cmd, len);
+	}
+	return ret;
+}
+
 /* internal utility functions */
 
 void

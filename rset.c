@@ -211,6 +211,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	regmatch_t regmatch;
 
 	int exit_code = 0;
+	int local_exit_code = 0;
 	int scp_exit_code = 0;
 
 	char *host_connect_msg = HL_HOST "%h" HL_RESET;
@@ -265,6 +266,14 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					log_msg(label_exec_begin_msg, hostname, host_labels[j]->name, 0);
 
+					/* local begin */
+					local_exit_code = local_exec(host_labels[j], host_labels[j]->options.begin);
+
+					if (stop_on_err_opt && local_exit_code != 0) {
+						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
+						goto exit;
+					}
+
 					/* restore */
 					if (restore_opt && host_labels[j]->export_paths[0])
 						scp_exit_code = scp_archive(hostname, socket_path, host_labels[j], http_port, 0);
@@ -294,7 +303,15 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 						goto exit;
 					}
 
-					/* ssh terminated, local interpreter could be executed */
+					/* local end */
+					local_exit_code = local_exec(host_labels[j], host_labels[j]->options.end);
+
+					if (stop_on_err_opt && local_exit_code != 0) {
+						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
+						goto exit;
+					}
+
+					/* ssh terminated, unable to execute local interpreter */
 					if ((exit_code == 255) || (exit_code == 127))
 						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, exit_code);
 					else
@@ -310,7 +327,10 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 exit:
 				if (socket_path) {
-					log_msg(host_disconnect_msg, hostname, "", stop_on_err_opt ? exit_code : scp_exit_code);
+					if (archive_opt || restore_opt)
+						log_msg(host_disconnect_msg, hostname, "", stop_on_err_opt ? exit_code : scp_exit_code);
+					else
+						log_msg(host_disconnect_msg, hostname, "", stop_on_err_opt ? exit_code : local_exit_code);
 					end_connection(socket_path, hostname, http_port);
 					free(socket_path);
 					socket_path = NULL;
