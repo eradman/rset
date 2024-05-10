@@ -451,6 +451,40 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	return ret;
 }
 
+int
+scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port, int direction) {
+	int i;
+	int argc;
+	char scp_opt[PLN_LABEL_SIZE];
+	char scp_src[PLN_LABEL_SIZE];
+	char scp_dst[PLN_LABEL_SIZE];
+	char *path;
+	char *argv[32];
+	int ret = 0;
+
+	snprintf(scp_opt, sizeof(scp_opt), "ControlPath=%s", socket_path);
+	argc = append(argv, 0, "scp", "-o", scp_opt, NULL);
+
+	for (i=0; host_label->export_paths[i]; i++) {
+		path = host_label->export_paths[i];
+
+		if (path[0] == '/')
+			snprintf(scp_src, sizeof(scp_src), "%s:%s", host_name, path);
+		else
+			snprintf(scp_src, sizeof(scp_src), "%s:%s/%s", host_name, stagedir(http_port), path);
+		snprintf(scp_dst, sizeof(scp_dst), ARCHIVE_DIRECTORY "/%s %s", host_name, xbasename(path));
+
+		if (direction == 0)
+			(void) append(argv, argc, scp_dst, scp_src, NULL);
+		if (direction == 1)
+			(void) append(argv, argc, scp_src, scp_dst, NULL);
+
+		ret = ret || run(argv);
+	}
+
+	return ret;
+}
+
 void
 end_connection(char *socket_path, char *host_name, int http_port) {
 	char *argv[32];

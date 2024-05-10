@@ -168,6 +168,39 @@ try 'Execute commands over ssh using a tty' do
   RESULT
 end
 
+try 'Archive files listed for a label' do
+  cmd = './ssh_command A 10.0.0.99 "var.tar certs.tar"'
+  out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
+  eq err, ''
+  eq status.success?, true
+  eq out, <<~RESULT
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/var.tar '_archive/10.0.0.99 var.tar'
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/certs.tar '_archive/10.0.0.99 certs.tar'
+  RESULT
+end
+
+try 'Archive files with relative and absolute paths' do
+  cmd = './ssh_command A 10.0.0.99 "../home.tgz /tmp/home.tgz"'
+  out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
+  eq err, ''
+  eq status.success?, true
+  eq out, <<~RESULT
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/../home.tgz '_archive/10.0.0.99 home.tgz'
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/home.tgz '_archive/10.0.0.99 home.tgz'
+  RESULT
+end
+
+try 'Restore files listed for a label' do
+  cmd = './ssh_command R 10.0.0.99 "certs.tar var.tar"'
+  out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
+  eq err, ''
+  eq status.success?, true
+  eq out, <<~RESULT
+    scp -o ControlPath=/tmp/test_rset_socket '_archive/10.0.0.99 certs.tar' 10.0.0.99:/tmp/rset_staging_6000/certs.tar
+    scp -o ControlPath=/tmp/test_rset_socket '_archive/10.0.0.99 var.tar' 10.0.0.99:/tmp/rset_staging_6000/var.tar
+  RESULT
+end
+
 try 'End an ssh session' do
   FileUtils.touch '/tmp/test_rset_socket'
   cmd = './ssh_command E 10.0.0.99'

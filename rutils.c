@@ -58,6 +58,17 @@ xdirname(const char *path) {
 }
 
 /*
+ * Mimic basename(3) on OpenBSD which does not modify it's input
+ */
+char *
+xbasename(const char *path) {
+	static char dname[PATH_MAX];
+
+	strlcpy(dname, path, sizeof(dname));
+	return basename(dname);
+}
+
+/*
  * create_dir - ensure a directory exists
  * install_if_new - ensure a file is up to date
  */

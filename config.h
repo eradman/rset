@@ -12,6 +12,7 @@
 #define INSTALL_PORT 6000
 #define ROUTES_FILE "routes.pln"
 #define REPLICATED_DIRECTORY "_rutils"
+#define ARCHIVE_DIRECTORY "_archive"
 #define PUBLIC_DIRECTORY "_sources"
 #define DEFAULT_LABEL_PATTERN "^[0-9a-z]"
 
