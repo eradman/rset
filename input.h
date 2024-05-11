@@ -34,6 +34,9 @@ typedef struct {
 	char local_interpreter[PLN_OPTION_SIZE];
 	char environment[PLN_OPTION_SIZE];
 	char environment_file[PLN_OPTION_SIZE];
+	/* not inherited */
+	char *begin;
+	char *end;
 } Options;
 
 typedef struct Label {

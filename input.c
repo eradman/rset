@@ -309,6 +309,10 @@ read_label(char *line, Label *label) {
 
 	memcpy(&label->options, &current_options, sizeof(current_options));
 
+	/* options not inherited */
+	current_options.begin = 0;
+	current_options.end = 0;
+
 	label->content_size = 0;
 	label->labels = 0;
 }
@@ -341,6 +345,13 @@ read_option(char *text, Options *op) {
 			free(content);
 		}
 	}
+	else if (strcmp(k, "begin") == 0) {
+		op->begin = strndup(v, strlen(v));
+	}
+	else if (strcmp(k, "end") == 0) {
+		op->end = strndup(v, strlen(v));
+	}
+
 	else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
 		exit(1);
