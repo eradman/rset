@@ -57,5 +57,4 @@ extern const char *status_str[];
 enum status http_send_status(int, enum status);
 int http_get_request(int, struct request *);
 enum status http_send_response(int, struct request *);
-enum status resp_file(int, const char *, struct request *,
-                      const struct stat *, long, long);
+enum status resp_file(int, const char *, struct request *, const struct stat *, long, long);

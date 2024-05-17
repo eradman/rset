@@ -20,21 +20,21 @@
 
 /* forwards */
 
-char *stagedir(int http_port);
-int append(char *argv[], int argc, char *arg, ...);
-int run(char *const argv[]);
-char *cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size);
-int cmd_pipe_stdin(char *const argv[], char *input, size_t len);
+char *stagedir(int);
+int append(char *[], int, char *, ...);
+int run(char *const []);
+char *cmd_pipe_stdout(char *const[], int *, int *);
+int cmd_pipe_stdin(char *const[], char *, size_t);
 int get_socket();
-char *findprog(char *prog);
+char *findprog(char *);
 
 int verify_ssh_agent();
-int start_connection(char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config);
-int update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override);
-int ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override);
-int ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override);
-int scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port, int direction);
-void end_connection(char *socket_path, char *host_name, int http_port);
-int local_exec(Label *host_label, char *cmd);
+int start_connection(char *, char *, Label *, int, const char *);
+int update_environment_file(char *, char *, Label *, int, const char *);
+int ssh_command_pipe(char *, char *, Label *, int, const char *);
+int ssh_command_tty(char *, char *, Label *, int, const char *);
+int scp_archive(char *, char *, Label *, int, int);
+void end_connection(char *, char *, int);
+int local_exec(Label *, char *);
 
-void apply_default(char *option, const char *user_option, const char *default_option);
+void apply_default(char *, const char *, const char *);

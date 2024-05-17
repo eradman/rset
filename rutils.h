@@ -22,9 +22,9 @@
 
 unsigned generate_session_id();
 unsigned current_session_id();
-char *xdirname(const char *path);
-char *xbasename(const char *path);
-int create_dir(const char *dir);
-void install_if_new(const char *src, const char *dst);
-void hl_range(const char *s, const char *color, unsigned so, unsigned eo);
-void log_msg(char *template, char *hostname, char *label_name, int exit_code);
+char *xdirname(const char *);
+char *xbasename(const char *);
+int create_dir(const char *);
+void install_if_new(const char *, const char *);
+void hl_range(const char *, const char *, unsigned, unsigned);
+void log_msg(char *, char *, char *, int);

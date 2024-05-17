@@ -18,8 +18,8 @@
 
 /* forwards */
 
-int create_worker_argv(char *argv[], char *worker_argv[]);
-int exec_worker(char *log_directory, int worker_id, char *worker_argv[]);
-void rexec_summary(int n_workers, int worker_pid[], char *log_directory);
-int open_log(char *log_directory, int worker_id);
+int create_worker_argv(char *[], char *[]);
+int exec_worker(char *, int, char *[]);
+void rexec_summary(int, int [], char *);
+int open_log(char *, int);
 char *get_tmstr();

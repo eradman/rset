@@ -59,14 +59,14 @@ void read_pln(const char *fn);
 void parse_pln();
 void read_host_labels(Label *route_label);
 Label** alloc_labels();
-int array_to_str(char *argv[], char *output, int max_length, const char *delim);
-int str_to_array(char *argv[], char *input, int max_elements, const char *delim);
+int array_to_str(char *[], char *, int, const char *);
+int str_to_array(char *[], char *, int, const char *);
 
-char* ltrim(char *s, int c);
-void read_label(char *line, Label *label);
-void read_option(char *text, Options *op);
-int expand_numeric_range(char **argv, char *input, int max_elements);
-char *env_split_lines(const char *s, const char *source, int verify);
-char *read_environment_file(const char *environment_file);
+char* ltrim(char *, int);
+void read_label(char *, Label *);
+void read_option(char *, Options *);
+int expand_numeric_range(char **, char *, int);
+char *env_split_lines(const char *, const char *, int);
+char *read_environment_file(const char *);
 
 #endif /* _RSET_INPUT_H_ */
