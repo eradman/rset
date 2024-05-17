@@ -1,7 +1,8 @@
 /* miniquark: see LICENSE file for copyright and license details. */
 
-#include <limits.h>
 #include <sys/stat.h>
+
+#include <limits.h>
 
 #define HEADER_MAX 4096
 #define FIELD_MAX 200

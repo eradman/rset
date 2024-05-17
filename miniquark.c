@@ -1,12 +1,14 @@
 /* miniquark: see LICENSE file for copyright and license details. */
 
-#include <err.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+
 #include <netinet/in.h>
+
+#include <err.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include "http.h"

@@ -1,11 +1,13 @@
 /* miniquark: see LICENSE file for copyright and license details. */
 
-#include <arpa/inet.h>
-#include <err.h>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+
+#include <arpa/inet.h>
+#include <netinet/in.h>
+
+#include <err.h>
+#include <netdb.h>
 #include <unistd.h>
 
 #include "sock.h"
