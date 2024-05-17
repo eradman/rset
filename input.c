@@ -325,17 +325,20 @@ read_option(char *text, Options *op) {
 	char *content;
 	char *k, *v;
 
+	int len = 0;
+
 	k = text;
 	strsep(&text, "=");
 	v = text;
+
 	if (strcmp(k, "execute_with") == 0)
-		strlcpy(op->execute_with, v, PLN_OPTION_SIZE);
+		len = strlcpy(op->execute_with, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "interpreter") == 0)
-		strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
+		len = strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "local_interpreter") == 0)
-		strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
+		len = strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "environment") == 0) {
-		strlcpy(op->environment, v, PLN_OPTION_SIZE);
+		len = strlcpy(op->environment, v, PLN_OPTION_SIZE);
 		free(env_split_lines(op->environment, op->environment, 1));
 	}
 	else if (strcmp(k, "environment_file") == 0) {
@@ -346,14 +349,18 @@ read_option(char *text, Options *op) {
 		}
 	}
 	else if (strcmp(k, "begin") == 0) {
-		op->begin = strndup(v, strlen(v));
+		op->begin = strdup(v);
 	}
 	else if (strcmp(k, "end") == 0) {
-		op->end = strndup(v, strlen(v));
+		op->end = strdup(v);
 	}
-
 	else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
+		exit(1);
+	}
+
+	if (len > PLN_OPTION_SIZE) {
+		fprintf(stderr, "%s: option '%s' too long: %d > %d\n", yyfn, k, len, PLN_OPTION_SIZE);
 		exit(1);
 	}
 }
