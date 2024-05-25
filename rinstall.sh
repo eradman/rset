@@ -24,7 +24,7 @@ main() {
 	# (with an absolute path) or in the current directory (normally $SD)
 	if [ ! -f "$source" ]; then
 		if [ $source_local -eq 1 ]; then
-			>&2 echo "rinstall: source is absolute path and does not exist"
+			>&2 echo "rinstall: source $source with absolute path does not exist"
 			exit 1
 		fi
 		# If file has not been staged, fetch over HTTP

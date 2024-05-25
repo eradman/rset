@@ -212,13 +212,13 @@ try 'Ensure that a relative target cannot be used' do
   eq File.exist?(dst), false
 end
 
-try 'Ensure that in case of fetching, an absolute source cannot be used' do
+try 'Raise error when source with absolute path is not found locally' do
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall /bogus.txt #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq status.exitstatus, 1
-  eq err, "rinstall: source is absolute path and does not exist\n"
+  eq err, "rinstall: source /bogus.txt with absolute path does not exist\n"
   eq out, ''
   eq File.exist?(dst), false
 end
