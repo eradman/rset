@@ -43,7 +43,6 @@ exists but is not the same as
 then
 .Xr diff 1
 is used to display the difference before it is updated.
-.Pp
 If the
 .Ar target
 is omitted, the
@@ -51,9 +50,10 @@ is omitted, the
 is placed in the staging directory defined by the
 .Ev SD
 environment variable.
-The source may be defined with either an absolute or relative path.
-An absolute path points to a file on a local file system on the remote side.
-Although, if the source is defined with a relative path, then
+.Pp
+If the source is defined absolute path it must exist on a file system on the
+remote host.
+If the source is defined with a relative path, then
 .Nm
 first checks if the source already exists in the
 .Ev SD
@@ -81,7 +81,7 @@ This argument is passed to
 .It Fl o
 Owner and/or group to set.
 This argument is passed to
-.Xr chown 1 .
+.Xr chown 8 .
 .El
 .Sh ENVIRONMENT
 .Bl -tag -width Ds
@@ -116,7 +116,7 @@ Fetch latest copy of sources and extract
 .Dl $SD/rinstall wodpress.tar.gz
 .Dl tar -xzf $SD/wordpress.tar.gz -C /var/www
 .Pp
-Fetch a file from an alternative location and store it in the Staging Directory
+Fetch a file from an alternative location and store it in the staging directory
 under tools/sys/ if it's not already there and it's not available at
 $INSTALL_URL/tools/sys/sometool.tgz
 .Pp
