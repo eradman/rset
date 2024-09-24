@@ -174,8 +174,8 @@ try 'Archive files listed for a label' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/var.tar '_archive/10.0.0.99 var.tar'
-    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/certs.tar '_archive/10.0.0.99 certs.tar'
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/var.tar _archive/10.0.0.99:var.tar
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/certs.tar _archive/10.0.0.99:certs.tar
   RESULT
 end
 
@@ -185,8 +185,8 @@ try 'Archive files with relative and absolute paths' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/../home.tgz '_archive/10.0.0.99 home.tgz'
-    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/home.tgz '_archive/10.0.0.99 home.tgz'
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/../home.tgz _archive/10.0.0.99:home.tgz
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/home.tgz _archive/10.0.0.99:home.tgz
   RESULT
 end
 
@@ -196,8 +196,8 @@ try 'Restore files listed for a label' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    scp -o ControlPath=/tmp/test_rset_socket '_archive/10.0.0.99 certs.tar' 10.0.0.99:/tmp/rset_staging_6000/certs.tar
-    scp -o ControlPath=/tmp/test_rset_socket '_archive/10.0.0.99 var.tar' 10.0.0.99:/tmp/rset_staging_6000/var.tar
+    scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:certs.tar 10.0.0.99:/tmp/rset_staging_6000/certs.tar
+    scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:var.tar 10.0.0.99:/tmp/rset_staging_6000/var.tar
   RESULT
 end
 
