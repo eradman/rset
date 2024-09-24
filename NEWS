@@ -1,5 +1,16 @@
 = Release History
 
+== 3.1: September 24, 2024
+
+ - Add begin= and end= options
+ - Add archive and restore options
+ - Allow IPv6 addresses to be used in routes
+ - Add out-of-bounds check to options
+ - Use 'set -a' instead of 'sh -a' to avoid environment contamination
+ - Enable parallel execution using background workers
+ - rinstall(1) print name of missing source with absolute path
+ - rinstall(1) adjust comments and error messages
+
 == 3.0: February 26, 2024
 
  - Check for ssh-agent before updating _rutils
@@ -12,10 +23,10 @@
  - Detect and use native strlcpy(3), strlcat(3), arc4random(3) on Linux
  - Upload _rutils and exported paths in two steps for compatibility with busybox tar(1)
  - rsub(1): escape ampersands found in '-l' argument
- - rinstall(1): allow diff(1) behavior to be modified using RINSTALL_DIFF_ARGS
- - rinstall(1): add '-a' option for defining an alternate source location
- - rinstall(1): saving a file in $SD no longer depends the current directory
- - rinstall(1): failure running diff(1) no longer reports "files are different"
+ - rinstall(1) allow diff(1) behavior to be modified using RINSTALL_DIFF_ARGS
+ - rinstall(1) add '-a' option for defining an alternate source location
+ - rinstall(1) saving a file in $SD no longer depends the current directory
+ - rinstall(1) failure running diff(1) no longer reports "files are different"
 
 == 2.9: December 22, 2023
 
