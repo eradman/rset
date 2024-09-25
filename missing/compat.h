@@ -4,11 +4,11 @@
 size_t strlcpy(char *dst, const char *src, size_t dsize);
 size_t strlcat(char *dst, const char *src, size_t dsize);
 unsigned int arc4random(void);
+long long strtonum(const char *numstr, long long minval, long long maxval, const char **errstrp);
 #endif
 
 #if defined(_MACOS_PORT) || defined(_LINUX_PORT)
 void setproctitle(const char *fmt, ...);
-long long strtonum(const char *numstr, long long minval, long long maxval, const char **errstrp);
 #endif
 
 #ifndef __OpenBSD__
