@@ -33,6 +33,7 @@
 #include <unistd.h>
 
 #include "missing/compat.h"
+
 #include "config.h"
 #include "execute.h"
 #include "input.h"

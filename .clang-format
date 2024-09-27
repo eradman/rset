@@ -1,0 +1,17 @@
+---
+UseTab: ForIndentation
+Language: Cpp
+TabWidth: 4
+ColumnLimit: 100
+IndentWidth: 4
+BasedOnStyle: LLVM
+AlignOperands: false
+IncludeBlocks: Preserve
+SpaceBeforeParens: ControlStatements
+Cpp11BracedListStyle: false
+SpaceAfterCStyleCast: true
+AlignAfterOpenBracket: DontAlign
+BreakBeforeBinaryOperators: NonAssignment
+SpacesBeforeTrailingComments: 2
+AlwaysBreakAfterDefinitionReturnType: TopLevel
+...

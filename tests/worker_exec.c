@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "missing/compat.h"
+
 #include "input.h"
 #include "worker.h"
-#include "missing/compat.h"
 
 /* globals */
 Label **route_labels;    /* parent */

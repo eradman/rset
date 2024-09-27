@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "missing/compat.h"
+
 #include "rutils.h"
 
 /* forwards */

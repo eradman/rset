@@ -28,6 +28,7 @@
 #include <unistd.h>
 
 #include "missing/compat.h"
+
 #include "config.h"
 #include "rutils.h"
 #include "execute.h"

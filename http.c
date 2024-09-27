@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "missing/compat.h"
+
 #include "http.h"
 
 const char *req_field_str[] = {
