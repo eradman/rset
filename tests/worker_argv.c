@@ -5,11 +5,11 @@
 #include "worker.h"
 
 /* globals */
-Label **route_labels;    /* parent */
-Label **host_labels;     /* child */
+Label **route_labels; /* parent */
+Label **host_labels;  /* child */
 
-int main(int argc, char **argv)
-{
+int
+main(int argc, char **argv) {
 	int n;
 	int worker_argc;
 	char **worker_argv;
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 	worker_argc = create_worker_argv(argv, worker_argv);
 
 	printf("(%d)\n", worker_argc);
-	for (n=0; n < worker_argc; n++)
+	for (n = 0; n < worker_argc; n++)
 		printf("%s\n", worker_argv[n]);
 
 	return 0;

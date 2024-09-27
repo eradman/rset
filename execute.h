@@ -22,7 +22,7 @@
 
 char *stagedir(int);
 int append(char *[], int, char *, ...);
-int run(char *const []);
+int run(char *const[]);
 char *cmd_pipe_stdout(char *const[], int *, int *);
 int cmd_pipe_stdin(char *const[], char *, size_t);
 int get_socket();

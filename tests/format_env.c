@@ -4,18 +4,19 @@
 #include "input.h"
 
 /* globals */
-Label **route_labels;    /* parent */
-Label **host_labels;     /* child */
+Label **route_labels; /* parent */
+Label **host_labels;  /* child */
 
 void usage();
 
-void usage() {
+void
+usage() {
 	fprintf(stderr, "usage: ./format_env N|V 'name=\"value\"'\n");
 	exit(1);
 }
 
-int main(int argc, char *argv[])
-{
+int
+main(int argc, char *argv[]) {
 	char *env;
 	char *mode;
 	int verify = 0;

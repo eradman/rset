@@ -12,56 +12,54 @@
 #include "http.h"
 
 const char *req_field_str[] = {
-	[REQ_RANGE]                 = "Range",
-	[REQ_IF_MODIFIED_SINCE]     = "If-Modified-Since",
-	[REQ_AGENT]                 = "User-Agent",
+	[REQ_RANGE] = "Range",
+	[REQ_IF_MODIFIED_SINCE] = "If-Modified-Since",
+	[REQ_AGENT] = "User-Agent",
 };
 
 const char *req_method_str[] = {
-	[M_GET]  = "GET",
+	[M_GET] = "GET",
 	[M_HEAD] = "HEAD",
 };
 
 const char *status_str[] = {
-	[S_OK]                    = "OK",
-	[S_PARTIAL_CONTENT]       = "Partial Content",
-	[S_MOVED_PERMANENTLY]     = "Moved Permanently",
-	[S_NOT_MODIFIED]          = "Not Modified",
-	[S_BAD_REQUEST]           = "Bad Request",
-	[S_FORBIDDEN]             = "Forbidden",
-	[S_NOT_FOUND]             = "Not Found",
-	[S_METHOD_NOT_ALLOWED]    = "Method Not Allowed",
-	[S_REQUEST_TIMEOUT]       = "Request Time-out",
+	[S_OK] = "OK",
+	[S_PARTIAL_CONTENT] = "Partial Content",
+	[S_MOVED_PERMANENTLY] = "Moved Permanently",
+	[S_NOT_MODIFIED] = "Not Modified",
+	[S_BAD_REQUEST] = "Bad Request",
+	[S_FORBIDDEN] = "Forbidden",
+	[S_NOT_FOUND] = "Not Found",
+	[S_METHOD_NOT_ALLOWED] = "Method Not Allowed",
+	[S_REQUEST_TIMEOUT] = "Request Time-out",
 	[S_RANGE_NOT_SATISFIABLE] = "Range Not Satisfiable",
-	[S_REQUEST_TOO_LARGE]     = "Request Header Fields Too Large",
+	[S_REQUEST_TOO_LARGE] = "Request Header Fields Too Large",
 	[S_INTERNAL_SERVER_ERROR] = "Internal Server Error",
 	[S_VERSION_NOT_SUPPORTED] = "HTTP Version not supported",
 };
 
 char *
-timestamp(time_t t, char buf[TIMESTAMP_LEN])
-{
+timestamp(time_t t, char buf[TIMESTAMP_LEN]) {
 	strftime(buf, TIMESTAMP_LEN, "%a, %d %b %Y %T GMT", gmtime(&t));
 
 	return buf;
 }
 
 enum status
-http_send_status(int fd, enum status s)
-{
+http_send_status(int fd, enum status s) {
 	char t[TIMESTAMP_LEN];
 
 	if (dprintf(fd,
-	            "HTTP/1.1 %d %s\r\n"
-	            "Date: %s\r\n"
-	            "Connection: close\r\n"
-	            "%s"
-	            "Content-Type: text/plain\r\n"
-	            "\r\n"
-	            "%d %s\n",
-	            s, status_str[s], timestamp(time(NULL), t),
-	            (s == S_METHOD_NOT_ALLOWED) ? "Allow: HEAD, GET\r\n" : "",
-	            s, status_str[s]) < 0) {
+	        "HTTP/1.1 %d %s\r\n"
+	        "Date: %s\r\n"
+	        "Connection: close\r\n"
+	        "%s"
+	        "Content-Type: text/plain\r\n"
+	        "\r\n"
+	        "%d %s\n",
+	        s, status_str[s], timestamp(time(NULL), t),
+	        (s == S_METHOD_NOT_ALLOWED) ? "Allow: HEAD, GET\r\n" : "", s, status_str[s])
+	    < 0) {
 		return S_REQUEST_TIMEOUT;
 	}
 
@@ -69,8 +67,7 @@ http_send_status(int fd, enum status s)
 }
 
 static void
-decode(const char src[PATH_MAX], char dest[PATH_MAX])
-{
+decode(const char src[PATH_MAX], char dest[PATH_MAX]) {
 	size_t i;
 	unsigned char n;
 	const char *s;
@@ -87,8 +84,7 @@ decode(const char src[PATH_MAX], char dest[PATH_MAX])
 }
 
 int
-http_get_request(int fd, struct request *req)
-{
+http_get_request(int fd, struct request *req) {
 	size_t hlen, i, mlen;
 	ssize_t off;
 	char h[HEADER_MAX], *p, *q;
@@ -99,7 +95,7 @@ http_get_request(int fd, struct request *req)
 	/*
 	 * receive header
 	 */
-	for (hlen = 0; ;) {
+	for (hlen = 0;;) {
 		if ((off = read(fd, h + hlen, sizeof(h) - hlen)) < 0) {
 			return http_send_status(fd, S_REQUEST_TIMEOUT);
 		} else if (off == 0) {
@@ -166,8 +162,7 @@ http_get_request(int fd, struct request *req)
 		return http_send_status(fd, S_BAD_REQUEST);
 	}
 	p += sizeof("HTTP/") - 1;
-	if (strncmp(p, "1.0", sizeof("1.0") - 1) &&
-	    strncmp(p, "1.1", sizeof("1.1") - 1)) {
+	if (strncmp(p, "1.0", sizeof("1.0") - 1) && strncmp(p, "1.1", sizeof("1.1") - 1)) {
 		return http_send_status(fd, S_VERSION_NOT_SUPPORTED);
 	}
 	p += sizeof("1.*") - 1;
@@ -187,8 +182,7 @@ http_get_request(int fd, struct request *req)
 	/* match field type */
 	for (; *p != '\0';) {
 		for (i = 0; i < NUM_REQ_FIELDS; i++) {
-			if (!strncasecmp(p, req_field_str[i],
-			                 strlen(req_field_str[i]))) {
+			if (!strncasecmp(p, req_field_str[i], strlen(req_field_str[i]))) {
 				break;
 			}
 		}
@@ -230,8 +224,7 @@ http_get_request(int fd, struct request *req)
 }
 
 static int
-normabspath(char *path)
-{
+normabspath(char *path) {
 	size_t len;
 	int last = 0;
 	char *p, *q;
@@ -245,7 +238,7 @@ normabspath(char *path)
 	/* get length of path */
 	len = strlen(p);
 
-	for (; !last; ) {
+	for (; !last;) {
 		/* bound path component within (p,q) */
 		if (!(q = strchr(p, '/'))) {
 			q = strchr(p, '\0');
@@ -259,7 +252,8 @@ normabspath(char *path)
 			/* "../" */
 			if (p != path + 1) {
 				/* place p right after the previous / */
-				for (p -= 2; p > path && *p != '/'; p--);
+				for (p -= 2; p > path && *p != '/'; p--)
+					;
 				p++;
 			}
 			goto squash;
@@ -268,7 +262,7 @@ normabspath(char *path)
 			p = q + 1;
 			continue;
 		}
-squash:
+	squash:
 		/* squash (p,q) into void */
 		if (last) {
 			*p = '\0';
@@ -283,8 +277,7 @@ squash:
 }
 
 enum status
-http_send_response(int fd, struct request *req)
-{
+http_send_response(int fd, struct request *req) {
 	struct stat st;
 	struct tm tm;
 	size_t len;
@@ -308,8 +301,7 @@ http_send_response(int fd, struct request *req)
 
 	/* stat the target */
 	if (stat(RELPATH(realtarget), &st) < 0) {
-		return http_send_status(fd, (errno == EACCES) ?
-		                        S_FORBIDDEN : S_NOT_FOUND);
+		return http_send_status(fd, (errno == EACCES) ? S_FORBIDDEN : S_NOT_FOUND);
 	}
 
 	if (S_ISDIR(st.st_mode)) {
@@ -337,12 +329,12 @@ http_send_response(int fd, struct request *req)
 		/* compare with last modification date of the file */
 		if (difftime(st.st_mtim.tv_sec, mktime(&tm)) <= 0) {
 			if (dprintf(fd,
-			            "HTTP/1.1 %d %s\r\n"
-			            "Date: %s\r\n"
-			            "Connection: close\r\n"
-				    "\r\n",
-			            S_NOT_MODIFIED, status_str[S_NOT_MODIFIED],
-			            timestamp(time(NULL), t)) < 0) {
+			        "HTTP/1.1 %d %s\r\n"
+			        "Date: %s\r\n"
+			        "Connection: close\r\n"
+			        "\r\n",
+			        S_NOT_MODIFIED, status_str[S_NOT_MODIFIED], timestamp(time(NULL), t))
+			    < 0) {
 				return S_REQUEST_TIMEOUT;
 			}
 			return S_NOT_MODIFIED;
@@ -376,8 +368,7 @@ http_send_response(int fd, struct request *req)
 			lower = strtonum(p, 0, LLONG_MAX, &err);
 			if (!err) {
 				if (q[0] != '\0') {
-					upper = strtonum(q, 0, LLONG_MAX,
-					                 &err);
+					upper = strtonum(q, 0, LLONG_MAX, &err);
 				} else {
 					upper = st.st_size - 1;
 				}
@@ -421,31 +412,28 @@ http_send_response(int fd, struct request *req)
 			upper = st.st_size - 1;
 		}
 		goto satisfiable;
-not_satisfiable:
+	not_satisfiable:
 		if (dprintf(fd,
-		            "HTTP/1.1 %d %s\r\n"
-		            "Date: %s\r\n"
-		            "Content-Range: bytes */%ld\r\n"
-		            "Connection: close\r\n"
-		            "\r\n",
-		            S_RANGE_NOT_SATISFIABLE,
-		            status_str[S_RANGE_NOT_SATISFIABLE],
-		            timestamp(time(NULL), t),
-		            (long)st.st_size) < 0) {
+		        "HTTP/1.1 %d %s\r\n"
+		        "Date: %s\r\n"
+		        "Content-Range: bytes */%ld\r\n"
+		        "Connection: close\r\n"
+		        "\r\n",
+		        S_RANGE_NOT_SATISFIABLE, status_str[S_RANGE_NOT_SATISFIABLE],
+		        timestamp(time(NULL), t), (long) st.st_size)
+		    < 0) {
 			return S_REQUEST_TIMEOUT;
 		}
 		return S_RANGE_NOT_SATISFIABLE;
-satisfiable:
-		;
+	satisfiable:;
 	}
 
 	return resp_file(fd, RELPATH(realtarget), req, &st, lower, upper);
 }
 
 enum status
-resp_file(int fd, const char *name, struct request *req,
-          const struct stat *st, long lower, long upper)
-{
+resp_file(
+    int fd, const char *name, struct request *req, const struct stat *st, long lower, long upper) {
 	FILE *fp;
 	enum status s;
 	ssize_t bread, bwritten;
@@ -473,22 +461,22 @@ resp_file(int fd, const char *name, struct request *req,
 	s = range ? S_PARTIAL_CONTENT : S_OK;
 
 	if (dprintf(fd,
-	            "HTTP/1.1 %d %s\r\n"
-	            "Date: %s\r\n"
-	            "Connection: close\r\n"
-	            "Last-Modified: %s\r\n"
-	            "Content-Type: application/octet-stream\r\n"
-	            "Content-Length: %ld\r\n",
-	            s, status_str[s], timestamp(time(NULL), t1),
-	            timestamp(st->st_mtim.tv_sec, t2),
-	            upper - lower + 1) < 0) {
+	        "HTTP/1.1 %d %s\r\n"
+	        "Date: %s\r\n"
+	        "Connection: close\r\n"
+	        "Last-Modified: %s\r\n"
+	        "Content-Type: application/octet-stream\r\n"
+	        "Content-Length: %ld\r\n",
+	        s, status_str[s], timestamp(time(NULL), t1), timestamp(st->st_mtim.tv_sec, t2),
+	        upper - lower + 1)
+	    < 0) {
 		s = S_REQUEST_TIMEOUT;
 		goto cleanup;
 	}
 	if (range) {
-		if (dprintf(fd, "Content-Range: bytes %ld-%ld/%ld\r\n",
-		            lower, upper + (upper < 0),
-		            (long)st->st_size) < 0) {
+		if (dprintf(fd, "Content-Range: bytes %ld-%ld/%ld\r\n", lower, upper + (upper < 0),
+		        (long) st->st_size)
+		    < 0) {
 			s = S_REQUEST_TIMEOUT;
 			goto cleanup;
 		}
@@ -502,8 +490,7 @@ resp_file(int fd, const char *name, struct request *req,
 		/* write data until upper bound is hit */
 		remaining = upper - lower + 1;
 
-		while ((bread = fread(read_buf, 1, MIN(sizeof(read_buf),
-		                      (size_t)remaining), fp))) {
+		while ((bread = fread(read_buf, 1, MIN(sizeof(read_buf), (size_t) remaining), fp))) {
 			if (bread < 0) {
 				s = S_INTERNAL_SERVER_ERROR;
 				goto cleanup;

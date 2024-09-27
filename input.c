@@ -24,21 +24,21 @@
 #include "missing/compat.h"
 
 #include "config.h"
-#include "input.h"
 #include "execute.h"
+#include "input.h"
 
 #define LABELS_MAX 100
 #define BUFSIZE 4096
 
 /* globals from input.h */
-extern Label **route_labels;    /* parent */
-extern Label **host_labels;     /* child */
+extern Label **route_labels; /* parent */
+extern Label **host_labels;  /* child */
 
 /* globals */
-FILE* yyin;
+FILE *yyin;
 Label *lp;
 Options current_options;
-const char* yyfn;
+const char *yyfn;
 int n_labels;
 
 void
@@ -58,7 +58,7 @@ parse_pln() {
 	int j;
 	int tfd = 0;
 	int local_argc;
-	enum {Local, Remote} context;
+	enum { Local, Remote } context;
 	unsigned n = 0;
 	char tmp_src[128];
 	char *aliases;
@@ -73,12 +73,12 @@ parse_pln() {
 		n++;
 
 		/* empty lines and comments */
-		if (line[0] == '\n' || line[0] == '#');
+		if (line[0] == '\n' || line[0] == '#')
+			;
 
 		/* leading whitespace */
 		else if (line[0] == ' ') {
-			fprintf(stderr, "%s: invalid leading character on line %d: '%c'\n",
-			    yyfn, n, line[0]);
+			fprintf(stderr, "%s: invalid leading character on line %d: '%c'\n", yyfn, n, line[0]);
 			exit(1);
 		}
 
@@ -86,8 +86,8 @@ parse_pln() {
 		else if (line[0] == '{') {
 			context = Local;
 			if (strlen(line) > 2) {
-				fprintf(stderr, "%s: invalid trailing characters on line %d: '%s'\n",
-				    yyfn, n, line);
+				fprintf(
+				    stderr, "%s: invalid trailing characters on line %d: '%s'\n", yyfn, n, line);
 				exit(1);
 			}
 			strlcpy(tmp_src, "/tmp/rset_local.XXXXXX", sizeof tmp_src);
@@ -98,14 +98,15 @@ parse_pln() {
 		else if (line[0] == '}') {
 			context = Remote;
 			if (strlen(line) > 2) {
-				fprintf(stderr, "%s: invalid trailing characters on line %d: '%s'\n",
-				    yyfn, n, line);
+				fprintf(
+				    stderr, "%s: invalid trailing characters on line %d: '%s'\n", yyfn, n, line);
 				exit(1);
 			}
 			if (tfd > 0) {
 				close(tfd);
-				lp = host_labels[n_labels-1];
-				apply_default(op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
+				lp = host_labels[n_labels - 1];
+				apply_default(
+				    op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
 
 				local_argc = str_to_array(local_argv, op.local_interpreter, PLN_MAX_PATHS, " ");
 				(void) append(local_argv, local_argc, tmp_src, NULL);
@@ -115,13 +116,15 @@ parse_pln() {
 
 				unlink(tmp_src);
 				if (error_code != 0)
-					errx(1, "local execution for %s label '%s' exited with code %d",
-					    yyfn, lp->name, error_code);
+					errx(1, "local execution for %s label '%s' exited with code %d", yyfn, lp->name,
+					    error_code);
 				tfd = 0;
 
-				if ((lp->content_size > 0) && (lp->content[lp->content_size-1] != '\n')) {
-					fprintf(stderr, "%s: output of local execution for the label '%s' "
-					    "must end with a newline\n", yyfn, lp->name);
+				if ((lp->content_size > 0) && (lp->content[lp->content_size - 1] != '\n')) {
+					fprintf(stderr,
+					    "%s: output of local execution for the label '%s' "
+					    "must end with a newline\n",
+					    yyfn, lp->name);
 					exit(1);
 				}
 			}
@@ -130,56 +133,59 @@ parse_pln() {
 		/* tab-intended content */
 		else if (line[0] == '\t') {
 			switch (context) {
-				case Local:
-					if ((write(tfd, line+1, linelen)) == -1)
-						err(1, "write");
-					break;
-				case Remote:
-					lp = host_labels[n_labels-1];
-					while ((linelen + lp->content_size) >= content_allocation) {
-						content_allocation += BUFSIZE;
-						lp->content = realloc(lp->content, content_allocation);
-					}
-					memcpy(lp->content+lp->content_size, line+1, linelen-1);
-					lp->content_size += linelen-1;
-					lp->content[lp->content_size] = '\0';
-					break;
+			case Local:
+				if ((write(tfd, line + 1, linelen)) == -1)
+					err(1, "write");
+				break;
+			case Remote:
+				lp = host_labels[n_labels - 1];
+				while ((linelen + lp->content_size) >= content_allocation) {
+					content_allocation += BUFSIZE;
+					lp->content = realloc(lp->content, content_allocation);
+				}
+				memcpy(lp->content + lp->content_size, line + 1, linelen - 1);
+				lp->content_size += linelen - 1;
+				lp->content[lp->content_size] = '\0';
+				break;
 			}
 		}
 
 		/* option */
 		else if (strchr(line, '=')) {
-			line[linelen-1] = '\0';
+			line[linelen - 1] = '\0';
 			read_option(line, &current_options);
 		}
 
 		/* label */
-		else if (strchr(line, ':') ) {
+		else if (strchr(line, ':')) {
 			host_labels[n_labels] = malloc(sizeof(Label));
 			host_labels[n_labels]->content = malloc(BUFSIZE);
 			content_allocation = BUFSIZE;
 			read_label(line, host_labels[n_labels]);
-			for (j=0; j < host_labels[n_labels]->n_aliases; j++) {
+			for (j = 0; j < host_labels[n_labels]->n_aliases; j++) {
 				aliases = host_labels[n_labels]->aliases[j];
 				if (aliases && aliases[0] == ' ') {
-					fprintf(stderr, "%s: invalid leading character for label alias on "
-					    "line %d: '%c'\n", yyfn, n, aliases[0]);
+					fprintf(stderr,
+					    "%s: invalid leading character for label alias on "
+					    "line %d: '%c'\n",
+					    yyfn, n, aliases[0]);
 					exit(1);
 				}
 			}
 			n_labels++;
 			if (n_labels == LABELS_MAX) {
-				fprintf(stderr, "%s: maximum number of labels (%d) "
-				    "exceeded\n", yyfn, n_labels );
+				fprintf(stderr,
+				    "%s: maximum number of labels (%d) "
+				    "exceeded\n",
+				    yyfn, n_labels);
 				exit(1);
 			}
 		}
 
 		/* unknown */
 		else {
-			line[linelen-1] = '\0';
-			fprintf(stderr, "%s: unknown symbol at line %d: '%s'\n",
-			    yyfn, n, line);
+			line[linelen - 1] = '\0';
+			fprintf(stderr, "%s: unknown symbol at line %d: '%s'\n", yyfn, n, line);
 			exit(1);
 		}
 	}
@@ -192,7 +198,7 @@ parse_pln() {
 /*
  * alloc_labels - allocate memory for Label struct
  */
-Label**
+Label **
 alloc_labels() {
 	Label **new_labels;
 
@@ -227,7 +233,7 @@ read_host_labels(Label *route_label) {
 			err(1, "%s", line);
 		parse_pln();
 		fclose(yyin);
-		line = next_line+1;
+		line = next_line + 1;
 	}
 	free(content);
 }
@@ -241,11 +247,10 @@ str_to_array(char *argv[], char *inputstring, int max_elements, const char *deli
 	char **ap;
 
 	argc = 0;
-	for (ap = argv; ap < &argv[max_elements] &&
-		(*ap = strsep(&inputstring, delim)) != NULL;) {
-			argc++;
-			if (**ap != '\0')
-				ap++;
+	for (ap = argv; ap < &argv[max_elements] && (*ap = strsep(&inputstring, delim)) != NULL;) {
+		argc++;
+		if (**ap != '\0')
+			ap++;
 	}
 	*ap = NULL;
 	return argc;
@@ -260,10 +265,10 @@ array_to_str(char *argv[], char *outputstring, int max_length, const char *delim
 	char *p = outputstring;
 
 	while (argv && *argv) {
-		argc += strlcpy(p+argc, *argv, max_length-argc);
+		argc += strlcpy(p + argc, *argv, max_length - argc);
 		argv++;
 		if (argv && *argv)
-			argc += strlcpy(p+argc, delim, max_length-argc);
+			argc += strlcpy(p + argc, delim, max_length - argc);
 	}
 	outputstring[argc] = '\0';
 	return argc;
@@ -273,9 +278,9 @@ array_to_str(char *argv[], char *outputstring, int max_length, const char *delim
  * ltrim - strim leading characters
  */
 
-char*
+char *
 ltrim(char *s, int c) {
-	int offset=0;
+	int offset = 0;
 
 	while (s[offset] == c && s[offset] != '\0')
 		offset++;
@@ -291,21 +296,21 @@ read_label(char *line, Label *label) {
 	char *export;
 
 	/* remove trailing newline and split on last ':' */
-	line[strlen(line)-1] = '\0';
+	line[strlen(line) - 1] = '\0';
 	export = strrchr(line, ':');
-	*export++ = '\0';
+	*export ++ = '\0';
 	strlcpy(label->name, line, PLN_LABEL_SIZE);
 
 	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES, ",");
 	if (label->n_aliases == PLN_MAX_ALIASES)
-		errx(1, "> %d aliases specified for label '%s'", PLN_MAX_ALIASES-2, label->name);
+		errx(1, "> %d aliases specified for label '%s'", PLN_MAX_ALIASES - 2, label->name);
 
 	if (label->n_aliases == 1)
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
 	len = str_to_array(label->export_paths, strdup(ltrim(export, ' ')), PLN_MAX_PATHS, " ");
 	if (len == PLN_MAX_PATHS)
-		errx(1, "> %d export paths specified for label '%s'", PLN_MAX_PATHS-1, label->name);
+		errx(1, "> %d export paths specified for label '%s'", PLN_MAX_PATHS - 1, label->name);
 
 	memcpy(&label->options, &current_options, sizeof(current_options));
 
@@ -340,21 +345,17 @@ read_option(char *text, Options *op) {
 	else if (strcmp(k, "environment") == 0) {
 		len = strlcpy(op->environment, v, PLN_OPTION_SIZE);
 		free(env_split_lines(op->environment, op->environment, 1));
-	}
-	else if (strcmp(k, "environment_file") == 0) {
+	} else if (strcmp(k, "environment_file") == 0) {
 		if (strlcpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
 			content = read_environment_file(op->environment_file);
 			free(env_split_lines(content, op->environment_file, 1));
 			free(content);
 		}
-	}
-	else if (strcmp(k, "begin") == 0) {
+	} else if (strcmp(k, "begin") == 0) {
 		op->begin = strdup(v);
-	}
-	else if (strcmp(k, "end") == 0) {
+	} else if (strcmp(k, "end") == 0) {
 		op->end = strdup(v);
-	}
-	else {
+	} else {
 		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
 		exit(1);
 	}
@@ -393,59 +394,60 @@ expand_numeric_range(char **argv, char *input, int max_elements) {
 
 	bzero(parts, sizeof(parts));
 	bzero(range_string, sizeof(range_string));
-	for (n=0; n<RANGE_SIZE; n++)
+	for (n = 0; n < RANGE_SIZE; n++)
 		range_index[n] = 0;
 	hostcount = 0;
 
-	for (group=0, pos=0, out_pos=0; input[pos]; pos++) {
+	for (group = 0, pos = 0, out_pos = 0; input[pos]; pos++) {
 		ch = input[pos];
 
 		if (group > RANGE_SIZE)
-			errx(1, "maximum of %d groups", RANGE_SIZE/2);
+			errx(1, "maximum of %d groups", RANGE_SIZE / 2);
 
 		switch (ch) {
-			case '.':
-				if (in_range) {
-					switch (input[pos+1]) {
-						case '.':
-							group++; pos++;
-							continue;
-						default:
-							errx(1, "unexpected %c at position %d", ch, pos);
-					}
-				}
-				break;
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-				if (in_range) {
-					n = group - 1; /* [low, high] */
-					if (range_index[n] > MAX_DIGITS-2)
-						errx(1, "range %s too large at position %d", range_string[n], pos);
-					range_string[n][range_index[n]++] = ch;
+		case '.':
+			if (in_range) {
+				switch (input[pos + 1]) {
+				case '.':
+					group++;
+					pos++;
 					continue;
+				default:
+					errx(1, "unexpected %c at position %d", ch, pos);
 				}
-				break;
-			case '{':
-				in_range = 1;
-				group++;
+			}
+			break;
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			if (in_range) {
 				n = group - 1; /* [low, high] */
-				range_index[n] = 0;
+				if (range_index[n] > MAX_DIGITS - 2)
+					errx(1, "range %s too large at position %d", range_string[n], pos);
+				range_string[n][range_index[n]++] = ch;
 				continue;
-			case '}':
-				if (!in_range)
-					errx(1, "unexpected: %c at position %d", ch, pos);
-				in_range = 0;
-				parts_index++;
-				out_pos = 0;
-				continue;
+			}
+			break;
+		case '{':
+			in_range = 1;
+			group++;
+			n = group - 1; /* [low, high] */
+			range_index[n] = 0;
+			continue;
+		case '}':
+			if (!in_range)
+				errx(1, "unexpected: %c at position %d", ch, pos);
+			in_range = 0;
+			parts_index++;
+			out_pos = 0;
+			continue;
 		}
 
 		parts[parts_index][out_pos++] = ch;
@@ -455,7 +457,7 @@ expand_numeric_range(char **argv, char *input, int max_elements) {
 		/* multiple groups may be captures, but only the first is formatted */
 		range_numeric[0] = range_numeric[1] = 0;
 
-		for (i=0; i<group; i++) {
+		for (i = 0; i < group; i++) {
 			range_numeric[i] = strtonum(range_string[i], 0, 9999, &errstr);
 			if (errstr != NULL)
 				errx(1, "number out of bounds %s: '%s'", errstr, range_string[i]);
@@ -467,13 +469,12 @@ expand_numeric_range(char **argv, char *input, int max_elements) {
 		if ((range_numeric[1] - range_numeric[0]) > max_elements)
 			errx(1, "maximum range exceeds %d", max_elements);
 
-		for (seq=range_numeric[0]; seq<=range_numeric[1]; seq++) {
+		for (seq = range_numeric[0]; seq <= range_numeric[1]; seq++) {
 			asprintf(&argv[hostcount], "%s%d%s", parts[0], seq, parts[1]);
 			hostcount++;
 		}
-	}
-	else {
-		argv[0] = (char *)input;
+	} else {
+		argv[0] = (char *) input;
 		hostcount = 1;
 	}
 	argv[hostcount] = NULL;
@@ -493,7 +494,7 @@ env_split_lines(const char *s, const char *option_value, int verify) {
 	size_t len;
 
 	len = strlen(s);
-	new = malloc(len+2);
+	new = malloc(len + 2);
 	memcpy(new, s, len);
 
 	/* add trailing newline */
@@ -538,7 +539,7 @@ read_environment_file(const char *environment_file) {
 
 	len = read(fd, buf, MAX_ENVIRONMENT);
 	if (len == MAX_ENVIRONMENT)
-		errx(1, "environment file %s exceeds %dkB", environment_file, MAX_ENVIRONMENT/1024);
+		errx(1, "environment file %s exceeds %dkB", environment_file, MAX_ENVIRONMENT / 1024);
 
 	close(fd);
 	buf[len] = '\0';

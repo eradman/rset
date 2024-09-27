@@ -8,8 +8,8 @@
 #define FIELD_MAX 200
 #define TIMESTAMP_LEN 30
 
-#define MIN(x,y)  ((x) < (y) ? (x) : (y))
-#define LEN(x) (sizeof (x) / sizeof *(x))
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define LEN(x) (sizeof(x) / sizeof *(x))
 #define RELPATH(x) ((!*(x) || !strcmp(x, "/")) ? "." : ((x) + 1))
 
 enum req_field {
@@ -37,17 +37,17 @@ struct request {
 };
 
 enum status {
-	S_OK                    = 200,
-	S_PARTIAL_CONTENT       = 206,
-	S_MOVED_PERMANENTLY     = 301,
-	S_NOT_MODIFIED          = 304,
-	S_BAD_REQUEST           = 400,
-	S_FORBIDDEN             = 403,
-	S_NOT_FOUND             = 404,
-	S_METHOD_NOT_ALLOWED    = 405,
-	S_REQUEST_TIMEOUT       = 408,
+	S_OK = 200,
+	S_PARTIAL_CONTENT = 206,
+	S_MOVED_PERMANENTLY = 301,
+	S_NOT_MODIFIED = 304,
+	S_BAD_REQUEST = 400,
+	S_FORBIDDEN = 403,
+	S_NOT_FOUND = 404,
+	S_METHOD_NOT_ALLOWED = 405,
+	S_REQUEST_TIMEOUT = 408,
 	S_RANGE_NOT_SATISFIABLE = 416,
-	S_REQUEST_TOO_LARGE     = 431,
+	S_REQUEST_TOO_LARGE = 431,
 	S_INTERNAL_SERVER_ERROR = 500,
 	S_VERSION_NOT_SUPPORTED = 505,
 };

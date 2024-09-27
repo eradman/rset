@@ -43,26 +43,26 @@ typedef struct Label {
 	char name[PLN_LABEL_SIZE];
 	char *aliases[PLN_MAX_ALIASES];
 	int n_aliases;
-	char* export_paths[PLN_MAX_PATHS];
-	char* content;
+	char *export_paths[PLN_MAX_PATHS];
+	char *content;
 	int content_size;
 	Options options;
 	struct Label **labels;
 } Label;
 
-extern Label **route_labels;    /* parent */
-extern Label **host_labels;     /* child */
+extern Label **route_labels; /* parent */
+extern Label **host_labels;  /* child */
 
 /* forwards */
 
 void read_pln(const char *fn);
 void parse_pln();
 void read_host_labels(Label *route_label);
-Label** alloc_labels();
+Label **alloc_labels();
 int array_to_str(char *[], char *, int, const char *);
 int str_to_array(char *[], char *, int, const char *);
 
-char* ltrim(char *, int);
+char *ltrim(char *, int);
 void read_label(char *, Label *);
 void read_option(char *, Options *);
 int expand_numeric_range(char **, char *, int);

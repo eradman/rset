@@ -82,11 +82,11 @@ run(char *const argv[]) {
 
 	pid = fork();
 	switch (pid) {
-		case -1:
-			err(1, "fork");
-		case 0:
-			execvp(argv[0], argv);
-			err(1, "%s", argv[0]);
+	case -1:
+		err(1, "fork");
+	case 0:
+		execvp(argv[0], argv);
+		err(1, "%s", argv[0]);
 	}
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "waitpid on %d", pid);
@@ -111,7 +111,7 @@ cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size) {
 
 	nbytes = 0;
 	buffer_size = ALLOCATION_SIZE;
-	output = malloc(buffer_size + 1);  /* Add room for NULL */
+	output = malloc(buffer_size + 1); /* Add room for NULL */
 	*error_code = -1;
 
 	pipe(stdout_pipe);
@@ -199,8 +199,8 @@ get_socket() {
 	addr.sin_port = htons(0);
 
 	sock = socket(AF_INET, SOCK_STREAM, 0);
-	bind(sock, (struct sockaddr*) &addr, sizeof(addr));
-	getsockname(sock, (struct sockaddr*) &addr, &addrlen);
+	bind(sock, (struct sockaddr *) &addr, sizeof(addr));
+	getsockname(sock, (struct sockaddr *) &addr, &addrlen);
 	port = ntohs(addr.sin_port);
 	close(sock);
 
@@ -212,8 +212,7 @@ get_socket() {
  */
 
 char *
-findprog(char *prog)
-{
+findprog(char *prog) {
 	int len;
 	char *path;
 	char *filename;
@@ -232,12 +231,11 @@ findprog(char *prog)
 			p = ".";
 
 		len = strlen(p);
-		while (len > 0 && p[len-1] == '/')
-			p[--len] = '\0';  /* strip trailing '/' */
+		while (len > 0 && p[len - 1] == '/')
+			p[--len] = '\0'; /* strip trailing '/' */
 
 		(void) snprintf(filename, PATH_MAX, "%s/%s", p, prog);
-		if ((stat(filename, &sbuf) == 0) && S_ISREG(sbuf.st_mode) &&
-		    access(filename, X_OK) == 0) {
+		if ((stat(filename, &sbuf) == 0) && S_ISREG(sbuf.st_mode) && access(filename, X_OK) == 0) {
 			(void) free(path);
 			return filename;
 		}
@@ -270,7 +268,8 @@ verify_ssh_agent() {
 }
 
 int
-start_connection(char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config) {
+start_connection(
+    char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config) {
 	int argc;
 	int ret;
 	char cmd[PATH_MAX];
@@ -292,7 +291,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
 	if (stat(socket_path, &sb) != -1) {
-		fprintf(stderr, "rset: socket for '%s' already exists, run\n"
+		fprintf(stderr,
+		    "rset: socket for '%s' already exists, run\n"
 		    "  fstat %s\n"
 		    "and remove the file if no process is listed.\n",
 		    host_name, socket_path);
@@ -300,8 +300,7 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	}
 
 	argc = 0;
-	argc = append(argv, argc, "ssh", "-fN", "-R", port_forwarding, "-S",
-		socket_path, "-M", NULL);
+	argc = append(argv, argc, "ssh", "-fN", "-R", port_forwarding, "-S", socket_path, "-M", NULL);
 	if (ssh_config)
 		(void) append(argv, argc, "-F", ssh_config, host_name, NULL);
 	else
@@ -309,7 +308,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	if ((ret = run(argv)) != 0)
 		return ret;
 
-	snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
+	snprintf(cmd, PATH_MAX,
+	    "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
 	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
 	    socket_path, host_name, stagedir(http_port), stagedir(http_port));
 	if ((ret = system(cmd)) != 0)
@@ -319,7 +319,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 	if (path && *path) {
 		array_to_str(route_label->export_paths, path_repr, sizeof(path_repr), " ");
 
-		snprintf(cmd, PATH_MAX, "tar " TAR_OPTIONS " -cf - %s "
+		snprintf(cmd, PATH_MAX,
+		    "tar " TAR_OPTIONS " -cf - %s "
 		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
 		    path_repr, socket_path, host_name, stagedir(http_port));
 
@@ -330,7 +331,8 @@ start_connection(char *socket_path, char *host_name, Label *route_label, int htt
 }
 
 int
-update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
+update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port,
+    const char *env_override) {
 	int fd;
 	int ret;
 	char cmd[PATH_MAX];
@@ -346,9 +348,8 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
 	/* only update when value changes */
-	if (session_id_set == current_session_id() &&
-	    (strcmp(environment_set, op.environment) == 0) &&
-	    (strcmp(environment_file_set, op.environment_file) == 0))
+	if (session_id_set == current_session_id() && (strcmp(environment_set, op.environment) == 0)
+	    && (strcmp(environment_file_set, op.environment_file) == 0))
 		return 0;
 
 	session_id_set = current_session_id();
@@ -371,10 +372,9 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 
 	close(fd);
 
-	snprintf(cmd, PATH_MAX,
-	    "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
-	    op.environment_file, tmp_src, socket_path, host_name,
-	    stagedir(http_port), stagedir(http_port));
+	snprintf(cmd, PATH_MAX, "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
+	    op.environment_file, tmp_src, socket_path, host_name, stagedir(http_port),
+	    stagedir(http_port));
 	ret = system(cmd);
 	unlink(tmp_src);
 
@@ -382,7 +382,8 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 }
 
 int
-ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
+ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port,
+    const char *env_override) {
 	int argc;
 	int ret;
 	char cmd[PATH_MAX];
@@ -398,7 +399,8 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \""
+	snprintf(cmd, sizeof(cmd),
+	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
 	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter);
@@ -413,7 +415,8 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 }
 
 int
-ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port, const char *env_override) {
+ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port,
+    const char *env_override) {
 	int argc;
 	int ret;
 	char cmd[PATH_MAX];
@@ -426,8 +429,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 		return ret;
 
 	/* copy the contents of the script */
-	snprintf(cmd, sizeof(cmd), "cat > %s/_script",
-	    stagedir(http_port));
+	snprintf(cmd, sizeof(cmd), "cat > %s/_script", stagedir(http_port));
 	/* construct ssh command */
 	argc = 0;
 	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
@@ -439,10 +441,12 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
-	snprintf(cmd, sizeof(cmd), "%s sh -c \""
+	snprintf(cmd, sizeof(cmd),
+	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s %s/_script\"",
-	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter, stagedir(http_port));
+	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter,
+	    stagedir(http_port));
 
 	/* construct ssh command */
 	argc = 0;
@@ -467,7 +471,7 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 	snprintf(scp_opt, sizeof(scp_opt), "ControlPath=%s", socket_path);
 	argc = append(argv, 0, "scp", "-o", scp_opt, NULL);
 
-	for (i=0; host_label->export_paths[i]; i++) {
+	for (i = 0; host_label->export_paths[i]; i++) {
 		path = host_label->export_paths[i];
 
 		if (path[0] == '/')
@@ -491,10 +495,10 @@ void
 end_connection(char *socket_path, char *host_name, int http_port) {
 	char *argv[32];
 
-	if(access(socket_path, F_OK) == -1)
+	if (access(socket_path, F_OK) == -1)
 		return;
 
-	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port) , NULL);
+	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port), NULL);
 	if (run(argv) != 0)
 		warn("remote tmp dir");
 
@@ -525,7 +529,7 @@ local_exec(Label *host_label, char *cmd) {
 void
 apply_default(char *option, const char *user_option, const char *default_option) {
 	if (strlen(user_option) > 0)
-		memcpy(option, user_option, strlen(user_option)+1);
+		memcpy(option, user_option, strlen(user_option) + 1);
 	else
-		memcpy(option, default_option, strlen(default_option)+1);
+		memcpy(option, default_option, strlen(default_option) + 1);
 }

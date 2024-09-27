@@ -37,23 +37,23 @@ create_worker_argv(char *argv[], char *worker_argv[]) {
 	int argc;
 	int skip;
 
-	for (argc=0, skip=0; argc < optind; argc++) {
+	for (argc = 0, skip = 0; argc < optind; argc++) {
 		if (argv[argc][0] == '-') {
 			switch (argv[argc][1]) {
-				case 'o':
-				case 'p':
-					if (argv[argc][2] == '\0') {
-						argc++;
-						skip++;
-					}
+			case 'o':
+			case 'p':
+				if (argv[argc][2] == '\0') {
+					argc++;
 					skip++;
-					continue;
+				}
+				skip++;
+				continue;
 			}
 		}
-		worker_argv[argc-skip] = argv[argc];
+		worker_argv[argc - skip] = argv[argc];
 	}
-	worker_argv[argc-skip] = NULL;
-	return argc-skip;
+	worker_argv[argc - skip] = NULL;
+	return argc - skip;
 }
 
 int
@@ -95,10 +95,10 @@ rexec_summary(int n_workers, int worker_pid[], char *log_directory) {
 	char *status_argv[MAX_WORKERS];
 	pid_t pid, status_pid;
 
-	const struct timespec timeout = { 0, 500000000 };  /* 0.5s */
+	const struct timespec timeout = { 0, 500000000 }; /* 0.5s */
 
-	status_argv[0] ="rexec-summary";
-	for (i=1; i <= n_workers; i++)
+	status_argv[0] = "rexec-summary";
+	for (i = 1; i <= n_workers; i++)
 		asprintf(&status_argv[i], "%s/%s.%d", log_directory, get_tmstr(), i);
 	status_argc = i;
 	status_argv[status_argc] = NULL;
@@ -106,7 +106,7 @@ rexec_summary(int n_workers, int worker_pid[], char *log_directory) {
 	remaining = n_workers;
 	while (remaining > 0) {
 		nanosleep(&timeout, NULL);
-		for (i=0; i < n_workers; i++) {
+		for (i = 0; i < n_workers; i++) {
 			if (worker_pid[i]) {
 				pid = waitpid(worker_pid[i], &status, WNOHANG);
 				if (pid == -1)
@@ -160,7 +160,7 @@ open_log(char *log_directory, int worker_id) {
 	char logfn[PATH_MAX];
 
 	snprintf(logfn, sizeof logfn, "%s/%s.%d", log_directory, get_tmstr(), worker_id);
-	logfd = open(logfn, O_RDWR|O_CREAT, 0640);
+	logfd = open(logfn, O_RDWR | O_CREAT, 0640);
 	if (logfd == -1)
 		err(1, "open %s", logfn);
 

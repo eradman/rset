@@ -2,17 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "input.h"
 #include "execute.h"
+#include "input.h"
 
 /* globals */
-Label **route_labels;    /* parent */
-Label **host_labels;     /* child */
+Label **route_labels; /* parent */
+Label **host_labels;  /* child */
 
 void usage();
 
-void usage() {
-	fprintf(stderr, "usage:\n"
+void
+usage() {
+	fprintf(stderr,
+	    "usage:\n"
 	    "  ./ssh_command S hostname [export_paths]\n" /* Start session */
 	    "  ./ssh_command P hostname [env_override]\n" /* Remote execution over a pipe */
 	    "  ./ssh_command T hostname [env_override]\n" /* Remote execution with TTY */
@@ -22,10 +24,10 @@ void usage() {
 	exit(1);
 }
 
-int main(int argc, char *argv[])
-{
+int
+main(int argc, char *argv[]) {
 	char *socket_path;
-	Label host_label = { .name="networking" };
+	Label host_label = { .name = "networking" };
 	int http_port = 6000;
 	char *env_override = 0;
 	char *host_name;
@@ -34,7 +36,8 @@ int main(int argc, char *argv[])
 	/* end_connection calls free() on socket_path */
 	socket_path = strdup("/tmp/test_rset_socket");
 
-	if (argc < 3 || argc > 4) usage();
+	if (argc < 3 || argc > 4)
+		usage();
 	mode = argv[1];
 	host_name = argv[2];
 	bzero(host_label.export_paths, sizeof host_label.export_paths);

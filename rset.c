@@ -30,9 +30,9 @@
 #include "missing/compat.h"
 
 #include "config.h"
-#include "rutils.h"
 #include "execute.h"
 #include "input.h"
+#include "rutils.h"
 #include "worker.h"
 
 /* forwards */
@@ -47,8 +47,8 @@ static int execute_remote(char *hostnames[], Label **route_labels, regex_t *labe
 static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 
 /* globals from input.h */
-Label **route_labels;    /* parent */
-Label **host_labels;     /* child */
+Label **route_labels; /* parent */
+Label **host_labels;  /* child */
 
 /* globals */
 int archive_opt;
@@ -74,8 +74,7 @@ int http_port;
  * configure systems using any scripting language
  */
 int
-main(int argc, char *argv[])
-{
+main(int argc, char *argv[]) {
 	char buf[_POSIX2_LINE_MAX];
 	int fd;
 	int i, j;
@@ -100,7 +99,7 @@ main(int argc, char *argv[])
 	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
 		err(1, "Failed to set SIGTERM handler");
 
-	hostnames = calloc(sizeof(char*), argc);
+	hostnames = calloc(sizeof(char *), argc);
 	set_options(argc, argv, hostnames);
 
 	if ((renv_bin = findprog("renv")) == 0)
@@ -150,7 +149,7 @@ main(int argc, char *argv[])
 	}
 
 	/* parse pln files for each host */
-	for (i=0; route_labels[i]; i++)
+	for (i = 0; route_labels[i]; i++)
 		read_host_labels(route_labels[i]);
 
 	/* ensure hostnames are valid */
@@ -161,18 +160,18 @@ main(int argc, char *argv[])
 		create_dir(log_directory);
 
 		/* distribute hostnames */
-		for (i=0; hostnames[i]; i++) {
+		for (i = 0; hostnames[i]; i++) {
 			j = i % n_parallel;
-			if (j+1 > n_workers) {
-				worker_argv[n_workers] = calloc(sizeof(char*), argc);
+			if (j + 1 > n_workers) {
+				worker_argv[n_workers] = calloc(sizeof(char *), argc);
 				worker_argc[n_workers] = create_worker_argv(argv, worker_argv[n_workers]);
 				n_workers++;
 			}
 			worker_argv[j][worker_argc[j]++] = hostnames[i];
 		}
 
-		for (i=0; i < n_workers; i++)
-			worker_pid[i] = exec_worker(log_directory, i+1, worker_argv[i]);
+		for (i = 0; i < n_workers; i++)
+			worker_pid[i] = exec_worker(log_directory, i + 1, worker_argv[i]);
 
 		rexec_summary(n_workers, worker_pid, log_directory);
 		exit(0);
@@ -235,11 +234,11 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 		label_exec_error_msg = getenv("RSET_LABEL_EXEC_ERROR");
 	}
 
-	for (i=0; route_labels[i]; i++) {
+	for (i = 0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
 
-		for (k=0; hostnames[k]; k++) {
-			for (l=0; l < route_labels[i]->n_aliases; l++) {
+		for (k = 0; hostnames[k]; k++) {
+			for (l = 0; l < route_labels[i]->n_aliases; l++) {
 				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0)
 					hostname = route_labels[i]->aliases[l];
 				else
@@ -252,7 +251,8 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				socket_path = malloc(len);
 				snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
-				ret = start_connection(socket_path, hostname, route_labels[i], http_port, sshconfig_file);
+				ret = start_connection(
+				    socket_path, hostname, route_labels[i], http_port, sshconfig_file);
 				if (ret != 0) {
 					log_msg(host_connect_error_msg, hostname, "", ret);
 					end_connection(socket_path, hostname, http_port);
@@ -261,8 +261,8 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					continue;
 				}
 
-				for (j=0; host_labels[j]; j++) {
-					if(regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
+				for (j = 0; host_labels[j]; j++) {
+					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
 
 					log_msg(label_exec_begin_msg, hostname, host_labels[j]->name, 0);
@@ -271,24 +271,29 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					local_exit_code = local_exec(host_labels[j], host_labels[j]->options.begin);
 
 					if (stop_on_err_opt && local_exit_code != 0) {
-						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
+						log_msg(
+						    label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
 						goto exit;
 					}
 
 					/* restore */
 					if (restore_opt && host_labels[j]->export_paths[0])
-						scp_exit_code = scp_archive(hostname, socket_path, host_labels[j], http_port, 0);
+						scp_exit_code =
+						    scp_archive(hostname, socket_path, host_labels[j], http_port, 0);
 
 					if (stop_on_err_opt && scp_exit_code != 0) {
-						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, scp_exit_code);
+						log_msg(
+						    label_exec_error_msg, hostname, host_labels[j]->name, scp_exit_code);
 						goto exit;
 					}
 
 					/* remote execution */
 					if (tty_opt)
-						exit_code = ssh_command_tty(hostname, socket_path, host_labels[j], http_port, env_override);
+						exit_code = ssh_command_tty(
+						    hostname, socket_path, host_labels[j], http_port, env_override);
 					else
-						exit_code = ssh_command_pipe(hostname, socket_path, host_labels[j], http_port, env_override);
+						exit_code = ssh_command_pipe(
+						    hostname, socket_path, host_labels[j], http_port, env_override);
 
 					if (stop_on_err_opt && (exit_code != 0)) {
 						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, exit_code);
@@ -297,10 +302,12 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					/* archive */
 					if (archive_opt && host_labels[j]->export_paths[0])
-						scp_exit_code = scp_archive(hostname, socket_path, host_labels[j], http_port, 1);
+						scp_exit_code =
+						    scp_archive(hostname, socket_path, host_labels[j], http_port, 1);
 
 					if (stop_on_err_opt && scp_exit_code != 0) {
-						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, scp_exit_code);
+						log_msg(
+						    label_exec_error_msg, hostname, host_labels[j]->name, scp_exit_code);
 						goto exit;
 					}
 
@@ -308,7 +315,8 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					local_exit_code = local_exec(host_labels[j], host_labels[j]->options.end);
 
 					if (stop_on_err_opt && local_exit_code != 0) {
-						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
+						log_msg(
+						    label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
 						goto exit;
 					}
 
@@ -326,12 +334,14 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 						warn("read from httpd output");
 				}
 
-exit:
+			exit:
 				if (socket_path) {
 					if (archive_opt || restore_opt)
-						log_msg(host_disconnect_msg, hostname, "", stop_on_err_opt ? exit_code : scp_exit_code);
+						log_msg(host_disconnect_msg, hostname, "",
+						    stop_on_err_opt ? exit_code : scp_exit_code);
 					else
-						log_msg(host_disconnect_msg, hostname, "", stop_on_err_opt ? exit_code : local_exit_code);
+						log_msg(host_disconnect_msg, hostname, "",
+						    stop_on_err_opt ? exit_code : local_exit_code);
 					end_connection(socket_path, hostname, http_port);
 					free(socket_path);
 					socket_path = NULL;
@@ -356,11 +366,11 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	int i, j, k, l;
 	regmatch_t regmatch;
 
-	for (i=0; route_labels[i]; i++) {
+	for (i = 0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;
 
-		for (k=0; hostnames[k]; k++) {
-			for (l=0; l < route_labels[i]->n_aliases; l++) {
+		for (k = 0; hostnames[k]; k++) {
+			for (l = 0; l < route_labels[i]->n_aliases; l++) {
 				if (strcmp(hostnames[k], route_labels[i]->aliases[l]) == 0)
 					hostname = route_labels[i]->aliases[l];
 				else
@@ -368,7 +378,7 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 				hl_range(hostname, HL_HOST, 0, strlen(hostname));
 				printf("\n");
-				for (j=0; host_labels[j]; j++) {
+				for (j = 0; host_labels[j]; j++) {
 					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
 
@@ -390,8 +400,7 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 void
 handle_exit(int sig) {
 	if (socket_path && hostname && http_port) {
-		printf("caught signal %d, terminating connection to '%s'\n", sig,
-			hostname);
+		printf("caught signal %d, terminating connection to '%s'\n", sig, hostname);
 		/* clean up socket and SSH connection; leaving staging dir */
 		execlp("ssh", "ssh", "-S", socket_path, "-O", "exit", hostname, NULL);
 		err(1, "ssh -O exit");
@@ -457,7 +466,7 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 		case 'p':
 			n_parallel = strtonum(optarg, 1, MAX_WORKERS, &errstr);
 			if (errstr != NULL)
-				errx(1, "number out of bounds %s: '%s'", errstr, argv[optind-1]);
+				errx(1, "number out of bounds %s: '%s'", errstr, argv[optind - 1]);
 			break;
 		case 'x':
 			label_pattern = optarg;
@@ -467,7 +476,8 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 			usage();
 		}
 	}
-	if (optind >= argc) usage();
+	if (optind >= argc)
+		usage();
 
 	if (n_parallel) {
 		if (dryrun_opt || tty_opt || archive_opt || restore_opt)
@@ -477,8 +487,8 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 	if ((log_directory == NULL) ^ (n_parallel == 0))
 		usage();
 
-	for (i=0; i < argc - optind; i++)
-		hostnames[i] = argv[optind+i];
+	for (i = 0; i < argc - optind; i++)
+		hostnames[i] = argv[optind + i];
 	hostnames[i] = NULL;
 }
 
@@ -494,10 +504,10 @@ compare_argv_routes(char *hostnames[], Label **route_labels) {
 	int i, j, k;
 	int labels_matched;
 
-	for (i=0; hostnames[i]; i++) {
+	for (i = 0; hostnames[i]; i++) {
 		labels_matched = 0;
-		for (j=0; route_labels[j]; j++) {
-			for (k=0; k < route_labels[j]->n_aliases; k++) {
+		for (j = 0; route_labels[j]; j++) {
+			for (k = 0; k < route_labels[j]->n_aliases; k++) {
 				if (strcmp(hostnames[i], route_labels[j]->aliases[k]) == 0)
 					labels_matched++;
 			}
@@ -580,13 +590,13 @@ format_http_log(char *output, size_t len) {
 	output[len] = '\0';
 	output_start = output;
 
-	while (n_lines++ < 0) {  /* 1 to strip off startup message */
+	while (n_lines++ < 0) { /* 1 to strip off startup message */
 		if ((eol = strchr(output_start, '\n')) != NULL) {
 			*eol = '\0';
-			output_start = eol+1;
+			output_start = eol + 1;
 		}
 	}
 	printf("%s", output_start);
-	if (output[len-1] != '\n')
+	if (output[len - 1] != '\n')
 		printf(" ...\n");
 }

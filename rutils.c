@@ -38,7 +38,8 @@ unsigned session_id;
  */
 unsigned
 generate_session_id() {
-	while ((session_id = arc4random()) == 0);
+	while ((session_id = arc4random()) == 0)
+		;
 	return session_id;
 }
 
@@ -125,10 +126,10 @@ hl_range(const char *s, const char *color, unsigned so, unsigned eo) {
 		printf("%s%s" HL_RESET, color, s);
 	else {
 		start = strndup(s, so);
-		match = strndup(s+so, eo-so);
-		printf("%s%s" HL_REVERSE "%s" HL_RESET "%s%s"
-		    HL_RESET, color, start, match, color, s+eo);
-		free(start); free(match);
+		match = strndup(s + so, eo - so);
+		printf("%s%s" HL_REVERSE "%s" HL_RESET "%s%s" HL_RESET, color, start, match, color, s + eo);
+		free(start);
+		free(match);
 	}
 }
 
@@ -156,30 +157,29 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 		if (p[0] == '%') {
 			p++;
 			switch (p[0]) {
-				case 'e':
-					index += snprintf(buf+index, sizeof(buf)-index, "%d", exit_code);
-					break;
-				case 'h':
-					index += strlcpy(buf+index, hostname, sizeof(buf)-index);
-					break;
-				case 'l':
-					index += strlcpy(buf+index, label_name, sizeof(buf)-index);
-					break;
-				case 's':
-					index += snprintf(buf+index, sizeof(buf)-index, "%08"PRIx32, session_id);
-					break;
-				case 'T':
-					strftime(tmstr, sizeof(tmstr), LOG_TIMESTAMP_FORMAT, tm);
-					index += strlcpy(buf+index, tmstr, sizeof(buf)-index);
-					break;
-				case '%':
-					buf[index++] = p[0];
-					break;
-				default:
-					break;
+			case 'e':
+				index += snprintf(buf + index, sizeof(buf) - index, "%d", exit_code);
+				break;
+			case 'h':
+				index += strlcpy(buf + index, hostname, sizeof(buf) - index);
+				break;
+			case 'l':
+				index += strlcpy(buf + index, label_name, sizeof(buf) - index);
+				break;
+			case 's':
+				index += snprintf(buf + index, sizeof(buf) - index, "%08" PRIx32, session_id);
+				break;
+			case 'T':
+				strftime(tmstr, sizeof(tmstr), LOG_TIMESTAMP_FORMAT, tm);
+				index += strlcpy(buf + index, tmstr, sizeof(buf) - index);
+				break;
+			case '%':
+				buf[index++] = p[0];
+				break;
+			default:
+				break;
 			}
-		}
-		else
+		} else
 			buf[index++] = p[0];
 		p++;
 	}

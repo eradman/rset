@@ -20,8 +20,7 @@ struct server {
 } s;
 
 static void
-serve(int infd, struct sockaddr_storage *in_sa)
-{
+serve(int infd, struct sockaddr_storage *in_sa) {
 	struct request r;
 	enum status status;
 	char inaddr[INET6_ADDRSTRLEN /* > INET_ADDRSTRLEN */];
@@ -39,7 +38,7 @@ serve(int infd, struct sockaddr_storage *in_sa)
 	if (sock_get_inaddr_str(in_sa, inaddr, LEN(inaddr))) {
 		goto cleanup;
 	}
-	printf("%lu\t%s\t%d\t%s\t%s\n", r.bytes_sent, inaddr, status,  r.field[REQ_AGENT], r.target);
+	printf("%lu\t%s\t%d\t%s\t%s\n", r.bytes_sent, inaddr, status, r.field[REQ_AGENT], r.target);
 
 cleanup:
 	/* clean up and finish */
@@ -49,15 +48,13 @@ cleanup:
 }
 
 static void
-sigcleanup(int sig)
-{
+sigcleanup(int sig) {
 	kill(0, sig);
 	_exit(1);
 }
 
 static void
-handlesignals(void(*hdl)(int))
-{
+handlesignals(void (*hdl)(int)) {
 	struct sigaction sa = {
 		.sa_handler = hdl,
 	};
@@ -70,16 +67,14 @@ handlesignals(void(*hdl)(int))
 }
 
 static void
-usage(void)
-{
+usage(void) {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr, "usage: miniquark -p port [-h host] [-d dir]\n");
 	exit(1);
 }
 
 int
-main(int argc, char *argv[])
-{
+main(int argc, char *argv[]) {
 	int ch;
 	struct sockaddr_storage in_sa;
 	socklen_t in_sa_len;
@@ -107,8 +102,10 @@ main(int argc, char *argv[])
 			usage();
 		}
 	}
-	if (argc > optind+1) usage();
-	if (s.port == NULL) usage();
+	if (argc > optind + 1)
+		usage();
+	if (s.port == NULL)
+		usage();
 
 	/* Open a new process group */
 	setpgid(0, 0);
@@ -144,8 +141,7 @@ main(int argc, char *argv[])
 		/* accept incoming connections */
 		while (1) {
 			in_sa_len = sizeof(in_sa);
-			if ((infd = accept(insock, (struct sockaddr *)&in_sa,
-			                   &in_sa_len)) < 0) {
+			if ((infd = accept(insock, (struct sockaddr *) &in_sa, &in_sa_len)) < 0) {
 				warn("accept");
 				continue;
 			}
