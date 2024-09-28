@@ -9,8 +9,17 @@ The bundled utilities [renv(1)], [rinstall(1)] and [rsub(1)] provide standard
 means of installing and modifying configuration files. Capabilities are added by
 writing utility scripts which are sent along with configuration data.
 
-Source Installation - BSD, Mac OS, and Linux
---------------------------------------------
+Supported Platforms
+-------------------
+
+- OpenBSD
+- FreeBSD
+- MacOS
+- Linux (glibc, coreutils)
+- Linux (musl libc, busybox)
+
+Source Installation
+-------------------
 
     ./configure
 

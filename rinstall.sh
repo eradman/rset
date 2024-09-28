@@ -152,13 +152,13 @@ download_source() {
 
 fetch_file() {
 	case $(uname) in
-		OpenBSD|NetBSD)
+		OpenBSD)
 			ftp -o "$SD/$source" -n "$1"
 			;;
-		FreeBSD|DragonFly)
+		FreeBSD)
 			fetch -qo "$SD/$source" "$1"
 			;;
-		Linux|Darwin|SunOS)
+		Linux|Darwin)
 			if command -pv curl > /dev/null; then
 				curl -fsLo "$SD/$source" "$1"
 			else

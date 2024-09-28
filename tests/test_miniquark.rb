@@ -55,7 +55,7 @@ puts "\e[32m---\e[39m"
 
     cd www
     case `uname` in
-      Darwin|NetBSD)
+      Darwin)
         dd if=/dev/urandom of=largefile bs=1m count=10 2>&1
         ;;
       *)
