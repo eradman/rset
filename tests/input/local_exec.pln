@@ -1,12 +1,12 @@
 one:
 {
-	echo "LOCAL_HOSTNAME=$(hostname -s)"
+	echo "LOCAL_HOSTNAME=$(hostname)"
 }
 	echo "$LOCAL_HOSTNAME"
 
 two:
 {
-	printf "LOCAL_HOSTNAME=$(hostname -s)"
+	printf "LOCAL_HOSTNAME=$(hostname)"
 }
 	echo "$LOCAL_HOSTNAME"
 
