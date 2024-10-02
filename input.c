@@ -134,7 +134,7 @@ parse_pln() {
 		else if (line[0] == '\t') {
 			switch (context) {
 			case Local:
-				if ((write(tfd, line + 1, linelen)) == -1)
+				if ((write(tfd, line + 1, linelen - 1)) == -1)
 					err(1, "write");
 				break;
 			case Remote:
