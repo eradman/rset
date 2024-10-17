@@ -24,6 +24,7 @@ unsigned generate_session_id();
 unsigned current_session_id();
 char *xdirname(const char *);
 char *xbasename(const char *);
+void check_permissions(const char *);
 int create_dir(const char *);
 void install_if_new(const char *, const char *);
 void hl_range(const char *, const char *, unsigned, unsigned);

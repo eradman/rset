@@ -10,6 +10,9 @@ require 'securerandom'
 
 # Setup
 @systmp = Dir.mktmpdir
+@mynet = "#{@systmp}/mynet"
+FileUtils.cp_r 'input', @mynet
+FileUtils.chmod 0o700, @mynet
 @renv = "#{Dir.pwd}/stubs/renv"
 File.write @renv, <<~STUB
   #!/bin/sh
@@ -53,7 +56,7 @@ try 'Install a missing file' do
   eq out, "rset: initialized directory '#{@systmp}/_rutils'\n"
   eq status.success?, true
   eq File.stat(dst).mode.to_s(8), '100755'
-  eq File.stat(File.dirname(dst)).mode.to_s(8), '40750'
+  eq File.stat(File.dirname(dst)).mode.to_s(8), '40700'
 end
 
 try 'Update an existing file' do
@@ -65,7 +68,7 @@ try 'Update an existing file' do
   eq out, "rset: updating '#{dst}'\n"
   eq status.success?, true
   eq File.stat(dst).mode.to_s(8), '100755'
-  eq File.stat(File.dirname(dst)).mode.to_s(8), '40750'
+  eq File.stat(File.dirname(dst)).mode.to_s(8), '40700'
 end
 
 # Execution functions
@@ -218,13 +221,23 @@ end
 
 try 'Require ssh-agent' do
   cmd = "#{Dir.pwd}/../rset localhost"
-  out, err, status = Open3.capture3(cmd, chdir: 'input')
+  out, err, status = Open3.capture3(cmd, chdir: @mynet)
   eq out, <<~HELP
     Try running:
       eval `ssh-agent`
       ssh-add
   HELP
   eq err.empty?, false
+  eq status.success?, false
+end
+
+try 'Verify directory permissions' do
+  cmd = "#{Dir.pwd}/../rset localhost"
+  FileUtils.chmod 0o701, @mynet
+  out, err, status = Open3.capture3(cmd, chdir: @mynet)
+  FileUtils.chmod 0o700, @mynet
+  eq err[0..24], 'rset: invalid permissions'
+  eq out, ''
   eq status.success?, false
 end
 
@@ -440,7 +453,7 @@ end
 try 'Show matching routes and hosts' do
   out, err, status = nil
   cmd = "#{Dir.pwd}/../rset -n localhost"
-  Dir.chdir('input') do
+  Dir.chdir(@mynet) do
     FileUtils.mkdir_p('_sources')
     out, err, status = Open3.capture3(cmd)
   end
@@ -453,7 +466,7 @@ try 'Raise error if no route match is found' do
   FileUtils.mkdir_p("#{@systmp}/_sources")
   out, err, status = nil
   cmd = "#{Dir.pwd}/../rset -n localhost.xyz"
-  Dir.chdir('input') do
+  Dir.chdir(@mynet) do
     out, err, status = Open3.capture3(cmd)
   end
   eq status.success?, false

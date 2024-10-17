@@ -120,6 +120,8 @@ main(int argc, char *argv[]) {
 		err(1, "unable to open %s", routes_file);
 	(void) close(fd);
 
+	check_permissions(routes_realpath);
+
 	if (!dryrun_opt) {
 		/* require ssh-agent */
 		if (verify_ssh_agent() != 0) {

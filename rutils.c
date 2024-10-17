@@ -33,6 +33,10 @@
 
 unsigned session_id;
 
+/* globals */
+
+int dir_mode = 0700;
+
 /*
  * Update global session ID before starting a new SSH session
  */
@@ -71,17 +75,29 @@ xbasename(const char *path) {
 }
 
 /*
+ * check_permissions - verify and memorize top-level directory permissions
+ */
+
+void
+check_permissions(const char *dir) {
+	struct stat stat_buf;
+
+	stat(dir, &stat_buf);
+	if (stat_buf.st_mode & (S_IWGRP | S_IRWXO))
+		errx(1, "invalid permissions for %s: mode must be u=rwx (0700) or u=rwx,g=rx (0750)", dir);
+	dir_mode = stat_buf.st_mode;
+}
+
+/*
  * create_dir - ensure a directory exists
  * install_if_new - ensure a file is up to date
  */
 int
 create_dir(const char *dir) {
-	mode_t dir_mode;
 	struct stat dst_sb;
 
 	if (stat(dir, &dst_sb) == -1) {
 		printf("rset: initialized directory '%s'\n", dir);
-		dir_mode = 0750;
 		(void) mkdir(dir, dir_mode);
 		return 1;
 	}
