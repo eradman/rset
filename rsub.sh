@@ -25,7 +25,6 @@ done
 shift $(($OPTIND - 1))
 [ $# -eq 1 ] || usage
 
-source=$(mktemp rsub_XXXXXXXX)
 target=$1
 
 case $(dirname "$target") in
@@ -40,6 +39,8 @@ test -f "$target" || {
 	>&2 echo "rsub: file not found: $target"
 	exit 3
 }
+
+source=$(mktemp rsub_XXXXXXXX)
 
 if test -z "$line_regex$line_text"; then
 	start="${RSUB_START:-# start managed block}"
@@ -64,7 +65,8 @@ fi
 
 test -e "$target" && diff -U 2 "$target" $source || {
 	cp $source "$target"
-	rm -f $source
 	ret=0
 }
+
+rm -f $source
 exit $ret

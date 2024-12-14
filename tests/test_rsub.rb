@@ -147,6 +147,7 @@ try 'Update a block' do
      # end managed block
   RESULT
   eq status.success?, true
+  eq Dir["#{@systmp}/rsub_*"], []
 end
 
 try 'Ensure that a relative target cannot be used' do
@@ -158,4 +159,5 @@ try 'Ensure that a relative target cannot be used' do
   eq err, "rsub: #{fn} is not an absolute path\n"
   eq out, ''
   eq status.exitstatus, 1
+  eq Dir["#{@systmp}/rsub_*"], []
 end
