@@ -1,3 +1,5 @@
+RUBOCOP ?= rubocop
+CLANG_FORMAT ?= clang-format
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
 RELEASE = 3.1
@@ -79,6 +81,10 @@ uninstall:
 test: ${PROGS}
 	make -C tests
 
+format:
+	${RUBOCOP} -A
+	${CLANG_FORMAT} -i *.c *.h tests/*.c
+
 clean:
 	rm -f compat.c *.o *.core ${PROGS}
 	make -C tests clean
@@ -87,4 +93,4 @@ distclean:
 	rm -f tests/Makefile
 	rm -f Makefile
 
-.PHONY: all clean distclean install test uninstall
+.PHONY: all clean distclean format install test uninstall

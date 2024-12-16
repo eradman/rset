@@ -1,4 +1,4 @@
-RUBY = ruby
+RUBY ?= ruby
 OBJS += args
 OBJS += cmd_pipe_stdin
 OBJS += cmd_pipe_stdout
