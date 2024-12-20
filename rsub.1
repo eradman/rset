@@ -53,11 +53,16 @@ The replacement text for a matching line.
 Newlines are not permitted as part of the replacement string.
 .El
 .Sh ENVIRONMENT
-When updating a block of text,
-.Ev RSUB_START
-and
-.Ev RSUB_END
-define the beginning and ending markers.
+.Bl -tag -width Ds
+.It Ev RSUB_DIFF_ARGS
+Arguments for
+.Xr diff 1
+tool.
+The default is
+.Qq -U 2 .
+.It Ev RSUB_START RSUB_END
+Define the beginning and ending markers when updating a block of text.
+.El
 .Sh EXIT STATUS
 The
 .Nm

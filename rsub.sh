@@ -3,6 +3,7 @@
 # Substitute lines in a file or append if not found
 
 ret=1
+: ${RSUB_DIFF_ARGS:="-U 2"}
 
 usage() {
 	>&2 echo "release: ${release}"
@@ -63,7 +64,7 @@ else
 	    ' "$target" > $source
 fi
 
-test -e "$target" && diff -U 2 "$target" $source || {
+test -e "$target" && diff $RSUB_DIFF_ARGS "$target" $source || {
 	cp $source "$target"
 	ret=0
 }
