@@ -2,8 +2,33 @@
 # A helper utility for rset(1)
 # Substitute lines in a file or append if not found
 
-ret=1
-: ${RSUB_DIFF_ARGS:="-U 2"}
+set_defaults() {
+	ret=1     # global exit statu
+	append=1  # set to 0 to append text in line-replace mode
+	line_regex=""
+	line_text=""
+	: ${RSUB_START:="# start managed block"}
+	: ${RSUB_END:="# end managed block"}
+	: ${RSUB_DIFF_ARGS:="-U 2"}
+}
+
+main() {
+	set_defaults
+	parse_args "$@"
+	init
+
+	if [ -z "$line_regex$line_text" ]; then
+		replace_block
+	else
+		replace_line
+	fi
+
+	# Source file exists: check the difference between source and target
+	check_diff_source_target
+
+	rm -f $source
+	exit $ret
+}
 
 usage() {
 	>&2 echo "release: ${release}"
@@ -12,62 +37,73 @@ usage() {
 	exit 1
 }
 
-trap '' HUP
-append=1
-
-while getopts Al:r: arg; do
-	case "$arg" in
-		A) append=0 ;;
-		r) line_regex="$OPTARG" ;;
-		l) line_text="$OPTARG" ;;
-		?) usage ;;
-	esac
-done
-shift $(($OPTIND - 1))
-[ $# -eq 1 ] || usage
-
-target=$1
-
-case $(dirname "$target") in
-	/*) ;;
-	*)
+init() {
+	if ! check_absolute_path "$target"; then
 		>&2 echo "rsub: $target is not an absolute path"
 		exit 1
-		;;
-esac
+	fi
 
-test -f "$target" || {
-	>&2 echo "rsub: file not found: $target"
-	exit 3
+	[ -f "$target" ] || {
+		>&2 echo "rsub: file not found: $target"
+		exit 3
+	}
+
+	source=$(mktemp rsub_XXXXXXXX)
+
+	trap '' HUP
 }
 
-source=$(mktemp rsub_XXXXXXXX)
+parse_args() {
+	while getopts Al:r: arg; do
+		case "$arg" in
+			A) append=0 ;;
+			r) line_regex="$OPTARG" ;;
+			l) line_text="$OPTARG" ;;
+			?) usage ;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	[ $# -eq 1 ] || usage
+	target=$1
+}
 
-if test -z "$line_regex$line_text"; then
-	start="${RSUB_START:-# start managed block}"
-	end="${RSUB_END:-# end managed block}"
+check_diff_source_target() {
+	[ -e "$target" ] && diff $RSUB_DIFF_ARGS "$target" $source || {
+		cp $source "$target"
+		ret=0
+	}
+}
+
+replace_block() {
 	cat <<-EOF > ${source}_b
-	${start}
+	${RSUB_START}
 	`cat`
-	${end}
+	${RSUB_END}
 	EOF
-	awk -v m="$start" -v n="$end" -v block=${source}_b '
+	awk -v m="$RSUB_START" -v n="$RSUB_END" -v block=${source}_b '
 	    $0 == m, $0 == n { if (!x) system("cat " block) ; x=1; next; }; 1
 	    END { if (!x) system("cat " block) }
 	    ' "$target" > $source
 	rm ${source}_b
-else
+}
+
+replace_line() {
 	awk -v n=$append -v a="$line_regex" -v b="$line_text" '
 	    BEGIN { gsub("&", "\\\\&", b) }
 	    { n+=sub(a, b); print }
 	    END { if (n==0) print b }
 	    ' "$target" > $source
-fi
-
-test -e "$target" && diff $RSUB_DIFF_ARGS "$target" $source || {
-	cp $source "$target"
-	ret=0
 }
 
-rm -f $source
-exit $ret
+check_absolute_path() {
+	case $(dirname "$1") in
+		/*) return 0
+			;;
+		*)  return 1
+			;;
+	esac
+}
+
+main "$@"
+
+# vim:noexpandtab:syntax=sh:ts=4
