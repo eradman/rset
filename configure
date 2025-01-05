@@ -51,6 +51,10 @@ case "${TARGET_OS:-`uname`}" in
 		copy_mk macos
 		copy_tests_mk bsd
 		;;
+	FreeBSD)
+		copy_mk freebsd
+		copy_tests_mk bsd
+		;;
 	Linux)
 		test_libc_features && copy_mk linux || copy_mk linux-compat
 		copy_tests_mk linux
