@@ -1,5 +1,16 @@
 = Release History
 
+== 3.2: February 6, 2025
+
+ - Update MANPREFIX for FreeBSD
+ - Format source using clang-format and rubocop
+ - rsub(1) allow diff(1) behavior to be modified using RSUB_DIFF_ARGS
+ - rsub(1) refactor based on patterns used in rinstall(1)
+ - rsub(1) remove temporary source file
+ - Ensure top-level directory permissions are not world-readable
+ - Avoid leaving a NUL character at the end of local execution script
+ - Use native strtonum(3) on MacOS
+
 == 3.1: September 24, 2024
 
  - Add begin= and end= options
