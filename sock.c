@@ -30,7 +30,7 @@ sock_get_ips(const char *host, const char *port) {
 		if ((insock = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) {
 			continue;
 		}
-		if (setsockopt(insock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0) {
+		if (setsockopt(insock, SOL_SOCKET, SO_REUSEADDR, &(int) { 1 }, sizeof(int)) < 0) {
 			err(1, "setsockopt");
 		}
 		if (bind(insock, p->ai_addr, p->ai_addrlen) < 0) {

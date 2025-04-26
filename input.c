@@ -298,7 +298,7 @@ read_label(char *line, Label *label) {
 	/* remove trailing newline and split on last ':' */
 	line[strlen(line) - 1] = '\0';
 	export = strrchr(line, ':');
-	*export ++ = '\0';
+	*export ++= '\0';
 	strlcpy(label->name, line, PLN_LABEL_SIZE);
 
 	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES, ",");

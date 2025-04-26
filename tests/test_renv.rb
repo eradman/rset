@@ -13,7 +13,7 @@ def try(descr)
   @tests += 1
   @test_description = descr
   yield
-  delta = format('%.3f', (Time.now - start))
+  delta = format('%.3f', Time.now - start)
   delta = "\e[37m#{delta}\e[39m"
   puts "#{delta}: #{descr}"
 end
