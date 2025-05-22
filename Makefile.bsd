@@ -90,7 +90,7 @@ clean:
 	make -C tests clean
 
 distclean:
-	rm -f tests/Makefile
-	rm -f Makefile
+	rm -f Makefile tests/Makefile
+	rm -f *.lock
 
 .PHONY: all clean distclean format install test uninstall

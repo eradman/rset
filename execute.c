@@ -198,8 +198,10 @@ get_socket() {
 	addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	addr.sin_port = htons(0);
 
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	bind(sock, (struct sockaddr *) &addr, sizeof(addr));
+	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+		err(1, "socket");
+	if (bind(sock, (struct sockaddr *) &addr, sizeof(addr)) == -1)
+		err(1, "bind");
 	getsockname(sock, (struct sockaddr *) &addr, &addrlen);
 	port = ntohs(addr.sin_port);
 	close(sock);
