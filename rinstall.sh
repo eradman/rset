@@ -158,16 +158,12 @@ fetch_file() {
 		FreeBSD)
 			fetch -qo "$SD/$source" "$1"
 			;;
-		Linux|Darwin)
+		*)
 			if command -pv curl > /dev/null; then
 				curl -fsLo "$SD/$source" "$1"
 			else
 				wget -qO "$SD/$source" "$1"
 			fi
-			;;
-		*)
-			>&2 echo "Unknown OS: $(uname)"
-			exit 2
 			;;
 	esac
 	return $?
