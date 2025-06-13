@@ -40,16 +40,7 @@ Label *lp;
 Options current_options;
 const char *yyfn;
 int n_labels;
-
-void
-read_pln(const char *fn) {
-	yyfn = fn;
-	yyin = fopen(fn, "r");
-	if (!yyin)
-		err(1, "%s", fn);
-	parse_pln();
-	fclose(yyin);
-}
+enum { RouteLabel, HostLabel } pln_mode;
 
 void
 parse_pln() {
@@ -209,13 +200,29 @@ alloc_labels() {
 }
 
 /*
- * read_host_labels - read a label an its contents
+ * read_route_labels - read the routes file
+ */
+void
+read_route_labels(const char *fn) {
+	yyfn = fn;
+	yyin = fopen(fn, "r");
+	if (!yyin)
+		err(1, "%s", fn);
+
+	pln_mode = RouteLabel;
+	parse_pln();
+	fclose(yyin);
+}
+
+/*
+ * read_host_labels - read all pln files referenced in a route label
  */
 void
 read_host_labels(Label *route_label) {
 	char *line, *next_line;
 	char *content;
 
+	pln_mode = HostLabel;
 	host_labels = alloc_labels();
 	route_label->labels = host_labels;
 	content = strdup(route_label->content);

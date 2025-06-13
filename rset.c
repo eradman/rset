@@ -143,7 +143,7 @@ main(int argc, char *argv[]) {
 	/* parse route labels */
 	route_labels = alloc_labels();
 	host_labels = route_labels;
-	read_pln(routes_file);
+	read_route_labels(routes_file);
 
 	if ((rv = regcomp(&label_reg, label_pattern, REG_EXTENDED)) != 0) {
 		regerror(rv, &label_reg, buf, sizeof(buf));

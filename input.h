@@ -55,8 +55,8 @@ extern Label **host_labels;  /* child */
 
 /* forwards */
 
-void read_pln(const char *fn);
 void parse_pln();
+void read_route_labels(const char *fn);
 void read_host_labels(Label *route_label);
 Label **alloc_labels();
 int array_to_str(char *[], char *, int, const char *);
