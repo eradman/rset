@@ -15,28 +15,29 @@ char *array_to_json(char *argv[]);
 char *str_or_empty(char *s);
 
 /* globals */
-Label **route_labels; /* parent */
-Label **host_labels;  /* child */
+Label **route_labels;
 
 int
 main(int argc, char *argv[]) {
 	int i, j;
-	char *yyfn;
+	char *fn;
+	Label **host_labels;
 
 	if (argc != 2) {
 		fprintf(stderr, "usage: ./parser routes_file\n");
 		exit(1);
 	}
 
-	yyfn = argv[1];
-	host_labels = alloc_labels();
-	read_pln(yyfn);
-	chdir(xdirname(yyfn));
+	fn = argv[1];
 
-	route_labels = host_labels;
+	route_labels = alloc_labels();
+	read_route_labels(fn);
+	chdir(xdirname(fn));
+
 	printf("[\n");
 	for (i = 0; route_labels[i]; i++) {
 		read_host_labels(route_labels[i]);
+		host_labels = route_labels[i]->labels;
 
 		if (i > 0)
 			printf(",\n");

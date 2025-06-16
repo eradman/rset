@@ -7,15 +7,10 @@
 #include "execute.h"
 
 /* globals */
-Label **route_labels; /* parent */
-Label **host_labels;  /* child */
+Label **route_labels;
 
 void usage();
 
-/*
- * H = Process as a host file
- * R = Process as route file
- */
 void
 usage() {
 	fprintf(stderr, "usage: ./which filename\n");

@@ -47,8 +47,7 @@ static int execute_remote(char *hostnames[], Label **route_labels, regex_t *labe
 static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 
 /* globals from input.h */
-Label **route_labels; /* parent */
-Label **host_labels;  /* child */
+Label **route_labels;
 
 /* globals */
 int archive_opt;
@@ -142,7 +141,6 @@ main(int argc, char *argv[]) {
 
 	/* parse route labels */
 	route_labels = alloc_labels();
-	host_labels = route_labels;
 	read_route_labels(routes_file);
 
 	if ((rv = regcomp(&label_reg, label_pattern, REG_EXTENDED)) != 0) {
@@ -211,6 +209,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	int stdout_pipe[2];
 	size_t len;
 	regmatch_t regmatch;
+	Label **host_labels;
 
 	int exit_code = 0;
 	int local_exit_code = 0;
@@ -367,6 +366,7 @@ static int
 dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 	int i, j, k, l;
 	regmatch_t regmatch;
+	Label **host_labels;
 
 	for (i = 0; route_labels[i]; i++) {
 		host_labels = route_labels[i]->labels;

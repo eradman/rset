@@ -4,8 +4,7 @@
 #include "rutils.h"
 
 /* globals */
-Label **route_labels; /* parent */
-Label **host_labels;  /* child */
+Label **route_labels;
 
 int
 main(int argc, char **argv) {

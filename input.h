@@ -50,12 +50,11 @@ typedef struct Label {
 	struct Label **labels;
 } Label;
 
-extern Label **route_labels; /* parent */
-extern Label **host_labels;  /* child */
+extern Label **route_labels;
 
 /* forwards */
 
-void parse_pln();
+void parse_pln(Label **host_labels);
 void read_route_labels(const char *fn);
 void read_host_labels(Label *route_label);
 Label **alloc_labels();

@@ -31,8 +31,7 @@
 #define BUFSIZE 4096
 
 /* globals from input.h */
-extern Label **route_labels; /* parent */
-extern Label **host_labels;  /* child */
+extern Label **route_labels;
 
 /* globals */
 FILE *yyin;
@@ -43,7 +42,7 @@ int n_labels;
 enum { RouteLabel, HostLabel } pln_mode;
 
 void
-parse_pln() {
+parse_pln(Label **labels) {
 	int content_allocation = 0;
 	int error_code;
 	int j;
@@ -95,7 +94,7 @@ parse_pln() {
 			}
 			if (tfd > 0) {
 				close(tfd);
-				lp = host_labels[n_labels - 1];
+				lp = labels[n_labels - 1];
 				apply_default(
 				    op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
 
@@ -129,7 +128,7 @@ parse_pln() {
 					err(1, "write");
 				break;
 			case Remote:
-				lp = host_labels[n_labels - 1];
+				lp = labels[n_labels - 1];
 				while ((linelen + lp->content_size) >= content_allocation) {
 					content_allocation += BUFSIZE;
 					lp->content = realloc(lp->content, content_allocation);
@@ -149,12 +148,12 @@ parse_pln() {
 
 		/* label */
 		else if (strchr(line, ':')) {
-			host_labels[n_labels] = malloc(sizeof(Label));
-			host_labels[n_labels]->content = malloc(BUFSIZE);
+			labels[n_labels] = malloc(sizeof(Label));
+			labels[n_labels]->content = malloc(BUFSIZE);
 			content_allocation = BUFSIZE;
-			read_label(line, host_labels[n_labels]);
-			for (j = 0; j < host_labels[n_labels]->n_aliases; j++) {
-				aliases = host_labels[n_labels]->aliases[j];
+			read_label(line, labels[n_labels]);
+			for (j = 0; j < labels[n_labels]->n_aliases; j++) {
+				aliases = labels[n_labels]->aliases[j];
 				if (aliases && aliases[0] == ' ') {
 					fprintf(stderr,
 					    "%s: invalid leading character for label alias on "
@@ -210,7 +209,7 @@ read_route_labels(const char *fn) {
 		err(1, "%s", fn);
 
 	pln_mode = RouteLabel;
-	parse_pln();
+	parse_pln(route_labels);
 	fclose(yyin);
 }
 
@@ -223,8 +222,7 @@ read_host_labels(Label *route_label) {
 	char *content;
 
 	pln_mode = HostLabel;
-	host_labels = alloc_labels();
-	route_label->labels = host_labels;
+	route_label->labels = alloc_labels();
 	content = strdup(route_label->content);
 	line = content;
 	n_labels = 0;
@@ -238,7 +236,7 @@ read_host_labels(Label *route_label) {
 		yyin = fopen(line, "r");
 		if (!yyin)
 			err(1, "%s", line);
-		parse_pln();
+		parse_pln(route_label->labels);
 		fclose(yyin);
 		line = next_line + 1;
 	}
