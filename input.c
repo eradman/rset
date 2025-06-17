@@ -39,7 +39,7 @@ Label *lp;
 Options current_options;
 const char *yyfn;
 int n_labels;
-enum { RouteLabel, HostLabel } pln_mode;
+enum { HostLabel, RouteLabel } pln_mode;
 
 void
 parse_pln(Label **labels) {

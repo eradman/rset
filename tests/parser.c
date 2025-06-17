@@ -16,27 +16,58 @@ char *str_or_empty(char *s);
 
 /* globals */
 Label **route_labels;
+extern const char *yyfn;
+extern FILE *yyin;
+
+void usage();
+
+void
+usage() {
+	fprintf(stderr,
+	    "usage:\n"
+	    "  ./parser R routes_file\n"
+	    "  ./parser H hosts_file\n");
+	exit(1);
+}
 
 int
 main(int argc, char *argv[]) {
 	int i, j;
 	char *fn;
+	char *mode;
 	Label **host_labels;
 
-	if (argc != 2) {
-		fprintf(stderr, "usage: ./parser routes_file\n");
-		exit(1);
-	}
+	if (argc != 3)
+		usage();
 
-	fn = argv[1];
+	mode = argv[1];
+	fn = argv[2];
 
 	route_labels = alloc_labels();
-	read_route_labels(fn);
+	switch (mode[0]) {
+	case 'R':
+		read_route_labels(fn);
+		break;
+	case 'H':
+		route_labels[0] = malloc(sizeof(Label));
+		bzero(route_labels[0], sizeof(Label));
+		strlcpy(route_labels[0]->name, fn, PLN_LABEL_SIZE);
+		route_labels[0]->labels = alloc_labels();
+		route_labels[0]->labels[0] = malloc(sizeof(Label));
+		yyfn = fn;
+		yyin = fopen(fn, "r");
+		parse_pln(route_labels[0]->labels);
+		break;
+	}
 	chdir(xdirname(fn));
 
 	printf("[\n");
 	for (i = 0; route_labels[i]; i++) {
-		read_host_labels(route_labels[i]);
+		switch (mode[0]) {
+		case 'R':
+			read_host_labels(route_labels[i]);
+			break;
+		}
 		host_labels = route_labels[i]->labels;
 
 		if (i > 0)

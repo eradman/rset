@@ -244,7 +244,7 @@ end
 # Parse Progressive Label Notation (pass)
 
 try 'Recursively parse routes and hosts' do
-  cmd = './parser input/routes.pln'
+  cmd = './parser R input/routes.pln'
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq status.success?, true
@@ -286,7 +286,7 @@ end
 
 try 'Detect local execution that does not emit a newline' do
   pln = 'input/local_exec.pln'
-  cmd = "./parser #{pln}"
+  cmd = "./parser H #{pln}"
   out, err, status = Open3.capture3(cmd)
   eq err, "#{pln}: output of local execution for the label 'two' must end with a newline\n"
   eq out, ''
