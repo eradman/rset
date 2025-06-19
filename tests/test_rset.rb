@@ -293,6 +293,15 @@ try 'Detect local execution that does not emit a newline' do
   eq status.exitstatus, 1
 end
 
+try 'Export paths may only be specified on a route label' do
+  pln = 'input/export_paths.pln'
+  cmd = "./parser H #{pln}"
+  out, err, status = Open3.capture3(cmd)
+  eq err, "#{pln}: export path on label 'etc' may only be specified in the routes file\n"
+  eq out, ''
+  eq status.exitstatus, 1
+end
+
 try 'Report a bad regex' do
   fn = "#{@systmp}/routes.pln"
   File.write(fn, '')

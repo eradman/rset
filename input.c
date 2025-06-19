@@ -314,6 +314,11 @@ read_label(char *line, Label *label) {
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
 	len = str_to_array(label->export_paths, strdup(ltrim(export, ' ')), PLN_MAX_PATHS, " ");
+	if ((label->export_paths[0] != NULL) && (pln_mode != RouteLabel)) {
+		fprintf(stderr, "%s: export path on label '%s' may only be specified in the routes file\n",
+		    yyfn, label->name);
+		exit(1);
+	}
 	if (len == PLN_MAX_PATHS)
 		errx(1, "> %d export paths specified for label '%s'", PLN_MAX_PATHS - 1, label->name);
 
