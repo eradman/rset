@@ -16,6 +16,7 @@
 
 #include <err.h>
 #include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,6 +41,20 @@ Options current_options;
 const char *yyfn;
 int n_labels;
 enum { HostLabel, RouteLabel } pln_mode;
+
+/*
+ * Emit an error current PLN
+ */
+void
+erry(const char *fmt, ...) {
+	va_list ap;
+
+	fprintf(stderr, "%s: ", yyfn);
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	write(STDERR_FILENO, "\n", 1);
+	exit(1);
+}
 
 void
 parse_pln(Label **labels) {
@@ -67,19 +82,15 @@ parse_pln(Label **labels) {
 			;
 
 		/* leading whitespace */
-		else if (line[0] == ' ') {
-			fprintf(stderr, "%s: invalid leading character on line %d: '%c'\n", yyfn, n, line[0]);
-			exit(1);
-		}
+		else if (line[0] == ' ')
+			erry("invalid leading character on line %d: '%c'", n, line[0]);
 
 		/* { ... } local execution */
 		else if (line[0] == '{') {
 			context = Local;
-			if (strlen(line) > 2) {
-				fprintf(
-				    stderr, "%s: invalid trailing characters on line %d: '%s'\n", yyfn, n, line);
-				exit(1);
-			}
+			if (strlen(line) > 2)
+				erry("invalid trailing characters on line %d: '%s'", n, line);
+
 			strlcpy(tmp_src, "/tmp/rset_local.XXXXXX", sizeof tmp_src);
 			if ((tfd = mkstemp(tmp_src)) == -1)
 				err(1, "open %s", tmp_src);
@@ -87,11 +98,9 @@ parse_pln(Label **labels) {
 
 		else if (line[0] == '}') {
 			context = Remote;
-			if (strlen(line) > 2) {
-				fprintf(
-				    stderr, "%s: invalid trailing characters on line %d: '%s'\n", yyfn, n, line);
-				exit(1);
-			}
+			if (strlen(line) > 2)
+				erry("invalid trailing characters on line %d: '%s'", n, line);
+
 			if (tfd > 0) {
 				close(tfd);
 				lp = labels[n_labels - 1];
@@ -110,13 +119,9 @@ parse_pln(Label **labels) {
 					    error_code);
 				tfd = 0;
 
-				if ((lp->content_size > 0) && (lp->content[lp->content_size - 1] != '\n')) {
-					fprintf(stderr,
-					    "%s: output of local execution for the label '%s' "
-					    "must end with a newline\n",
-					    yyfn, lp->name);
-					exit(1);
-				}
+				if ((lp->content_size > 0) && (lp->content[lp->content_size - 1] != '\n'))
+					erry("output of local execution for the label '%s' must end with a newline",
+					    lp->name);
 			}
 		}
 
@@ -154,29 +159,19 @@ parse_pln(Label **labels) {
 			read_label(line, labels[n_labels]);
 			for (j = 0; j < labels[n_labels]->n_aliases; j++) {
 				aliases = labels[n_labels]->aliases[j];
-				if (aliases && aliases[0] == ' ') {
-					fprintf(stderr,
-					    "%s: invalid leading character for label alias on "
-					    "line %d: '%c'\n",
-					    yyfn, n, aliases[0]);
-					exit(1);
-				}
+				if (aliases && aliases[0] == ' ')
+					erry("invalid leading character for label alias on line %d: '%c'", n,
+					    aliases[0]);
 			}
 			n_labels++;
-			if (n_labels == LABELS_MAX) {
-				fprintf(stderr,
-				    "%s: maximum number of labels (%d) "
-				    "exceeded\n",
-				    yyfn, n_labels);
-				exit(1);
-			}
+			if (n_labels == LABELS_MAX)
+				erry("maximum number of labels (%d) exceeded", n_labels);
 		}
 
 		/* unknown */
 		else {
 			line[linelen - 1] = '\0';
-			fprintf(stderr, "%s: unknown symbol at line %d: '%s'\n", yyfn, n, line);
-			exit(1);
+			erry("unknown symbol at line %d: '%s'", n, line);
 		}
 	}
 
@@ -314,13 +309,11 @@ read_label(char *line, Label *label) {
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
 	len = str_to_array(label->export_paths, strdup(ltrim(export, ' ')), PLN_MAX_PATHS, " ");
-	if ((label->export_paths[0] != NULL) && (pln_mode != RouteLabel)) {
-		fprintf(stderr, "%s: export path on label '%s' may only be specified in the routes file\n",
-		    yyfn, label->name);
-		exit(1);
-	}
+	if ((label->export_paths[0] != NULL) && (pln_mode != RouteLabel))
+		erry("export path on label '%s' may only be specified in the routes file", label->name);
+
 	if (len == PLN_MAX_PATHS)
-		errx(1, "> %d export paths specified for label '%s'", PLN_MAX_PATHS - 1, label->name);
+		erry("> %d export paths specified for label '%s'", PLN_MAX_PATHS - 1, label->name);
 
 	memcpy(&label->options, &current_options, sizeof(current_options));
 
@@ -365,15 +358,11 @@ read_option(char *text, Options *op) {
 		op->begin = strdup(v);
 	} else if (strcmp(k, "end") == 0) {
 		op->end = strdup(v);
-	} else {
-		fprintf(stderr, "%s: unknown option '%s=%s'\n", yyfn, k, v);
-		exit(1);
-	}
+	} else
+		erry("unknown option '%s=%s'", k, v);
 
-	if (len > PLN_OPTION_SIZE) {
-		fprintf(stderr, "%s: option '%s' too long: %d > %d\n", yyfn, k, len, PLN_OPTION_SIZE);
-		exit(1);
-	}
+	if (len > PLN_OPTION_SIZE)
+		erry("option '%s' too long: %d > %d", k, len, PLN_OPTION_SIZE);
 }
 
 /*

@@ -54,6 +54,7 @@ extern Label **route_labels;
 
 /* forwards */
 
+void erry(const char *fmt, ...);
 void parse_pln(Label **host_labels);
 void read_route_labels(const char *fn);
 void read_host_labels(Label *route_label);
