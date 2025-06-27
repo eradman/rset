@@ -83,7 +83,7 @@ test: ${PROGS}
 
 format:
 	${RUBOCOP} -A
-	${CLANG_FORMAT} -i *.c *.h tests/*.c
+	${CLANG_FORMAT} -i *.c *.h tests/*.c missing/*.c missing/*.h
 
 clean:
 	rm -f compat.c *.o *.core ${PROGS}
