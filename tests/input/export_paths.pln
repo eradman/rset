@@ -1,2 +1,5 @@
+_archive: ssl.tar
+	tar -XPp -cf ssl.tar /etc/ssl
+
 etc: radnet/
 	hostname

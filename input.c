@@ -16,6 +16,7 @@
 
 #include <err.h>
 #include <fcntl.h>
+#include <regex.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -294,6 +295,8 @@ void
 read_label(char *line, Label *label) {
 	int len;
 	char *export;
+	regex_t label_reg;
+	regmatch_t regmatch;
 
 	/* remove trailing newline and split on last ':' */
 	line[strlen(line) - 1] = '\0';
@@ -309,8 +312,13 @@ read_label(char *line, Label *label) {
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
 	len = str_to_array(label->export_paths, strdup(ltrim(export, ' ')), PLN_MAX_PATHS, " ");
-	if ((label->export_paths[0] != NULL) && (pln_mode != RouteLabel))
-		erry("export path on label '%s' may only be specified in the routes file", label->name);
+	if ((label->export_paths[0] != NULL) && (pln_mode == HostLabel)) {
+		regcomp(&label_reg, DEFAULT_LABEL_PATTERN, REG_EXTENDED);
+		if (regexec(&label_reg, label->name, 1, &regmatch, 0) == 0)
+			erry("export path on label '%s' implies archive/restore and must not match "
+			     "default label pattern '" DEFAULT_LABEL_PATTERN "'",
+			    label->name);
+	}
 
 	if (len == PLN_MAX_PATHS)
 		erry("> %d export paths specified for label '%s'", PLN_MAX_PATHS - 1, label->name);

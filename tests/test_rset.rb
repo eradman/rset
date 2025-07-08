@@ -297,7 +297,8 @@ try 'Export paths may only be specified on a route label' do
   pln = 'input/export_paths.pln'
   cmd = "./parser H #{pln}"
   out, err, status = Open3.capture3(cmd)
-  eq err, "#{pln}: export path on label 'etc' may only be specified in the routes file\n"
+  eq err,
+     "#{pln}: export path on label 'etc' implies archive/restore and must not match default label pattern '^[0-9a-z]'\n"
   eq out, ''
   eq status.exitstatus, 1
 end
