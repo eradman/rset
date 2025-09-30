@@ -22,7 +22,7 @@
 #define _RSET_INPUT_H_
 
 #define PLN_LABEL_SIZE 128
-#define PLN_OPTION_SIZE 64
+#define PLN_OPTION_SIZE 90
 #define PLN_MAX_PATHS 32
 #define PLN_MAX_ALIASES 100
 
