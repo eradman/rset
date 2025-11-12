@@ -64,7 +64,7 @@ parse_pln(Label **labels) {
 	int j;
 	int tfd = 0;
 	int local_argc;
-	enum { Local, Remote } context;
+	enum { Unset, Local, Remote } context;
 	unsigned n = 0;
 	char tmp_src[128];
 	char *aliases;
@@ -74,7 +74,7 @@ parse_pln(Label **labels) {
 	ssize_t linelen;
 	Options op;
 
-	context = Remote;
+	context = Unset;
 	while ((linelen = getline(&line, &linesize, yyin)) != -1) {
 		n++;
 
@@ -129,6 +129,8 @@ parse_pln(Label **labels) {
 		/* tab-intended content */
 		else if (line[0] == '\t') {
 			switch (context) {
+			case Unset:
+				erry("indented text in unexpected context on line %d", n);
 			case Local:
 				if ((write(tfd, line + 1, linelen - 1)) == -1)
 					err(1, "write");
@@ -148,12 +150,14 @@ parse_pln(Label **labels) {
 
 		/* option */
 		else if (strchr(line, '=')) {
+			context = Unset;
 			line[linelen - 1] = '\0';
 			read_option(line, &current_options);
 		}
 
 		/* label */
 		else if (strchr(line, ':')) {
+			context = Remote;
 			labels[n_labels] = malloc(sizeof(Label));
 			labels[n_labels]->content = malloc(BUFSIZE);
 			content_allocation = BUFSIZE;
