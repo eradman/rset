@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "execute.h"
+#include "xlibc.h"
 
 /* globals */
 Label **route_labels;
@@ -22,8 +23,8 @@ main(int argc, char *argv[]) {
 
 	cmd_argv[0] = "/bin/cat";
 	cmd_argv[1] = NULL;
-	buf = malloc(ALLOCATION_SIZE);
 	fd = open(argv[1], O_RDONLY);
+	buf = xmalloc(ALLOCATION_SIZE, "buf");
 	len = read(fd, buf, ALLOCATION_SIZE);
 	close(fd);
 

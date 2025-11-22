@@ -4,7 +4,7 @@ PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
 RELEASE = 3.2
 
-RSET_COMPONENTS = rutils input execute worker
+RSET_COMPONENTS = execute input rutils worker xlibc
 RSET_OBJS = ${RSET_COMPONENTS:=.o} compat.o rset.o
 RSET_INC = ${RSET_COMPONENTS:=.h} config.h missing/compat.h
 

@@ -34,6 +34,7 @@
 #include "input.h"
 #include "rutils.h"
 #include "worker.h"
+#include "xlibc.h"
 
 /* forwards */
 static void handle_exit(int sig);
@@ -98,7 +99,7 @@ main(int argc, char *argv[]) {
 	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
 		err(1, "Failed to set SIGTERM handler");
 
-	hostnames = calloc(sizeof(char *), argc);
+	hostnames = xcalloc(argc, sizeof(char *), "hostnames");
 	set_options(argc, argv, hostnames);
 
 	if ((renv_bin = findprog("renv")) == 0)
@@ -163,7 +164,7 @@ main(int argc, char *argv[]) {
 		for (i = 0; hostnames[i]; i++) {
 			j = i % n_parallel;
 			if (j + 1 > n_workers) {
-				worker_argv[n_workers] = calloc(sizeof(char *), argc);
+				worker_argv[n_workers] = xcalloc(argc, sizeof(char *), "worker_argv[]");
 				worker_argc[n_workers] = create_worker_argv(argv, worker_argv[n_workers]);
 				n_workers++;
 			}
@@ -249,7 +250,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				log_msg(host_connect_msg, hostname, "", 0);
 
 				len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
-				socket_path = malloc(len);
+				socket_path = xmalloc(len, "socket_path");
 				snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
 
 				ret = start_connection(
@@ -532,14 +533,15 @@ start_http_server(int stdout_pipe[], int http_port) {
 	sigset_t set;
 
 	/* Convert http server command line into a vector */
-	inputstring = malloc(PATH_MAX);
+	inputstring = xmalloc(PATH_MAX, "inputstring");
+
 	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d " PUBLIC_DIRECTORY, http_port);
 	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv), " ");
 	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
 
 	/* start the web server */
-	pipe(stdout_pipe);
+	xpipe(stdout_pipe, "stdout");
 	http_server_pid = fork();
 	if (http_server_pid == 0) {
 		/* close input side of pipe, and connect stdout */

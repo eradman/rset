@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "worker.h"
+#include "xlibc.h"
 
 /*
  * create_worker_argv - assemble argv for workers
