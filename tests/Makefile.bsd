@@ -12,7 +12,7 @@ OBJS += ssh_command
 OBJS += which
 OBJS += worker_argv
 OBJS += worker_exec
-RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o ../worker.o
+RSET_LIBS = ../compat.o ../rutils.o ../input.o ../execute.o ../worker.o ../xlibc.o
 
 all: rset.o test
 

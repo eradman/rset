@@ -28,6 +28,7 @@
 #include "config.h"
 #include "execute.h"
 #include "input.h"
+#include "xlibc.h"
 
 #define LABELS_MAX 100
 #define BUFSIZE 4096
@@ -139,7 +140,7 @@ parse_pln(Label **labels) {
 				lp = labels[n_labels - 1];
 				while ((linelen + lp->content_size) >= content_allocation) {
 					content_allocation += BUFSIZE;
-					lp->content = realloc(lp->content, content_allocation);
+					lp->content = xrealloc(lp->content, content_allocation, "lp->content");
 				}
 				memcpy(lp->content + lp->content_size, line + 1, linelen - 1);
 				lp->content_size += linelen - 1;
@@ -158,8 +159,10 @@ parse_pln(Label **labels) {
 		/* label */
 		else if (strchr(line, ':')) {
 			context = Remote;
-			labels[n_labels] = malloc(sizeof(Label));
-			labels[n_labels]->content = malloc(BUFSIZE);
+
+			labels[n_labels] = xmalloc(sizeof(Label), "labels[]");
+			labels[n_labels]->content = xmalloc(BUFSIZE, "labels[].content");
+
 			content_allocation = BUFSIZE;
 			read_label(line, labels[n_labels]);
 			for (j = 0; j < labels[n_labels]->n_aliases; j++) {
@@ -192,7 +195,7 @@ Label **
 alloc_labels() {
 	Label **new_labels;
 
-	new_labels = malloc(LABELS_MAX * sizeof(Label *));
+	new_labels = xmalloc(LABELS_MAX * sizeof(Label *), "new_labels");
 	bzero(new_labels, LABELS_MAX * sizeof(Label *));
 
 	return new_labels;
@@ -505,7 +508,7 @@ env_split_lines(const char *s, const char *option_value, int verify) {
 	size_t len;
 
 	len = strlen(s);
-	new = malloc(len + 2);
+	new = xmalloc(len + 2, "new");
 	memcpy(new, s, len);
 
 	/* add trailing newline */
@@ -543,7 +546,7 @@ read_environment_file(const char *environment_file) {
 	int fd;
 	size_t len;
 
-	buf = malloc(MAX_ENVIRONMENT);
+	buf = xmalloc(MAX_ENVIRONMENT, "buf");
 
 	if ((fd = open(environment_file, O_RDONLY)) == -1)
 		err(1, "%s: %s", yyfn, environment_file);

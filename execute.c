@@ -38,6 +38,7 @@
 #include "execute.h"
 #include "input.h"
 #include "rutils.h"
+#include "xlibc.h"
 
 #define BLOCK_SIZE 512
 
@@ -111,10 +112,11 @@ cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size) {
 
 	nbytes = 0;
 	buffer_size = ALLOCATION_SIZE;
-	output = malloc(buffer_size + 1); /* Add room for NULL */
 	*error_code = -1;
 
-	pipe(stdout_pipe);
+	output = xmalloc(buffer_size + 1, "output"); /* Add room for NULL */
+
+	xpipe(stdout_pipe, "stdout");
 	pid = fork();
 	if (pid == -1)
 		err(1, "fork");
@@ -135,8 +137,7 @@ cmd_pipe_stdout(char *const argv[], int *error_code, int *output_size) {
 		/* ensure we have enough space to terminate string */
 		if (nbytes + nr + 1 > buffer_size) {
 			buffer_size += ALLOCATION_SIZE;
-			if ((newp = realloc(output, buffer_size + 1)) == NULL)
-				err(1, "realloc");
+			newp = xrealloc(output, buffer_size + 1, "newp");
 			output = newp;
 		}
 		memcpy(output + nbytes, buf, nr);
@@ -162,7 +163,7 @@ cmd_pipe_stdin(char *const argv[], char *input, size_t len) {
 	int stdin_pipe[2];
 	pid_t pid;
 
-	pipe(stdin_pipe);
+	xpipe(stdin_pipe, "stdin");
 	pid = fork();
 	if (pid == -1)
 		err(1, "fork");
@@ -226,7 +227,8 @@ findprog(char *prog) {
 	if ((path = strdup(path)) == NULL)
 		err(1, "strdup");
 	pathcpy = path;
-	filename = malloc(PATH_MAX);
+
+	filename = xmalloc(PATH_MAX, "filename");
 
 	while ((p = strsep(&pathcpy, ":")) != NULL) {
 		if (*p == '\0')

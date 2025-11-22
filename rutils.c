@@ -18,8 +18,6 @@
 #include <sys/wait.h>
 
 #include <err.h>
-#include <libgen.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,6 +28,7 @@
 
 #include "config.h"
 #include "rutils.h"
+#include "xlibc.h"
 
 unsigned session_id;
 
@@ -50,28 +49,6 @@ generate_session_id() {
 unsigned
 current_session_id() {
 	return session_id;
-}
-
-/*
- * Mimic dirname(3) on OpenBSD which does not modify it's input
- */
-char *
-xdirname(const char *path) {
-	static char dname[PATH_MAX];
-
-	strlcpy(dname, path, sizeof(dname));
-	return dirname(dname);
-}
-
-/*
- * Mimic basename(3) on OpenBSD which does not modify it's input
- */
-char *
-xbasename(const char *path) {
-	static char dname[PATH_MAX];
-
-	strlcpy(dname, path, sizeof(dname));
-	return basename(dname);
 }
 
 /*

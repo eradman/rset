@@ -7,6 +7,7 @@
 #include "missing/compat.h"
 
 #include "rutils.h"
+#include "xlibc.h"
 
 /* forwards */
 void indent(int level);
@@ -49,11 +50,11 @@ main(int argc, char *argv[]) {
 		read_route_labels(fn);
 		break;
 	case 'H':
-		route_labels[0] = malloc(sizeof(Label));
+		route_labels[0] = xmalloc(sizeof(Label), "route_labels[]");
 		bzero(route_labels[0], sizeof(Label));
 		strlcpy(route_labels[0]->name, fn, PLN_LABEL_SIZE);
 		route_labels[0]->labels = alloc_labels();
-		route_labels[0]->labels[0] = malloc(sizeof(Label));
+		route_labels[0]->labels[0] = xmalloc(sizeof(Label), "route_labels[].labels[]");
 		yyfn = fn;
 		yyin = fopen(fn, "r");
 		parse_pln(route_labels[0]->labels);
@@ -168,12 +169,12 @@ quote(char *inputstring) {
 	static char *str = NULL;
 
 	if (!str)
-		str = malloc(size);
+		str = xmalloc(size, "str");
 
 	for (i = 0, count = 0; inputstring[i]; i++, count++) {
 		if (count > size - 2) {
 			size += 4096;
-			str = realloc(str, size);
+			str = xrealloc(str, size, "str");
 		}
 
 		switch (inputstring[i]) {

@@ -14,16 +14,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <inttypes.h>
-
-#include "input.h"
+#define REALLOC_MAX_SIZE 1048576
 
 /* forwards */
 
-unsigned generate_session_id();
-unsigned current_session_id();
-void check_permissions(const char *);
-int create_dir(const char *);
-void install_if_new(const char *, const char *);
-void hl_range(const char *, const char *, unsigned, unsigned);
-void log_msg(char *, char *, char *, int);
+char *xdirname(const char *);
+char *xbasename(const char *);
+void *xcalloc(size_t, size_t, const char *);
+void *xmalloc(size_t, const char *);
+void *xrealloc(void *, size_t, const char *);
+int xpipe(int *, const char *);
