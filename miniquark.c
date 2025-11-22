@@ -130,12 +130,6 @@ main(int argc, char *argv[]) {
 		if (chdir(servedir) < 0)
 			err(1, "chdir '%s'", servedir);
 
-		/* chroot */
-		if (getuid() == 0) {
-			if (chroot(".") < 0) {
-				err(1, "chroot .");
-			}
-		}
 		insock = sock_get_ips(s.host, s.port);
 
 		/* accept incoming connections */
