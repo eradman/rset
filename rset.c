@@ -281,7 +281,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					/* restore */
 					if (restore_opt && host_labels[j]->export_paths[0])
 						scp_exit_code =
-						    scp_archive(hostname, socket_path, host_labels[j], http_port, 0);
+						    scp_archive(hostname, socket_path, host_labels[j], http_port, true);
 
 					if (stop_on_err_opt && scp_exit_code != 0) {
 						log_msg(
@@ -305,7 +305,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					/* archive */
 					if (archive_opt && host_labels[j]->export_paths[0])
 						scp_exit_code =
-						    scp_archive(hostname, socket_path, host_labels[j], http_port, 1);
+						    scp_archive(hostname, socket_path, host_labels[j], http_port, false);
 
 					if (stop_on_err_opt && scp_exit_code != 0) {
 						log_msg(

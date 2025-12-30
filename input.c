@@ -501,7 +501,7 @@ expand_numeric_range(char **argv, char *input, int max_elements) {
  */
 
 char *
-env_split_lines(const char *s, const char *option_value, int verify) {
+env_split_lines(const char *s, const char *option_value, bool verify) {
 	int count = 0;
 	char *argv[8];
 	char *new, *p;

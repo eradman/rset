@@ -33,7 +33,7 @@ int start_connection(char *, char *, Label *, int, const char *);
 int update_environment_file(char *, char *, Label *, int, const char *);
 int ssh_command_pipe(char *, char *, Label *, int, const char *);
 int ssh_command_tty(char *, char *, Label *, int, const char *);
-int scp_archive(char *, char *, Label *, int, int);
+int scp_archive(char *, char *, Label *, int, bool);
 void end_connection(char *, char *, int);
 int local_exec(Label *, char *);
 

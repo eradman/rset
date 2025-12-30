@@ -15,6 +15,7 @@
  */
 
 #include <limits.h>
+#include <stdbool.h>
 
 /* data */
 
@@ -66,7 +67,7 @@ char *ltrim(char *, int);
 void read_label(char *, Label *);
 void read_option(char *, Options *);
 int expand_numeric_range(char **, char *, int);
-char *env_split_lines(const char *, const char *, int);
+char *env_split_lines(const char *, const char *, bool);
 char *read_environment_file(const char *);
 
 #endif /* _RSET_INPUT_H_ */
