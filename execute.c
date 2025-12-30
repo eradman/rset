@@ -462,7 +462,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 }
 
 int
-scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port, int direction) {
+scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port, bool upload) {
 	int i;
 	int argc;
 	char scp_opt[PLN_LABEL_SIZE];
@@ -484,10 +484,10 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 			snprintf(scp_src, sizeof(scp_src), "%s:%s/%s", host_name, stagedir(http_port), path);
 		snprintf(scp_dst, sizeof(scp_dst), ARCHIVE_DIRECTORY "/%s:%s", host_name, xbasename(path));
 
-		if (direction == 0)
-			(void) append(argv, argc, scp_dst, scp_src, NULL);
-		if (direction == 1)
+		if (upload)
 			(void) append(argv, argc, scp_src, scp_dst, NULL);
+		else
+			(void) append(argv, argc, scp_dst, scp_src, NULL);
 
 		ret = ret || run(argv);
 	}
