@@ -60,12 +60,12 @@ main(int argc, char *argv[]) {
 	case 'A':
 		if (argc == 4)
 			str_to_array(host_label.export_paths, strdup(argv[3]), PLN_MAX_PATHS, " ");
-		scp_archive(host_name, socket_path, &host_label, http_port, 1);
+		scp_archive(host_name, socket_path, &host_label, http_port, false);
 		break;
 	case 'R':
 		if (argc == 4)
 			str_to_array(host_label.export_paths, strdup(argv[3]), PLN_MAX_PATHS, " ");
-		scp_archive(host_name, socket_path, &host_label, http_port, 0);
+		scp_archive(host_name, socket_path, &host_label, http_port, true);
 		break;
 	case 'E':
 		end_connection(socket_path, host_name, http_port);
