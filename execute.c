@@ -466,9 +466,9 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 	int i;
 	int argc;
 	char scp_opt[PLN_LABEL_SIZE];
-	char scp_src[PLN_LABEL_SIZE];
-	char scp_dst[PLN_LABEL_SIZE];
+	char scp_arg[2][PLN_LABEL_SIZE];
 	char *path;
+	char *archive_name;
 	char *argv[32];
 	int ret = 0;
 
@@ -479,15 +479,17 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 		path = host_label->export_paths[i];
 
 		if (path[0] == '/')
-			snprintf(scp_src, sizeof(scp_src), "%s:%s", host_name, path);
+			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s", host_name, path);
 		else
-			snprintf(scp_src, sizeof(scp_src), "%s:%s/%s", host_name, stagedir(http_port), path);
-		snprintf(scp_dst, sizeof(scp_dst), ARCHIVE_DIRECTORY "/%s:%s", host_name, xbasename(path));
+			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s/%s", host_name, stagedir(http_port), path);
+
+		archive_name = xbasename(path);
+		snprintf(scp_arg[1], sizeof(scp_arg[1]), ARCHIVE_DIRECTORY "/%s:%s", host_name, archive_name);
 
 		if (upload)
-			(void) append(argv, argc, scp_src, scp_dst, NULL);
+			(void) append(argv, argc, scp_arg[1], scp_arg[0], NULL);
 		else
-			(void) append(argv, argc, scp_dst, scp_src, NULL);
+			(void) append(argv, argc, scp_arg[0], scp_arg[1], NULL);
 
 		ret = ret || run(argv);
 	}
