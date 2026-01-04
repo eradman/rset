@@ -79,6 +79,7 @@ exec_worker(char *log_directory, int worker_id, char *worker_argv[]) {
 		setenv("RSET_LABEL_EXEC_END", "%s|%T|EXEC_END|%l|%e", 1);
 		setenv("RSET_LABEL_EXEC_ERROR", "%s|%T|EXEC_ERROR|%l|%e", 1);
 		setenv("RSET_HOST_DISCONNECT", "%s|%T|HOST_DISCONNECT|%h|%e", 1);
+		unsetenv("SSH_TRACE");
 
 		execvp(worker_argv[0], worker_argv);
 		err(1, "Failed to start worker '%s'", worker_argv[0]);

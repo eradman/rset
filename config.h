@@ -31,6 +31,7 @@
 #define HL_HOST "\x1b[33m"  /* yellow */
 #define HL_LABEL "\x1b[36m" /* cyan */
 #define HL_ERROR "\x1b[31m" /* red */
+#define HL_TRACE "\x1b[7m"  /* inverted */
 
 /* options */
 #if defined(_MACOS_PORT)
