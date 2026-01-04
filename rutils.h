@@ -30,3 +30,5 @@ int create_dir(const char *);
 void install_if_new(const char *, const char *);
 void hl_range(const char *, const char *, unsigned, unsigned);
 void log_msg(char *, char *, char *, int);
+void trace_shell(char *);
+void trace_exec(char *[]);

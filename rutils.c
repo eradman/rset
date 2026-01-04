@@ -228,3 +228,26 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 	buf[index++] = '\n';
 	write(STDOUT_FILENO, buf, index);
 }
+
+/*
+ * trace_shell - log ssh commands using system(3)
+ * trace_exec  - log ssh commands using execvp(3)
+ */
+void
+trace_shell(char *cmd) {
+	if (!getenv("SSH_TRACE"))
+		return;
+
+	printf("+ " HL_TRACE "sh -c \"%s\"" HL_RESET "\n", cmd);
+}
+
+void
+trace_exec(char *cmd[]) {
+	char argv_repr[PATH_MAX];
+
+	if (!getenv("SSH_TRACE"))
+		return;
+
+	array_to_str(cmd, argv_repr, sizeof(argv_repr), " ");
+	printf("+ " HL_TRACE "%s" HL_RESET "\n", argv_repr);
+}

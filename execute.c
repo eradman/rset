@@ -293,6 +293,7 @@ start_connection(
 		array_append(argv, argc, "-F", ssh_config, host_name, NULL);
 	else
 		array_append(argv, argc, host_name, NULL);
+	trace_exec(argv);
 	if ((ret = run(argv)) != 0)
 		return ret;
 
@@ -300,6 +301,7 @@ start_connection(
 	    "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
 	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
 	    socket_path, host_name, stagedir(http_port), stagedir(http_port));
+	trace_shell(cmd);
 	if ((ret = system(cmd)) != 0)
 		return ret;
 
@@ -312,6 +314,7 @@ start_connection(
 		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
 		    path_repr, socket_path, host_name, stagedir(http_port));
 
+		trace_shell(cmd);
 		if ((ret = system(cmd)) != 0)
 			return ret;
 	}
@@ -363,6 +366,7 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	snprintf(cmd, PATH_MAX, "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
 	    op.environment_file, tmp_src, socket_path, host_name, stagedir(http_port),
 	    stagedir(http_port));
+	trace_shell(cmd);
 	ret = system(cmd);
 	unlink(tmp_src);
 
@@ -398,6 +402,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	argc = array_append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
 
 	array_append(argv, argc, host_name, cmd, NULL);
+	trace_exec(argv);
 	ret = cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
 	return ret;
 }
@@ -441,6 +446,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	argc = array_append(argv, argc, "ssh", "-t", "-S", socket_path, NULL);
 
 	array_append(argv, argc, host_name, cmd, NULL);
+	trace_exec(argv);
 	ret = run(argv);
 	return ret;
 }
@@ -477,6 +483,7 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 		else
 			array_append(argv, argc, scp_arg[0], scp_arg[1], NULL);
 
+		trace_exec(argv);
 		ret = ret || run(argv);
 	}
 
@@ -492,10 +499,12 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 
 	array_append(
 	    argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port), NULL);
+	trace_exec(argv);
 	if (run(argv) != 0)
 		warn("remote tmp dir");
 
 	array_append(argv, 0, "ssh", "-q", "-S", socket_path, "-O", "exit", host_name, NULL);
+	trace_exec(argv);
 	if (run(argv) != 0)
 		warn("exec ssh -O exit");
 }
