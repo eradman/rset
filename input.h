@@ -60,8 +60,6 @@ void parse_pln(Label **host_labels);
 void read_route_labels(const char *fn);
 void read_host_labels(Label *route_label);
 Label **alloc_labels();
-int array_to_str(char *[], char *, int, const char *);
-int str_to_array(char *[], char *, int, const char *);
 
 char *ltrim(char *, int);
 void read_label(char *, Label *);
