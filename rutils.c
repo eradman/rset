@@ -18,6 +18,7 @@
 #include <sys/wait.h>
 
 #include <err.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,6 +36,54 @@ unsigned session_id;
 /* globals */
 
 int dir_mode = 0700;
+
+/*
+ * str_to_array - split a string using the input string as the buffer
+ * array_to_str - format an array using the output string as the buffer
+ * array_append - add a list of arguments to an array
+ */
+int
+str_to_array(char *argv[], char *inputstring, int max_elements, const char *delim) {
+	int argc;
+	char **ap;
+
+	argc = 0;
+	for (ap = argv; ap < &argv[max_elements] && (*ap = strsep(&inputstring, delim)) != NULL;) {
+		argc++;
+		if (**ap != '\0')
+			ap++;
+	}
+	*ap = NULL;
+	return argc;
+}
+
+int
+array_to_str(char *argv[], char *outputstring, int max_length, const char *delim) {
+	int argc = 0;
+	char *p = outputstring;
+
+	while (argv && *argv) {
+		argc += strlcpy(p + argc, *argv, max_length - argc);
+		argv++;
+		if (argv && *argv)
+			argc += strlcpy(p + argc, delim, max_length - argc);
+	}
+	outputstring[argc] = '\0';
+	return argc;
+}
+
+int
+array_append(char *argv[], int argc, char *arg1, ...) {
+	char *s;
+	va_list ap;
+
+	va_start(ap, arg1);
+	for (s = arg1; s != NULL; s = va_arg(ap, char *))
+		argv[argc++] = s;
+	va_end(ap);
+	argv[argc] = NULL;
+	return argc;
+}
 
 /*
  * Update global session ID before starting a new SSH session

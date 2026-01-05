@@ -4,6 +4,7 @@
 
 #include "execute.h"
 #include "input.h"
+#include "rutils.h"
 
 /* globals */
 Label **route_labels;

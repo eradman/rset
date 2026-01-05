@@ -28,6 +28,7 @@
 #include "config.h"
 #include "execute.h"
 #include "input.h"
+#include "rutils.h"
 #include "xlibc.h"
 
 #define LABELS_MAX 100
@@ -110,7 +111,7 @@ parse_pln(Label **labels) {
 				    op.local_interpreter, lp->options.local_interpreter, LOCAL_INTERPRETER);
 
 				local_argc = str_to_array(local_argv, op.local_interpreter, PLN_MAX_PATHS, " ");
-				(void) append(local_argv, local_argc, tmp_src, NULL);
+				array_append(local_argv, local_argc, tmp_src, NULL);
 
 				lp->content = cmd_pipe_stdout(local_argv, &error_code, &content_allocation);
 				lp->content_size = strlen(lp->content);
@@ -244,42 +245,6 @@ read_host_labels(Label *route_label) {
 		line = next_line + 1;
 	}
 	free(content);
-}
-
-/*
- * str_to_array - split a string using the input string as the buffer
- */
-int
-str_to_array(char *argv[], char *inputstring, int max_elements, const char *delim) {
-	int argc;
-	char **ap;
-
-	argc = 0;
-	for (ap = argv; ap < &argv[max_elements] && (*ap = strsep(&inputstring, delim)) != NULL;) {
-		argc++;
-		if (**ap != '\0')
-			ap++;
-	}
-	*ap = NULL;
-	return argc;
-}
-
-/*
- * array_to_str - format an array using the output string as the buffer
- */
-int
-array_to_str(char *argv[], char *outputstring, int max_length, const char *delim) {
-	int argc = 0;
-	char *p = outputstring;
-
-	while (argv && *argv) {
-		argc += strlcpy(p + argc, *argv, max_length - argc);
-		argv++;
-		if (argv && *argv)
-			argc += strlcpy(p + argc, delim, max_length - argc);
-	}
-	outputstring[argc] = '\0';
-	return argc;
 }
 
 /*
@@ -528,7 +493,7 @@ env_split_lines(const char *s, const char *option_value, bool verify) {
 		errx(1, "no closing quote: %s", option_value);
 
 	if ((len > 0) && verify) {
-		(void) append(argv, 0, "renv", "-", "-q", NULL);
+		array_append(argv, 0, "renv", "-", "-q", NULL);
 		if (cmd_pipe_stdin(argv, new, len) != 0)
 			exit(1);
 	}

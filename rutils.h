@@ -20,6 +20,9 @@
 
 /* forwards */
 
+int str_to_array(char *[], char *, int, const char *);
+int array_to_str(char *[], char *, int, const char *);
+int array_append(char *[], int, char *, ...);
 unsigned generate_session_id();
 unsigned current_session_id();
 void check_permissions(const char *);

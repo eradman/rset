@@ -26,7 +26,6 @@
 #include <limits.h>
 #include <netdb.h>
 #include <paths.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,22 +54,6 @@ stagedir(int http_port) {
 		port = http_port;
 	}
 	return path;
-}
-
-/*
- * append - add a list of arguments to an array
- */
-int
-append(char *argv[], int argc, char *arg1, ...) {
-	char *s;
-	va_list ap;
-
-	va_start(ap, arg1);
-	for (s = arg1; s != NULL; s = va_arg(ap, char *))
-		argv[argc++] = s;
-	va_end(ap);
-	argv[argc] = NULL;
-	return argc;
 }
 
 /*
@@ -264,7 +247,7 @@ verify_ssh_agent() {
 	char *output;
 	char *argv[32];
 
-	append(argv, 0, "ssh-add", "-l", NULL);
+	array_append(argv, 0, "ssh-add", "-l", NULL);
 	output = cmd_pipe_stdout(argv, &error_code, &output_size);
 	free(output);
 
@@ -304,11 +287,12 @@ start_connection(
 	}
 
 	argc = 0;
-	argc = append(argv, argc, "ssh", "-fN", "-R", port_forwarding, "-S", socket_path, "-M", NULL);
+	argc = array_append(
+	    argv, argc, "ssh", "-fN", "-R", port_forwarding, "-S", socket_path, "-M", NULL);
 	if (ssh_config)
-		(void) append(argv, argc, "-F", ssh_config, host_name, NULL);
+		array_append(argv, argc, "-F", ssh_config, host_name, NULL);
 	else
-		(void) append(argv, argc, host_name, NULL);
+		array_append(argv, argc, host_name, NULL);
 	if ((ret = run(argv)) != 0)
 		return ret;
 
@@ -411,9 +395,9 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 
 	/* construct ssh command */
 	argc = 0;
-	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
+	argc = array_append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
 
-	(void) append(argv, argc, host_name, cmd, NULL);
+	array_append(argv, argc, host_name, cmd, NULL);
 	ret = cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
 	return ret;
 }
@@ -436,8 +420,8 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	snprintf(cmd, sizeof(cmd), "cat > %s/_script", stagedir(http_port));
 	/* construct ssh command */
 	argc = 0;
-	argc = append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
-	(void) append(argv, argc, host_name, cmd, NULL);
+	argc = array_append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
+	array_append(argv, argc, host_name, cmd, NULL);
 	cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
 
 	/* construct command to execute on remote host  */
@@ -454,9 +438,9 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 
 	/* construct ssh command */
 	argc = 0;
-	argc = append(argv, argc, "ssh", "-t", "-S", socket_path, NULL);
+	argc = array_append(argv, argc, "ssh", "-t", "-S", socket_path, NULL);
 
-	(void) append(argv, argc, host_name, cmd, NULL);
+	array_append(argv, argc, host_name, cmd, NULL);
 	ret = run(argv);
 	return ret;
 }
@@ -473,7 +457,7 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 	int ret = 0;
 
 	snprintf(scp_opt, sizeof(scp_opt), "ControlPath=%s", socket_path);
-	argc = append(argv, 0, "scp", "-o", scp_opt, NULL);
+	argc = array_append(argv, 0, "scp", "-o", scp_opt, NULL);
 
 	for (i = 0; host_label->export_paths[i]; i++) {
 		path = host_label->export_paths[i];
@@ -481,15 +465,17 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 		if (path[0] == '/')
 			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s", host_name, path);
 		else
-			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s/%s", host_name, stagedir(http_port), path);
+			snprintf(
+			    scp_arg[0], sizeof(scp_arg[0]), "%s:%s/%s", host_name, stagedir(http_port), path);
 
 		archive_name = xbasename(path);
-		snprintf(scp_arg[1], sizeof(scp_arg[1]), ARCHIVE_DIRECTORY "/%s:%s", host_name, archive_name);
+		snprintf(
+		    scp_arg[1], sizeof(scp_arg[1]), ARCHIVE_DIRECTORY "/%s:%s", host_name, archive_name);
 
 		if (upload)
-			(void) append(argv, argc, scp_arg[1], scp_arg[0], NULL);
+			array_append(argv, argc, scp_arg[1], scp_arg[0], NULL);
 		else
-			(void) append(argv, argc, scp_arg[0], scp_arg[1], NULL);
+			array_append(argv, argc, scp_arg[0], scp_arg[1], NULL);
 
 		ret = ret || run(argv);
 	}
@@ -504,11 +490,12 @@ end_connection(char *socket_path, char *host_name, int http_port) {
 	if (access(socket_path, F_OK) == -1)
 		return;
 
-	append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port), NULL);
+	array_append(
+	    argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port), NULL);
 	if (run(argv) != 0)
 		warn("remote tmp dir");
 
-	append(argv, 0, "ssh", "-q", "-S", socket_path, "-O", "exit", host_name, NULL);
+	array_append(argv, 0, "ssh", "-q", "-S", socket_path, "-O", "exit", host_name, NULL);
 	if (run(argv) != 0)
 		warn("exec ssh -O exit");
 }
@@ -524,7 +511,7 @@ local_exec(Label *host_label, char *cmd) {
 
 	if ((cmd) && (len = strlen(cmd)) > 0) {
 		apply_default(op.local_interpreter, host_label->options.interpreter, INTERPRETER);
-		(void) append(argv, 0, op.local_interpreter, NULL);
+		array_append(argv, 0, op.local_interpreter, NULL);
 		ret = cmd_pipe_stdin(argv, cmd, len);
 	}
 	return ret;
