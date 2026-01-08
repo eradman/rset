@@ -42,7 +42,6 @@ static void usage();
 static void set_options(int argc, char *argv[], char *hostnames[]);
 static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
-static void format_http_log(char *output, size_t len);
 static void compare_argv_routes(char *hostnames[], Label **route_labels);
 static int execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg);
 static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
@@ -55,7 +54,6 @@ int archive_opt;
 int dryrun_opt;
 int restore_opt;
 int tty_opt;
-int verbose_opt;
 int stop_on_err_opt;
 int n_parallel;
 char *sshconfig_file;
@@ -330,8 +328,9 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					/* read output of web server */
 					nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
-					if ((verbose_opt) && (nr > 0))
-						format_http_log(httpd_log, nr);
+					httpd_log[nr] = '\0';
+					if (nr > 0)
+						trace_http(httpd_log);
 					if ((nr == -1) && (errno != EAGAIN))
 						warn("read from httpd output");
 				}
@@ -433,7 +432,7 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 
 	bzero(&op, sizeof op);
 
-	while ((ch = getopt(argc, argv, "AenRtvE:F:f:o:p:x:")) != -1) {
+	while ((ch = getopt(argc, argv, "AenRtE:F:f:o:p:x:")) != -1) {
 		switch (ch) {
 		case 'A':
 			archive_opt = 1;
@@ -446,9 +445,6 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 			break;
 		case 't':
 			tty_opt = 1;
-			break;
-		case 'v':
-			verbose_opt = 1;
 			break;
 		case 'R':
 			restore_opt = 1;
@@ -584,23 +580,4 @@ start_http_server(int stdout_pipe[], int http_port) {
 			err(1, "terminate http_server with pid %d", http_server_pid);
 		exit(WEXITSTATUS(status));
 	}
-}
-
-static void
-format_http_log(char *output, size_t len) {
-	char *eol, *output_start;
-	static int n_lines = 0;
-
-	output[len] = '\0';
-	output_start = output;
-
-	while (n_lines++ < 0) { /* 1 to strip off startup message */
-		if ((eol = strchr(output_start, '\n')) != NULL) {
-			*eol = '\0';
-			output_start = eol + 1;
-		}
-	}
-	printf("%s", output_start);
-	if (output[len - 1] != '\n')
-		printf(" ...\n");
 }

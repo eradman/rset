@@ -32,3 +32,4 @@ void hl_range(const char *, const char *, unsigned, unsigned);
 void log_msg(char *, char *, char *, int);
 void trace_shell(char *);
 void trace_exec(char *[]);
+void trace_http(const char *);

@@ -21,14 +21,14 @@
 .Nd remote staging and execution tool
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl AenRtv
+.Op Fl AenRt
 .Op Fl E Ar environment
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
 .Op Fl x Ar label_pattern
 .Ar hostname ...
 .Nm rset
-.Op Fl ev
+.Op Fl e
 .Op Fl E Ar environment
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
@@ -70,8 +70,6 @@ This is the reverse of
 .It Fl t
 Allow TTY input by copying the content of each label to the remote host instead
 of opening a pipe to the interpreter.
-.It Fl v
-Print the HTTP log messages after each label is executed.
 .It Fl E
 Set one or more environment variables using the format
 .Sq name="value" ... .
@@ -149,6 +147,9 @@ for fetching content from
 Staging directory where
 .Nm
 unpacks utilities and configuration files.
+.It Ev HTTP_TRACE
+If defined, print log messages from
+.Xr miniquark 1 .
 .It Ev SSH_TRACE
 If defined, print commands used for remote execution.
 .El
@@ -210,7 +211,6 @@ Execute a script using the
 .Sq local_interpreter
 after the label is executed on the remote host.
 .Sh SEE ALSO
-.Xr miniquark 1 ,
 .Xr rinstall 1 ,
 .Xr rsub 1 ,
 .Xr ssh_config 5 ,
