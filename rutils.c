@@ -232,6 +232,7 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 /*
  * trace_shell - log ssh commands using system(3)
  * trace_exec  - log ssh commands using execvp(3)
+ * trace_http  - format log messages emitted by miniquark(1)
  */
 void
 trace_shell(char *cmd) {
@@ -250,4 +251,22 @@ trace_exec(char *cmd[]) {
 
 	array_to_str(cmd, argv_repr, sizeof(argv_repr), " ");
 	printf("+ " HL_TRACE "%s" HL_RESET "\n", argv_repr);
+}
+
+void
+trace_http(const char *http_log) {
+	char *ap, *bp, *input;
+
+	if (!getenv("HTTP_TRACE"))
+		return;
+
+	bp = input = strdup(http_log);
+	if (input == NULL)
+		err(1, "strdup");
+
+	while ((ap = strsep(&input, "\n")) != NULL) {
+		if (*ap != '\0')
+			printf("+ " HL_TRACE "%s" HL_RESET "\n", ap);
+	}
+	free(bp);
 }
