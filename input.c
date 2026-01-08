@@ -227,7 +227,7 @@ read_host_labels(Label *route_label) {
 
 	pln_mode = HostLabel;
 	route_label->labels = alloc_labels();
-	content = strdup(route_label->content);
+	content = xstrdup(route_label->content, "content");
 	line = content;
 	n_labels = 0;
 	while (*line) {
@@ -283,7 +283,7 @@ read_label(char *line, Label *label) {
 	if (label->n_aliases == 1)
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
-	len = str_to_array(label->export_paths, strdup(ltrim(export, ' ')), PLN_MAX_PATHS, " ");
+	len = str_to_array(label->export_paths, ltrim(export, ' '), PLN_MAX_PATHS, " ");
 	if ((label->export_paths[0] != NULL) && (pln_mode == HostLabel)) {
 		regcomp(&label_reg, DEFAULT_LABEL_PATTERN, REG_EXTENDED);
 		if (regexec(&label_reg, label->name, 1, &regmatch, 0) == 0)
@@ -335,9 +335,9 @@ read_option(char *text, Options *op) {
 			free(content);
 		}
 	} else if (strcmp(k, "begin") == 0) {
-		op->begin = strdup(v);
+		op->begin = xstrdup(v, "op.begin");
 	} else if (strcmp(k, "end") == 0) {
-		op->end = strdup(v);
+		op->end = xstrdup(v, "op.end");
 	} else
 		erry("unknown option '%s=%s'", k, v);
 

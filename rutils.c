@@ -43,12 +43,15 @@ int dir_mode = 0700;
  * array_append - add a list of arguments to an array
  */
 int
-str_to_array(char *argv[], char *inputstring, int max_elements, const char *delim) {
+str_to_array(char *argv[], const char *inputstring, int max_elements, const char *delim) {
 	int argc;
+	char *input;
 	char **ap;
 
+	input = xstrdup(inputstring, "input");
+
 	argc = 0;
-	for (ap = argv; ap < &argv[max_elements] && (*ap = strsep(&inputstring, delim)) != NULL;) {
+	for (ap = argv; ap < &argv[max_elements] && (*ap = strsep(&input, delim)) != NULL;) {
 		argc++;
 		if (**ap != '\0')
 			ap++;
@@ -260,9 +263,7 @@ trace_http(const char *http_log) {
 	if (!getenv("HTTP_TRACE"))
 		return;
 
-	bp = input = strdup(http_log);
-	if (input == NULL)
-		err(1, "strdup");
+	bp = input = xstrdup(http_log, "http_log");
 
 	while ((ap = strsep(&input, "\n")) != NULL) {
 		if (*ap != '\0')

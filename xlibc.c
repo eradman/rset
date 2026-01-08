@@ -48,6 +48,18 @@ xbasename(const char *path) {
 }
 
 /*
+ * Call strdup(3) and exit on failure
+ */
+void *
+xstrdup(const char *s, const char *name) {
+	void *p;
+	p = strdup(s);
+	if (p == NULL)
+		err(1, "strdup > %s", name);
+	return p;
+}
+
+/*
  * Call calloc(3) and exit on failure
  */
 void *
