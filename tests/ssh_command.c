@@ -5,6 +5,7 @@
 #include "execute.h"
 #include "input.h"
 #include "rutils.h"
+#include "xlibc.h"
 
 /* globals */
 Label **route_labels;
@@ -34,7 +35,7 @@ main(int argc, char *argv[]) {
 	char *mode;
 
 	/* end_connection calls free() on socket_path */
-	socket_path = strdup("/tmp/test_rset_socket");
+	socket_path = xstrdup("/tmp/test_rset_socket", "socket_path");
 
 	if (argc < 3 || argc > 4)
 		usage();
@@ -45,7 +46,7 @@ main(int argc, char *argv[]) {
 	switch (mode[0]) {
 	case 'S':
 		if (argc == 4)
-			str_to_array(host_label.export_paths, strdup(argv[3]), PLN_MAX_PATHS, " ");
+			str_to_array(host_label.export_paths, argv[3], PLN_MAX_PATHS, " ");
 		start_connection(socket_path, host_name, &host_label, http_port, NULL);
 		break;
 	case 'P':
@@ -60,12 +61,12 @@ main(int argc, char *argv[]) {
 		break;
 	case 'A':
 		if (argc == 4)
-			str_to_array(host_label.export_paths, strdup(argv[3]), PLN_MAX_PATHS, " ");
+			str_to_array(host_label.export_paths, argv[3], PLN_MAX_PATHS, " ");
 		scp_archive(host_name, socket_path, &host_label, http_port, false);
 		break;
 	case 'R':
 		if (argc == 4)
-			str_to_array(host_label.export_paths, strdup(argv[3]), PLN_MAX_PATHS, " ");
+			str_to_array(host_label.export_paths, argv[3], PLN_MAX_PATHS, " ");
 		scp_archive(host_name, socket_path, &host_label, http_port, true);
 		break;
 	case 'E':

@@ -202,18 +202,16 @@ findprog(char *prog) {
 	int len;
 	char *path;
 	char *filename;
-	char *p, *pathcpy;
+	char *p, *bp, *input;
 	struct stat sbuf;
 
 	if ((path = getenv("PATH")) == NULL)
 		errx(1, "PATH is not set");
-	if ((path = strdup(path)) == NULL)
-		err(1, "strdup");
-	pathcpy = path;
+	bp = input = xstrdup(path, "path");
 
 	filename = xmalloc(PATH_MAX, "filename");
 
-	while ((p = strsep(&pathcpy, ":")) != NULL) {
+	while ((p = strsep(&input, ":")) != NULL) {
 		if (*p == '\0')
 			p = ".";
 
@@ -223,11 +221,11 @@ findprog(char *prog) {
 
 		(void) snprintf(filename, PATH_MAX, "%s/%s", p, prog);
 		if ((stat(filename, &sbuf) == 0) && S_ISREG(sbuf.st_mode) && access(filename, X_OK) == 0) {
-			(void) free(path);
+			(void) free(bp);
 			return filename;
 		}
 	}
-	(void) free(path);
+	(void) free(bp);
 	(void) free(filename);
 	return NULL;
 }
