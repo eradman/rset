@@ -394,7 +394,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	snprintf(cmd, sizeof(cmd),
 	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
-	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s\"",
+	    "SD='%s'; exec %s\"",
 	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter);
 
 	/* construct ssh command */
@@ -437,7 +437,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	snprintf(cmd, sizeof(cmd),
 	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
-	    "SD='%s' INSTALL_URL='" INSTALL_URL "'; exec %s %s/_script\"",
+	    "SD='%s'; exec %s %s/_script\"",
 	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter,
 	    stagedir(http_port));
 
