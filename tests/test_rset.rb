@@ -128,7 +128,7 @@ try 'Start an ssh session' do
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
     tar -cf - -C _rutils .
-    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_staging_6000; tar -xf - -C /tmp/rset_staging_6000'
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_00000000; tar -xf - -C /tmp/rset_00000000'
   RESULT
 end
 
@@ -140,9 +140,9 @@ try 'Start an ssh session with exported paths' do
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
     tar -cf - -C _rutils .
-    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_staging_6000; tar -xf - -C /tmp/rset_staging_6000'
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_00000000; tar -xf - -C /tmp/rset_00000000'
     tar -cf - input expected
-    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'tar -xf - -C /tmp/rset_staging_6000'
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'tar -xf - -C /tmp/rset_00000000'
   RESULT
 end
 
@@ -153,8 +153,8 @@ try 'Execute commands over ssh using a pipe' do
   eq status.success?, true
   eq out, <<~RESULT
     renv /dev/null /tmp/rset_env_XXXXXX
-    ssh -q -S /tmp/test_rset_socket 10.0.0.98 'cat > /tmp/rset_staging_6000/final.env; touch /tmp/rset_staging_6000/local.env'
-    ssh -T -S /tmp/test_rset_socket 10.0.0.98 ' sh -c "cd /tmp/rset_staging_6000; set -a; . ./final.env; . ./local.env; SD='/tmp/rset_staging_6000'; exec /bin/sh"'
+    ssh -q -S /tmp/test_rset_socket 10.0.0.98 'cat > /tmp/rset_00000000/final.env; touch /tmp/rset_00000000/local.env'
+    ssh -T -S /tmp/test_rset_socket 10.0.0.98 ' sh -c "cd /tmp/rset_00000000; set -a; . ./final.env; . ./local.env; SD='/tmp/rset_00000000'; exec /bin/sh"'
   RESULT
 end
 
@@ -165,9 +165,9 @@ try 'Execute commands over ssh using a tty' do
   eq status.success?, true
   eq out, <<~RESULT
     renv /dev/null /tmp/rset_env_XXXXXX
-    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_staging_6000/final.env; touch /tmp/rset_staging_6000/local.env'
-    ssh -T -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_staging_6000/_script'
-    ssh -t -S /tmp/test_rset_socket 10.0.0.99 ' sh -c "cd /tmp/rset_staging_6000; set -a; . ./final.env; . ./local.env; SD='/tmp/rset_staging_6000'; exec /bin/sh /tmp/rset_staging_6000/_script"'
+    ssh -q -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_00000000/final.env; touch /tmp/rset_00000000/local.env'
+    ssh -T -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_00000000/_script'
+    ssh -t -S /tmp/test_rset_socket 10.0.0.99 ' sh -c "cd /tmp/rset_00000000; set -a; . ./final.env; . ./local.env; SD='/tmp/rset_00000000'; exec /bin/sh /tmp/rset_00000000/_script"'
   RESULT
 end
 
@@ -177,8 +177,8 @@ try 'Archive files listed for a label' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/var.tar _archive/10.0.0.99:var.tar
-    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/certs.tar _archive/10.0.0.99:certs.tar
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_00000000/var.tar _archive/10.0.0.99:var.tar
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_00000000/certs.tar _archive/10.0.0.99:certs.tar
   RESULT
 end
 
@@ -188,7 +188,7 @@ try 'Archive files with relative and absolute paths' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_staging_6000/../home.tgz _archive/10.0.0.99:home.tgz
+    scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_00000000/../home.tgz _archive/10.0.0.99:home.tgz
     scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/home.tgz _archive/10.0.0.99:home.tgz
   RESULT
 end
@@ -199,8 +199,8 @@ try 'Restore files listed for a label' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:certs.tar 10.0.0.99:/tmp/rset_staging_6000/certs.tar
-    scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:var.tar 10.0.0.99:/tmp/rset_staging_6000/var.tar
+    scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:certs.tar 10.0.0.99:/tmp/rset_00000000/certs.tar
+    scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:var.tar 10.0.0.99:/tmp/rset_00000000/var.tar
   RESULT
 end
 
@@ -211,7 +211,7 @@ try 'End an ssh session' do
   eq err, ''
   eq status.success?, true
   eq out, <<~RESULT
-    ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_staging_6000
+    ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_00000000
     ssh -q -S /tmp/test_rset_socket -O exit 10.0.0.99
   RESULT
   File.unlink '/tmp/test_rset_socket'

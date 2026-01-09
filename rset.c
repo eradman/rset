@@ -247,15 +247,15 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				generate_session_id();
 				log_msg(host_connect_msg, hostname, "", 0);
 
-				len = PLN_LABEL_SIZE + sizeof(LOCAL_SOCKET_PATH);
+				len = PLN_LABEL_SIZE + sizeof(LOCAL_CONTROL_SOCKET);
 				socket_path = xmalloc(len, "socket_path");
-				snprintf(socket_path, len, LOCAL_SOCKET_PATH, hostname);
+				snprintf(socket_path, len, LOCAL_CONTROL_SOCKET, hostname);
 
 				ret = start_connection(
 				    socket_path, hostname, route_labels[i], http_port, sshconfig_file);
 				if (ret != 0) {
 					log_msg(host_connect_error_msg, hostname, "", ret);
-					end_connection(socket_path, hostname, http_port);
+					end_connection(socket_path, hostname);
 					free(socket_path);
 					socket_path = NULL;
 					continue;
@@ -278,8 +278,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					/* restore */
 					if (restore_opt && host_labels[j]->export_paths[0])
-						scp_exit_code =
-						    scp_archive(hostname, socket_path, host_labels[j], http_port, true);
+						scp_exit_code = scp_archive(hostname, socket_path, host_labels[j], true);
 
 					if (stop_on_err_opt && scp_exit_code != 0) {
 						log_msg(
@@ -289,11 +288,11 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					/* remote execution */
 					if (tty_opt)
-						exit_code = ssh_command_tty(
-						    hostname, socket_path, host_labels[j], http_port, env_override);
+						exit_code =
+						    ssh_command_tty(hostname, socket_path, host_labels[j], env_override);
 					else
-						exit_code = ssh_command_pipe(
-						    hostname, socket_path, host_labels[j], http_port, env_override);
+						exit_code =
+						    ssh_command_pipe(hostname, socket_path, host_labels[j], env_override);
 
 					if (stop_on_err_opt && (exit_code != 0)) {
 						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, exit_code);
@@ -302,8 +301,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					/* archive */
 					if (archive_opt && host_labels[j]->export_paths[0])
-						scp_exit_code =
-						    scp_archive(hostname, socket_path, host_labels[j], http_port, false);
+						scp_exit_code = scp_archive(hostname, socket_path, host_labels[j], false);
 
 					if (stop_on_err_opt && scp_exit_code != 0) {
 						log_msg(
@@ -343,7 +341,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					else
 						log_msg(host_disconnect_msg, hostname, "",
 						    stop_on_err_opt ? exit_code : local_exit_code);
-					end_connection(socket_path, hostname, http_port);
+					end_connection(socket_path, hostname);
 					free(socket_path);
 					socket_path = NULL;
 				}

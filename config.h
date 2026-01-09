@@ -3,8 +3,8 @@
  */
 
 /* templates */
-#define REMOTE_TMP_PATH "/tmp/rset_staging_%d"
-#define LOCAL_SOCKET_PATH "/tmp/rset_control_%s"
+#define REMOTE_STAGE_DIR "/tmp/rset_%08" PRIx32
+#define LOCAL_CONTROL_SOCKET "/tmp/rset_control_%s"
 #define LOG_TIMESTAMP_FORMAT "%F %T%z"
 #define WORKER_TIMESTAMP_FORMAT "%F_%H%M%S"
 

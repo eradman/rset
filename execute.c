@@ -45,14 +45,12 @@
  * stagedir - return string containing temporary path
  */
 char *
-stagedir(int http_port) {
+stagedir() {
 	static char path[PATH_MAX];
-	static int port = 0;
+	static int len = 0;
 
-	if (http_port != port) {
-		snprintf(path, sizeof path, REMOTE_TMP_PATH, http_port);
-		port = http_port;
-	}
+	if (len == 0)
+		len = snprintf(path, sizeof path, REMOTE_STAGE_DIR, current_session_id());
 	return path;
 }
 
@@ -298,7 +296,7 @@ start_connection(
 	snprintf(cmd, PATH_MAX,
 	    "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
 	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
-	    socket_path, host_name, stagedir(http_port), stagedir(http_port));
+	    socket_path, host_name, stagedir(), stagedir());
 	trace_shell(cmd);
 	if ((ret = system(cmd)) != 0)
 		return ret;
@@ -310,7 +308,7 @@ start_connection(
 		snprintf(cmd, PATH_MAX,
 		    "tar " TAR_OPTIONS " -cf - %s "
 		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
-		    path_repr, socket_path, host_name, stagedir(http_port));
+		    path_repr, socket_path, host_name, stagedir());
 
 		trace_shell(cmd);
 		if ((ret = system(cmd)) != 0)
@@ -320,8 +318,8 @@ start_connection(
 }
 
 int
-update_environment_file(char *host_name, char *socket_path, Label *host_label, int http_port,
-    const char *env_override) {
+update_environment_file(
+    char *host_name, char *socket_path, Label *host_label, const char *env_override) {
 	int fd;
 	int ret;
 	char cmd[PATH_MAX];
@@ -362,8 +360,7 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 	close(fd);
 
 	snprintf(cmd, PATH_MAX, "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
-	    op.environment_file, tmp_src, socket_path, host_name, stagedir(http_port),
-	    stagedir(http_port));
+	    op.environment_file, tmp_src, socket_path, host_name, stagedir(), stagedir());
 	trace_shell(cmd);
 	ret = system(cmd);
 	unlink(tmp_src);
@@ -372,8 +369,7 @@ update_environment_file(char *host_name, char *socket_path, Label *host_label, i
 }
 
 int
-ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http_port,
-    const char *env_override) {
+ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, const char *env_override) {
 	int argc;
 	int ret;
 	char cmd[PATH_MAX];
@@ -381,7 +377,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	Options op;
 
 	/* setup environment file */
-	ret = update_environment_file(host_name, socket_path, host_label, http_port, env_override);
+	ret = update_environment_file(host_name, socket_path, host_label, env_override);
 	if (ret != 0)
 		return ret;
 
@@ -393,7 +389,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s'; exec %s\"",
-	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter);
+	    op.execute_with, stagedir(), stagedir(), op.interpreter);
 
 	/* construct ssh command */
 	argc = 0;
@@ -406,8 +402,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, int http
 }
 
 int
-ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_port,
-    const char *env_override) {
+ssh_command_tty(char *host_name, char *socket_path, Label *host_label, const char *env_override) {
 	int argc;
 	int ret;
 	char cmd[PATH_MAX];
@@ -415,12 +410,12 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	Options op;
 
 	/* setup environment file */
-	ret = update_environment_file(host_name, socket_path, host_label, http_port, env_override);
+	ret = update_environment_file(host_name, socket_path, host_label, env_override);
 	if (ret != 0)
 		return ret;
 
 	/* copy the contents of the script */
-	snprintf(cmd, sizeof(cmd), "cat > %s/_script", stagedir(http_port));
+	snprintf(cmd, sizeof(cmd), "cat > %s/_script", stagedir());
 	/* construct ssh command */
 	argc = 0;
 	argc = array_append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
@@ -436,8 +431,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s'; exec %s %s/_script\"",
-	    op.execute_with, stagedir(http_port), stagedir(http_port), op.interpreter,
-	    stagedir(http_port));
+	    op.execute_with, stagedir(), stagedir(), op.interpreter, stagedir());
 
 	/* construct ssh command */
 	argc = 0;
@@ -450,7 +444,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, int http_
 }
 
 int
-scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port, bool upload) {
+scp_archive(char *host_name, char *socket_path, Label *host_label, bool upload) {
 	int i;
 	int argc;
 	char scp_opt[PLN_LABEL_SIZE];
@@ -469,8 +463,7 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 		if (path[0] == '/')
 			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s", host_name, path);
 		else
-			snprintf(
-			    scp_arg[0], sizeof(scp_arg[0]), "%s:%s/%s", host_name, stagedir(http_port), path);
+			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s/%s", host_name, stagedir(), path);
 
 		archive_name = xbasename(path);
 		snprintf(
@@ -489,14 +482,13 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, int http_port
 }
 
 void
-end_connection(char *socket_path, char *host_name, int http_port) {
+end_connection(char *socket_path, char *host_name) {
 	char *argv[32];
 
 	if (access(socket_path, F_OK) == -1)
 		return;
 
-	array_append(
-	    argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(http_port), NULL);
+	array_append(argv, 0, "ssh", "-S", socket_path, host_name, "rm", "-rf", stagedir(), NULL);
 	trace_exec(argv);
 	if (run(argv) != 0)
 		warn("remote tmp dir");
