@@ -13,7 +13,7 @@
 #include "sock.h"
 
 int
-sock_get_ips(const char *host, const char *port) {
+addr_listen(const char *host, const char *port, struct pollfd *pfd) {
 	struct addrinfo hints = {
 		.ai_flags = AI_NUMERICSERV,
 		.ai_family = AF_UNSPEC,
@@ -21,36 +21,29 @@ sock_get_ips(const char *host, const char *port) {
 	};
 	struct addrinfo *ai, *p;
 	int ret, insock = 0;
+	int addr_count = 0;
 
-	if ((ret = getaddrinfo(host, port, &hints, &ai))) {
+	ret = getaddrinfo(host, port, &hints, &ai);
+	if (ret != 0)
 		err(1, "getaddrinfo: %s", gai_strerror(ret));
-	}
 
-	for (p = ai; p; p = p->ai_next) {
-		if ((insock = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) {
-			continue;
-		}
-		if (setsockopt(insock, SOL_SOCKET, SO_REUSEADDR, &(int) { 1 }, sizeof(int)) < 0) {
+	for (p = ai; p && (addr_count < LISTEN_MAX); p = p->ai_next) {
+		if ((insock = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0)
+			err(1, "socket");
+		if (setsockopt(insock, SOL_SOCKET, SO_REUSEADDR, &(int) { 1 }, sizeof(int)) < 0)
 			err(1, "setsockopt");
-		}
-		if (bind(insock, p->ai_addr, p->ai_addrlen) < 0) {
-			if (close(insock) < 0) {
-				err(1, "close");
-			}
-			continue;
-		}
-		break;
+		if (bind(insock, p->ai_addr, p->ai_addrlen) < 0)
+			err(1, "bind");
+		if (listen(insock, SOMAXCONN) < 0)
+			err(1, "listen");
+
+		pfd[addr_count].fd = insock;
+		pfd[addr_count].events = POLLIN;
+		addr_count++;
 	}
+
 	freeaddrinfo(ai);
-	if (!p) {
-		err(1, "bind");
-	}
-
-	if (listen(insock, SOMAXCONN) < 0) {
-		err(1, "listen");
-	}
-
-	return insock;
+	return addr_count;
 }
 
 int
