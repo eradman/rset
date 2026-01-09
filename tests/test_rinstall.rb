@@ -22,10 +22,10 @@ require 'digest/md5'
 ENV['SD'] ||= @systmp.to_s
 @wwwtmp = Dir.mktmpdir
 http_port = `./getsocket`.chomp
-@install_url = "http://127.0.0.1:#{http_port}"
+@install_url = "http://localhost:#{http_port}"
 @wwwserver = fork do
   WEBrick::HTTPServer.new(
-    BindAddress: '127.0.0.1',
+    BindAddress: 'localhost',
     Port: http_port,
     DocumentRoot: @wwwtmp,
     Logger: WEBrick::Log.new(File::NULL),
@@ -143,7 +143,7 @@ try 'Install a file from the local staging directory' do
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"
   File.write(src, '456')
-  cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{dst}"
+  cmd = "INSTALL_URL=http://localhost/X/ #{Dir.pwd}/../rinstall #{src} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
   eq err, ''
@@ -156,7 +156,7 @@ try 'Install a file from the using a directory target' do
   dst = "#{@systmp}/#{fn}"
   src = "#{@wwwtmp}/#{fn}"
   File.write(src, '456')
-  cmd = "INSTALL_URL=http://127.0.0.1/X/ #{Dir.pwd}/../rinstall #{src} #{@systmp}"
+  cmd = "INSTALL_URL=http://localhost/X/ #{Dir.pwd}/../rinstall #{src} #{@systmp}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq out.chomp, "rinstall: created #{dst}"
   eq err, ''

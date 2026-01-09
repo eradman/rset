@@ -86,10 +86,10 @@ today = 'Sat, 11 Jul 2020 01:25:02 GMT'
 # Fetch content
 
 try 'HEAD request with target host and user-agent' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~REQUEST
       HEAD /largefile HTTP/1.0\r
-      Host: 127.0.0.1\r
+      Host: localhost\r
       User-Agent: Ruby tcp\r
       \r
     REQUEST
@@ -108,7 +108,7 @@ try 'HEAD request with target host and user-agent' do
 end
 
 try 'HEAD request for missing file' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print "HEAD /robots.txt HTTP/1.0\r\n\r\n"
     sock.close_write
     response = sock.read.gsub(/^(Date: |Last-Modified: ).+(\r)/, "\\1#{today}\\2")
@@ -125,7 +125,7 @@ end
 
 is_root = Process.uid.zero?
 try 'GET a file that does not have have read permission', is_root do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print "GET /noread.sh HTTP/1.1\r\n\r\n"
     sock.close_write
     response = sock.read.gsub(/^(Date: |Last-Modified: ).+(\r)/, "\\1#{today}\\2")
@@ -141,7 +141,7 @@ try 'GET a file that does not have have read permission', is_root do
 end
 
 try 'GET a small file' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print "GET /smallfile HTTP/1.0\r\n\r\n"
     sock.close_write
     response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, "\\1#{today}\\2")
@@ -159,7 +159,7 @@ try 'GET a small file' do
 end
 
 try 'GET a small from a subdirectory' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print "GET /x/y/digits HTTP/1.0\r\n\r\n"
     sock.close_write
     response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, "\\1#{today}\\2")
@@ -178,7 +178,7 @@ end
 
 try 'GET a file using If-Modified-Since' do
   file = File.stat File.join(@systmp, 'www/smallfile')
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~REQUEST
       GET /smallfile HTTP/1.1\r
       If-Modified-Since: #{file.mtime.httpdate}\r
@@ -196,7 +196,7 @@ try 'GET a file using If-Modified-Since' do
 end
 
 try 'GET Range (partial content, part 1)' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~REQUEST
       GET /smallfile HTTP/1.1\r
       Range: bytes=0-12\r
@@ -219,7 +219,7 @@ try 'GET Range (partial content, part 1)' do
 end
 
 try 'GET Range (partial content, part 2)' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~REQUEST
       GET /smallfile HTTP/1.1\r
       Range: bytes=13-27\r
@@ -242,7 +242,7 @@ try 'GET Range (partial content, part 2)' do
 end
 
 try 'GET Range (past end of file)' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~REQUEST
       GET /smallfile HTTP/1.1\r
       Range: bytes=30-60\r
@@ -261,7 +261,7 @@ try 'GET Range (past end of file)' do
 end
 
 try 'GET Range (suffix)' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~REQUEST
       GET /smallfile HTTP/1.1\r
       Range: bytes=-8\r
@@ -284,7 +284,7 @@ try 'GET Range (suffix)' do
 end
 
 try 'GET Range (bogus range)' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~REQUEST
       GET /smallfile HTTP/1.1\r
       Range: bytes=12-6\r
@@ -303,7 +303,7 @@ try 'GET Range (bogus range)' do
 end
 
 try 'GET an empty archive' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print "GET /empty.tar.gz HTTP/1.0\r\n\r\n"
     sock.close_write
     response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, "\\1#{today}\\2")
@@ -320,7 +320,7 @@ try 'GET an empty archive' do
 end
 
 try 'GET a file in a parent directory' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print "GET /../secrets HTTP/1.0\r\n\r\n"
     sock.close_write
     response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, "\\1#{today}\\2")
@@ -336,7 +336,7 @@ try 'GET a file in a parent directory' do
 end
 
 try 'List a directory' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print "GET /subdir HTTP/1.0\r\n\r\n"
     sock.close_write
     response = sock.read.gsub(/(Date: |Last-Modified: ).+(\r)/, "\\1#{today}\\2")
@@ -352,7 +352,7 @@ try 'List a directory' do
 end
 
 try 'POST JSON content' do
-  Socket.tcp('127.0.0.1', port) do |sock|
+  Socket.tcp('localhost', port) do |sock|
     sock.print <<~DATA
       POST /login HTTP/1.1\r"
       Content-Type: application/json\r
@@ -376,7 +376,7 @@ end
 
 try 'Fetch a 10MB file in parallel with an external utility' do
   pids = []
-  src_url = "http://127.0.0.1:#{port}/largefile"
+  src_url = "http://localhost:#{port}/largefile"
   6.times do |i|
     dst = "#{@systmp}/largefile.#{i}"
     pids << spawn('./fetch.sh', src_url, dst,

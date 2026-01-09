@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 
 #include <err.h>
+#include <poll.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,12 +79,14 @@ main(int argc, char *argv[]) {
 	int ch;
 	struct sockaddr_storage in_sa;
 	socklen_t in_sa_len;
-	int insock, status = 0, infd;
+	int status = 0, infd;
+	struct pollfd pfd[LISTEN_MAX];
+	int addr_count, nready, n;
 
 	/* defaults */
 	char *servedir = ".";
 
-	s.host = "127.0.0.1";
+	s.host = "localhost";
 	s.port = NULL;
 
 	opterr = 0;
@@ -111,8 +114,6 @@ main(int argc, char *argv[]) {
 	setpgid(0, 0);
 
 	handlesignals(sigcleanup);
-	printf("listening on: http://%s:%s/\n", s.host, s.port);
-	fflush(stdout);
 
 	switch (fork()) {
 	case -1:
@@ -130,15 +131,28 @@ main(int argc, char *argv[]) {
 		if (chdir(servedir) < 0)
 			err(1, "chdir '%s'", servedir);
 
-		insock = sock_get_ips(s.host, s.port);
+		addr_count = addr_listen(s.host, s.port, pfd);
+		printf("listening on: http://%s:%s/\n", s.host, s.port);
 
 		/* accept incoming connections */
 		while (1) {
-			in_sa_len = sizeof(in_sa);
-			if ((infd = accept(insock, (struct sockaddr *) &in_sa, &in_sa_len)) < 0) {
-				warn("accept");
-				continue;
+			infd = 0;
+			nready = poll(pfd, addr_count, -1);
+			if (nready < 1)
+				err(1, "poll");
+
+			for (n = 0; n < addr_count; n++) {
+				if (pfd[n].revents & (POLLERR | POLLNVAL))
+					errx(1, "bad fd %d", pfd[n].fd);
+				if (pfd[n].revents & (POLLIN | POLLHUP)) {
+					in_sa_len = sizeof(in_sa);
+					infd = accept(pfd[n].fd, (struct sockaddr *) &in_sa, &in_sa_len);
+					if (infd < 0)
+						err(1, "accept");
+				}
 			}
+			if (!infd)
+				continue;
 
 			/* fork and handle */
 			switch (fork()) {
