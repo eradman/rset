@@ -18,7 +18,6 @@
 
 /* option defaults */
 #define EXECUTE_WITH ""
-#define INSTALL_URL "http://127.0.0.1:6000"
 #define INTERPRETER "/bin/sh"
 #define LOCAL_INTERPRETER "/bin/sh"
 #define ENVIRONMENT ""
