@@ -52,25 +52,25 @@ main(int argc, char *argv[]) {
 	case 'P':
 		if (argc == 4)
 			env_override = argv[3];
-		ssh_command_pipe(host_name, socket_path, &host_label, http_port, env_override);
+		ssh_command_pipe(host_name, socket_path, &host_label, env_override);
 		break;
 	case 'T':
 		if (argc == 4)
 			env_override = argv[3];
-		ssh_command_tty(host_name, socket_path, &host_label, http_port, env_override);
+		ssh_command_tty(host_name, socket_path, &host_label, env_override);
 		break;
 	case 'A':
 		if (argc == 4)
 			str_to_array(host_label.export_paths, argv[3], PLN_MAX_PATHS, " ");
-		scp_archive(host_name, socket_path, &host_label, http_port, false);
+		scp_archive(host_name, socket_path, &host_label, false);
 		break;
 	case 'R':
 		if (argc == 4)
 			str_to_array(host_label.export_paths, argv[3], PLN_MAX_PATHS, " ");
-		scp_archive(host_name, socket_path, &host_label, http_port, true);
+		scp_archive(host_name, socket_path, &host_label, true);
 		break;
 	case 'E':
-		end_connection(socket_path, host_name, http_port);
+		end_connection(socket_path, host_name);
 		break;
 	default:
 		usage();
