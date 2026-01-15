@@ -521,17 +521,21 @@ static void
 start_http_server(int stdout_pipe[], int http_port) {
 	int flags;
 	int status;
-	char *http_srv_argv[9], *inputstring;
+	char port[6];
+	char *http_srv_argv[6];
 	char *httpd_bin;
 	pid_t http_server_pid;
 	pid_t rset_pid;
 	sigset_t set;
 
-	/* Convert http server command line into a vector */
-	inputstring = xmalloc(PATH_MAX, "inputstring");
+	snprintf(port, sizeof(port), "%u", http_port);
+	http_srv_argv[0] = "miniquark";
+	http_srv_argv[1] = "-p";
+	http_srv_argv[2] = port;
+	http_srv_argv[3] = "-d";
+	http_srv_argv[4] = PUBLIC_DIRECTORY;
+	http_srv_argv[5] = NULL;
 
-	snprintf(inputstring, PATH_MAX, "miniquark -p %d -d " PUBLIC_DIRECTORY, http_port);
-	str_to_array(http_srv_argv, inputstring, sizeof(http_srv_argv), " ");
 	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
 
@@ -542,7 +546,6 @@ start_http_server(int stdout_pipe[], int http_port) {
 		/* close input side of pipe, and connect stdout */
 		dup2(stdout_pipe[1], STDOUT_FILENO);
 		close(stdout_pipe[1]);
-
 		if (unveil(xdirname(PUBLIC_DIRECTORY), "r") == -1)
 			err(1, "unveil");
 		if (unveil(xdirname(httpd_bin), "x") == -1)
