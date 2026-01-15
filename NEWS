@@ -1,5 +1,19 @@
 = Release History
 
+== 3.3: January 17, 2026
+
+ - Use session_id for remote stage dir name
+ - Access miniquark logs using HTTP_TRACE
+ - Access ssh invocation using SSH_TRACE
+ - Do not set INSTALL_URL, rely on default in rinstall(1)
+ - Exit on failure for malloc(2), pipe(2), socket(2), bind(2), strdup(2)
+ - Allow export path on host labels used for archive/restore
+ - pln(5) Ensure export paths are only specified on route labels
+ - pln(5) Raise error for indented text in unexpected context
+ - miniquark(1) listen on multiple addresses, log each bind address
+ - miniquark(1) remove chroot feature
+ - rinstall(1) default to curl
+
 == 3.2: February 6, 2025
 
  - Update MANPREFIX for FreeBSD
@@ -138,7 +152,7 @@
 
 == 1.5: June 30, 2020
 
- - Fetch files from '_sources' on 127.0.0.1 to avoid IPv6 confusion
+ - Fetch files from '_sources' on 127.0.0.1
  - Require the ssh-agent(1) to be running with at least one unlocked key
  - New '-v' option prints HTTP log messages after each label is executed
 
