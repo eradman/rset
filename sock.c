@@ -8,12 +8,13 @@
 
 #include <err.h>
 #include <netdb.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "sock.h"
 
 int
-addr_listen(const char *host, const char *port, struct pollfd *pfd) {
+addr_listen(const char *host, const char *port, struct pollfd *pfd, struct sockaddr_storage *sa) {
 	struct addrinfo hints = {
 		.ai_flags = AI_NUMERICSERV,
 		.ai_family = AF_UNSPEC,
@@ -39,6 +40,7 @@ addr_listen(const char *host, const char *port, struct pollfd *pfd) {
 
 		pfd[addr_count].fd = insock;
 		pfd[addr_count].events = POLLIN;
+		memcpy(&sa[addr_count], p->ai_addr, sizeof(struct sockaddr_storage));
 		addr_count++;
 	}
 
@@ -63,7 +65,7 @@ sock_set_timeout(int fd, int sec) {
 }
 
 int
-sock_get_inaddr_str(const struct sockaddr_storage *in_sa, char *str, size_t len) {
+inaddr_to_str(const struct sockaddr_storage *in_sa, char *str, size_t len) {
 	switch (in_sa->ss_family) {
 	case AF_INET:
 		if (!inet_ntop(AF_INET, &((struct sockaddr_in *) in_sa)->sin_addr, str, len)) {

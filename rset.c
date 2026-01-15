@@ -326,9 +326,10 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					/* read output of web server */
 					nr = read(stdout_pipe[0], httpd_log, sizeof(httpd_log));
-					httpd_log[nr] = '\0';
-					if (nr > 0)
+					if (nr > 0) {
+						httpd_log[nr] = '\0';
 						trace_http(httpd_log);
+					}
 					if ((nr == -1) && (errno != EAGAIN))
 						warn("read from httpd output");
 				}

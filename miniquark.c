@@ -36,7 +36,7 @@ serve(int infd, struct sockaddr_storage *in_sa) {
 		status = http_send_response(infd, &r);
 	}
 
-	if (sock_get_inaddr_str(in_sa, inaddr, LEN(inaddr))) {
+	if (inaddr_to_str(in_sa, inaddr, LEN(inaddr))) {
 		goto cleanup;
 	}
 	printf("%lu\t%s\t%d\t%s\t%s\n", r.bytes_sent, inaddr, status, r.field[REQ_AGENT], r.target);
@@ -80,8 +80,10 @@ main(int argc, char *argv[]) {
 	struct sockaddr_storage in_sa;
 	socklen_t in_sa_len;
 	int status = 0, infd;
-	struct pollfd pfd[LISTEN_MAX];
 	int addr_count, nready, n;
+	char inaddr[INET6_ADDRSTRLEN];
+	struct pollfd pfd[LISTEN_MAX];
+	struct sockaddr_storage resolved[LISTEN_MAX];
 
 	/* defaults */
 	char *servedir = ".";
@@ -131,8 +133,14 @@ main(int argc, char *argv[]) {
 		if (chdir(servedir) < 0)
 			err(1, "chdir '%s'", servedir);
 
-		addr_count = addr_listen(s.host, s.port, pfd);
-		printf("listening on: http://%s:%s/\n", s.host, s.port);
+		addr_count = addr_listen(s.host, s.port, pfd, resolved);
+		printf("Listening on");
+		for (n = 0; n < addr_count; n++) {
+			inaddr_to_str(&resolved[n], inaddr, sizeof(inaddr));
+			printf(" %s", inaddr);
+		}
+		printf(" port %s\n", s.port);
+		fflush(stdout);
 
 		/* accept incoming connections */
 		while (1) {
