@@ -273,7 +273,7 @@ start_connection(
 	/* construct command to execute on remote host  */
 	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
-	if (stat(socket_path, &sb) != -1) {
+	if (xstat(socket_path, &sb, -1) == 0) {
 		fprintf(stderr,
 		    "rset: socket for '%s' already exists, run\n"
 		    "  fstat %s\n"

@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "missing/compat.h"
@@ -45,6 +46,25 @@ xbasename(const char *path) {
 
 	strlcpy(dname, path, sizeof(dname));
 	return basename(dname);
+}
+
+/*
+ * Like stat(2) but retry until expected status
+ */
+int
+xstat(const char *path, struct stat *sb, int expected) {
+	int i;
+	int ret;
+	struct timespec delay = { 0, 1000000 };
+
+	/* wait up to 0.5 seconds */
+	for (i = 0; i < 5; i++) {
+		ret = stat(path, sb);
+		if (ret == expected)
+			break;
+		nanosleep(&delay, NULL);
+	}
+	return ret;
 }
 
 /*
