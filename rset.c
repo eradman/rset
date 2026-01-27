@@ -38,7 +38,7 @@
 
 /* forwards */
 static void handle_exit(int sig);
-static void usage();
+static void usage(bool);
 static void set_options(int argc, char *argv[], char *hostnames[]);
 static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
@@ -411,13 +411,34 @@ handle_exit(int sig) {
 /* internal utilty functions */
 
 static void
-usage() {
+usage(bool summary) {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr,
-	    "usage: rset [-AenRtv] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
+	    "usage: rset [-AenRt] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
 	    "            [-x label_pattern] hostname ...\n"
-	    "       rset [-ev] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
+	    "       rset [-e] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
 	    "            [-x label_pattern] -o log_directory -p workers hostname ...\n");
+	if (!summary) {
+		fprintf(stderr, "hint: use -h to display option summary\n");
+		goto end;
+	}
+
+	printf("summary:\n"
+	       "    -A                 Download files listed in label export paths\n"
+	       "    -E environment     Key-value environment variables recognized by renv(1)\n"
+	       "    -e                 Exit if any label returns non-zero exit status\n"
+	       "    -F sshconfig_file  Specify a ssh_config(5) file to use\n"
+	       "    -f routes_file     Specify routes file using pln(5) format\n"
+	       "    -o log_directory   Log output of background tasks to directory\n"
+	       "    -n                 Print hostnames and matching labels\n"
+	       "    -p workers         Run using parallel execution\n"
+	       "    -R                 Upload files listed in label export paths\n"
+	       "    -t                 Enable TTY input on remote host\n"
+	       "    -x label_pattern   Execute labels matching specified regex\n");
+	printf("docs:\n"
+	       "    man rset\n");
+
+end:
 	exit(1);
 }
 
@@ -430,6 +451,9 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 	Options op;
 
 	bzero(&op, sizeof op);
+
+	if (argv[1] && strcmp(argv[1], "-h") == 0)
+		usage(true);
 
 	while ((ch = getopt(argc, argv, "AenRtE:F:f:o:p:x:")) != -1) {
 		switch (ch) {
@@ -471,19 +495,19 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 			break;
 
 		default:
-			usage();
+			usage(false);
 		}
 	}
 	if (optind >= argc)
-		usage();
+		usage(false);
 
 	if (n_parallel) {
 		if (dryrun_opt || tty_opt || archive_opt || restore_opt)
-			usage();
+			usage(false);
 	}
 
 	if ((log_directory == NULL) ^ (n_parallel == 0))
-		usage();
+		usage(false);
 
 	for (i = 0; i < argc - optind; i++)
 		hostnames[i] = argv[optind + i];
