@@ -179,7 +179,7 @@ main(int argc, char *argv[]) {
 	/* select a port to communicate on */
 	http_port = get_socket();
 
-	if (pledge("stdio rpath proc exec unveil tmppath", NULL) == -1)
+	if (pledge("stdio rpath wpath cpath proc exec unveil", NULL) == -1)
 		err(1, "pledge");
 
 	/* main loop */
