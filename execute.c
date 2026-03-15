@@ -279,7 +279,7 @@ start_connection(
 		    "  fstat %s\n"
 		    "and remove the file if no process is listed.\n",
 		    host_name, socket_path);
-		return 1;
+		exit(1);
 	}
 
 	argc = 0;
