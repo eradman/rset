@@ -125,6 +125,7 @@ try 'Start an ssh session' do
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
   eq err, ''
   eq status.success?, true
+  out.gsub!(/(-F ustar|--no-xattrs) /, '')
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
     tar -cf - -C _rutils .
@@ -137,6 +138,7 @@ try 'Start an ssh session with exported paths' do
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
   eq err, ''
   eq status.success?, true
+  out.gsub!(/(-F ustar|--no-xattrs) /, '')
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
     tar -cf - -C _rutils .

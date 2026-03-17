@@ -33,8 +33,10 @@
 #define HL_TRACE "\x1b[7m"  /* inverted */
 
 /* options */
-#if defined(_MACOS_PORT)
+#if defined(__darwin__)
 #define TAR_OPTIONS "--no-xattrs"
+#elif defined(__OpenBSD__)
+#define TAR_OPTIONS "-F ustar"
 #else
 #define TAR_OPTIONS ""
 #endif

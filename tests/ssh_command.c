@@ -7,6 +7,8 @@
 #include "rutils.h"
 #include "xlibc.h"
 
+#define TAR_OPTIONS ""
+
 /* globals */
 Label **route_labels;
 
