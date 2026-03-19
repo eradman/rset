@@ -54,9 +54,9 @@ try 'Install a missing file' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, "rset: initialized directory '#{@systmp}/_rutils'\n"
-  eq status.success?, true
   eq File.stat(dst).mode.to_s(8), '100755'
   eq File.stat(File.dirname(dst)).mode.to_s(8), '40700'
+  eq status.success?, true
 end
 
 try 'Update an existing file' do
@@ -66,9 +66,9 @@ try 'Update an existing file' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, "rset: updating '#{dst}'\n"
-  eq status.success?, true
   eq File.stat(dst).mode.to_s(8), '100755'
   eq File.stat(File.dirname(dst)).mode.to_s(8), '40700'
+  eq status.success?, true
 end
 
 # Execution functions
@@ -77,24 +77,24 @@ try 'Pipe input to a command' do
   cmd = './cmd_pipe_stdin input/whereami.sh'
   out, err, status = Open3.capture3(cmd)
   eq err, ''
-  eq status.success?, true
   eq out, File.read('input/whereami.sh')
+  eq status.success?, true
 end
 
 try 'Capture output of a command' do
   cmd = "./cmd_pipe_stdout head -n1 #{__FILE__}"
   out, err, status = Open3.capture3(cmd)
   eq err, "output_size: 15\nstrlen: 15\n"
-  eq status.success?, true
   eq out, "require 'json'\n"
+  eq status.success?, true
 end
 
 try 'Capture multi-line output from a command' do
   cmd = "./cmd_pipe_stdout tail -c 4096 #{__FILE__}"
   out, err, status = Open3.capture3(cmd)
   eq err, "output_size: 4096\nstrlen: 4096\n"
-  eq status.success?, true
   eq out.length, 4096
+  eq status.success?, true
 end
 
 try 'Capture a large chunk of text from a command' do
@@ -116,28 +116,27 @@ try 'Locate an executable in the current path' do
   cmd = './which sh'
   out, err, status = Open3.capture3({ 'PATH' => '/bin:/usr/bin' }, cmd)
   eq err, ''
-  eq status.success?, true
   eq out, "/bin/sh\n"
+  eq status.success?, true
 end
 
 try 'Start an ssh session' do
   cmd = './ssh_command S 10.0.0.99'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
   eq err, ''
-  eq status.success?, true
   out.gsub!(/(-F ustar|--no-xattrs) /, '')
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
     tar -cf - -C _rutils .
     ssh -q -S /tmp/test_rset_socket 10.0.0.99 'mkdir /tmp/rset_00000000; tar -xf - -C /tmp/rset_00000000'
   RESULT
+  eq status.success?, true
 end
 
 try 'Start an ssh session with exported paths' do
   cmd = './ssh_command S 10.0.0.99 "input expected"'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
   eq err, ''
-  eq status.success?, true
   out.gsub!(/(-F ustar|--no-xattrs) /, '')
   eq out, <<~RESULT
     ssh -fN -R 6000:localhost:6000 -S /tmp/test_rset_socket -M 10.0.0.99
@@ -146,64 +145,65 @@ try 'Start an ssh session with exported paths' do
     tar -cf - input expected
     ssh -q -S /tmp/test_rset_socket 10.0.0.99 'tar -xf - -C /tmp/rset_00000000'
   RESULT
+  eq status.success?, true
 end
 
 try 'Execute commands over ssh using a pipe' do
   cmd = './ssh_command P 10.0.0.98'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
   eq err, ''
-  eq status.success?, true
   eq out, <<~RESULT
     renv /dev/null /tmp/rset_env_XXXXXX
     ssh -q -S /tmp/test_rset_socket 10.0.0.98 'cat > /tmp/rset_00000000/final.env; touch /tmp/rset_00000000/local.env'
     ssh -T -S /tmp/test_rset_socket 10.0.0.98 ' sh -c "cd /tmp/rset_00000000; set -a; . ./final.env; . ./local.env; SD='/tmp/rset_00000000'; exec /bin/sh"'
   RESULT
+  eq status.success?, true
 end
 
 try 'Execute commands over ssh using a tty' do
   cmd = './ssh_command T 10.0.0.99'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
   eq err, ''
-  eq status.success?, true
   eq out, <<~RESULT
     renv /dev/null /tmp/rset_env_XXXXXX
     ssh -q -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_00000000/final.env; touch /tmp/rset_00000000/local.env'
     ssh -T -S /tmp/test_rset_socket 10.0.0.99 'cat > /tmp/rset_00000000/_script'
     ssh -t -S /tmp/test_rset_socket 10.0.0.99 ' sh -c "cd /tmp/rset_00000000; set -a; . ./final.env; . ./local.env; SD='/tmp/rset_00000000'; exec /bin/sh /tmp/rset_00000000/_script"'
   RESULT
+  eq status.success?, true
 end
 
 try 'Archive files listed for a label' do
   cmd = './ssh_command A 10.0.0.99 "var.tar certs.tar"'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
   eq err, ''
-  eq status.success?, true
   eq out, <<~RESULT
     scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_00000000/var.tar _archive/10.0.0.99:var.tar
     scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_00000000/certs.tar _archive/10.0.0.99:certs.tar
   RESULT
+  eq status.success?, true
 end
 
 try 'Archive files with relative and absolute paths' do
   cmd = './ssh_command A 10.0.0.99 "../home.tgz /tmp/home.tgz"'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
   eq err, ''
-  eq status.success?, true
   eq out, <<~RESULT
     scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/rset_00000000/../home.tgz _archive/10.0.0.99:home.tgz
     scp -o ControlPath=/tmp/test_rset_socket 10.0.0.99:/tmp/home.tgz _archive/10.0.0.99:home.tgz
   RESULT
+  eq status.success?, true
 end
 
 try 'Restore files listed for a label' do
   cmd = './ssh_command R 10.0.0.99 "certs.tar var.tar"'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs:#{Dir.pwd}/.." }, cmd)
   eq err, ''
-  eq status.success?, true
   eq out, <<~RESULT
     scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:certs.tar 10.0.0.99:/tmp/rset_00000000/certs.tar
     scp -o ControlPath=/tmp/test_rset_socket _archive/10.0.0.99:var.tar 10.0.0.99:/tmp/rset_00000000/var.tar
   RESULT
+  eq status.success?, true
 end
 
 try 'End an ssh session' do
@@ -211,11 +211,11 @@ try 'End an ssh session' do
   cmd = './ssh_command E 10.0.0.99'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
   eq err, ''
-  eq status.success?, true
   eq out, <<~RESULT
     ssh -S /tmp/test_rset_socket 10.0.0.99 rm -rf /tmp/rset_00000000
     ssh -q -S /tmp/test_rset_socket -O exit 10.0.0.99
   RESULT
+  eq status.success?, true
   File.unlink '/tmp/test_rset_socket'
 end
 
@@ -224,12 +224,12 @@ end
 try 'Require ssh-agent' do
   cmd = "#{Dir.pwd}/../rset localhost"
   out, err, status = Open3.capture3(cmd, chdir: @mynet)
+  eq err.empty?, false
   eq out, <<~HELP
     Try running:
       eval `ssh-agent`
       ssh-add
   HELP
-  eq err.empty?, false
   eq status.success?, false
 end
 
@@ -249,8 +249,8 @@ try 'Recursively parse routes and hosts' do
   cmd = './parser R input/routes.pln'
   out, err, status = Open3.capture3(cmd)
   eq err, ''
-  eq status.success?, true
   eq out, File.read('expected/recursive.json')
+  eq status.success?, true
   JSON.parse(out)
 end
 
@@ -282,8 +282,8 @@ try 'Report an unknown syntax' do
   cmd = "#{Dir.pwd}/../rset -n localhost"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown symbol at line 1: 'php'\n"
-  eq status.success?, false
   eq out, ''
+  eq status.success?, false
 end
 
 try 'Detect local execution that does not emit a newline' do
@@ -311,8 +311,8 @@ try 'Report a bad regex' do
   cmd = "#{Dir.pwd}/../rset -n -x 't[42' localhost"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err[0..20], 'rset: bad expression:'
-  eq status.success?, false
   eq out, ''
+  eq status.success?, false
 end
 
 try 'Report an unknown option' do
@@ -321,8 +321,8 @@ try 'Report an unknown option' do
   cmd = "#{Dir.pwd}/../rset -n 't[42'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
   eq err, "routes.pln: unknown option 'username=radman'\n"
-  eq status.success?, false
   eq out, ''
+  eq status.success?, false
 end
 
 # Custom Logging
@@ -470,8 +470,8 @@ try 'Show matching routes and hosts' do
     out, err, status = Open3.capture3(cmd)
   end
   eq err, ''
-  eq status.success?, true
   eq out, File.read('expected/dry_run.out')
+  eq status.success?, true
 end
 
 try 'Raise error if no route match is found' do
@@ -481,6 +481,6 @@ try 'Raise error if no route match is found' do
   Dir.chdir(@mynet) do
     out, err, status = Open3.capture3(cmd)
   end
-  eq status.success?, false
   eq err, "rset: No match for 'localhost.xyz' in routes.pln\n"
+  eq status.success?, false
 end

@@ -73,8 +73,8 @@ try 'Install a file from a remote URL to the staging area' do
   File.write(src, '123')
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 x/y/#{fn} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq out.chomp, "rinstall: created #{dst}"
   eq err, ''
+  eq out.chomp, "rinstall: created #{dst}"
   eq status.success?, true
   eq '123', File.read(dst)
   eq File.stat(dst).mode.to_s(8), '100644'
@@ -88,8 +88,8 @@ try 'Stage the file by fetching over HTTP when no target is defined' do
   File.write(src, '123')
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall x/y/#{fn}"
   out, err, status = Open3.capture3({ 'SD' => @systmp.to_s }, cmd, chdir: @systmp)
-  eq out, "rinstall: fetched #{dst}\n"
   eq err, ''
+  eq out, "rinstall: fetched #{dst}\n"
   eq status.exitstatus, 0
   eq '123', File.read(dst)
 end
@@ -120,8 +120,8 @@ try 'Install a file from a remote URL containing special characters', is_busybox
   File.write(src, '123')
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 'x/#{fn}' '#{dst}'"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq out.chomp, "rinstall: created #{dst}"
   eq err, ''
+  eq out.chomp, "rinstall: created #{dst}"
   eq status.success?, true
   eq '123', File.read(dst)
   eq File.stat(dst).mode.to_s(8), '100644'
@@ -132,9 +132,9 @@ try 'Fetch a file that does not exist' do
   dst = "#{@systmp}/#{fn}"
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall bogus.txt #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq status.exitstatus, 3
   eq err.split("\n")[-1], "rinstall: unable to fetch #{@install_url}/bogus.txt"
   eq out, ''
+  eq status.exitstatus, 3
   eq File.exist?(dst), false
 end
 
@@ -145,8 +145,8 @@ try 'Install a file from the local staging directory' do
   File.write(src, '456')
   cmd = "INSTALL_URL=http://localhost/X/ #{Dir.pwd}/../rinstall #{src} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq out.chomp, "rinstall: created #{dst}"
   eq err, ''
+  eq out.chomp, "rinstall: created #{dst}"
   eq status.exitstatus, 0
   eq File.exist?(dst), true
 end
@@ -158,8 +158,8 @@ try 'Install a file from the using a directory target' do
   File.write(src, '456')
   cmd = "INSTALL_URL=http://localhost/X/ #{Dir.pwd}/../rinstall #{src} #{@systmp}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq out.chomp, "rinstall: created #{dst}"
   eq err, ''
+  eq out.chomp, "rinstall: created #{dst}"
   eq status.exitstatus, 0
   eq File.exist?(dst), true
 end
@@ -206,9 +206,9 @@ try 'Ensure that a relative target cannot be used' do
   dst = "#{@systmp}/#{fn}"
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall bogus.txt #{fn}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq status.exitstatus, 1
   eq err, "rinstall: #{fn} is not an absolute path\n"
   eq out, ''
+  eq status.exitstatus, 1
   eq File.exist?(dst), false
 end
 
@@ -217,8 +217,8 @@ try 'Raise error when source with absolute path is not found locally' do
   dst = "#{@systmp}/#{fn}"
   cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall /bogus.txt #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq status.exitstatus, 1
   eq err, "rinstall: source /bogus.txt with absolute path does not exist\n"
   eq out, ''
+  eq status.exitstatus, 1
   eq File.exist?(dst), false
 end

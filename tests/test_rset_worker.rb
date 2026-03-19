@@ -38,8 +38,8 @@ try 'Options not compatible with parallel operation' do
   %w[-n -t].each do |option|
     cmd = "../rset -p 2 -o logs #{option} db1 db2 db3"
     _, err, status = Open3.capture3(cmd)
-    eq status.success?, false
     eq err.include?('usage: rset'), true
+    eq status.success?, false
   end
 end
 
@@ -48,7 +48,6 @@ end
 try 'Construct worker arguments' do
   cmd = './worker_argv -x etc -o logs -p 4 -v db1'
   out, err, status = Open3.capture3(cmd)
-  eq status.success?, true
   eq err, ''
   eq out, <<~ARGS
     (4)
@@ -57,12 +56,12 @@ try 'Construct worker arguments' do
     etc
     -v
   ARGS
+  eq status.success?, true
 end
 
 try 'Construct worker arguments without spaces' do
   cmd = './worker_argv -xetc -ologs -p4 -v db1'
   out, err, status = Open3.capture3(cmd)
-  eq status.success?, true
   eq err, ''
   eq out, <<~ARGS
     (3)
@@ -70,12 +69,12 @@ try 'Construct worker arguments without spaces' do
     -xetc
     -v
   ARGS
+  eq status.success?, true
 end
 
 try 'Capture and log stdout/stderr for two workers' do
   cmd = "./worker_exec #{@systmp} 2 sh -c 'echo one; echo two >&2; sleep 0.1'"
   out, err, status = Open3.capture3(cmd)
-  eq status.success?, true
   eq err, ''
   lines = out.split "\n"
   lines.each do |fn|
@@ -86,12 +85,12 @@ try 'Capture and log stdout/stderr for two workers' do
     File.unlink fn
   end
   eq lines[0].chomp('1'), lines[1].chomp('2')
+  eq status.success?, true
 end
 
 try 'Worker environment variables' do
   cmd = "./worker_exec #{@systmp} 1 /usr/bin/env"
   out, err, status = Open3.capture3(cmd)
-  eq status.success?, true
   eq err, ''
   log_fn = out.strip
   lines = File.readlines(log_fn).select { |s| s.match '^RSET_' }
@@ -103,6 +102,7 @@ try 'Worker environment variables' do
     RSET_LABEL_EXEC_END=%s|%T|EXEC_END|%l|%e
     RSET_LABEL_EXEC_ERROR=%s|%T|EXEC_ERROR|%l|%e
   ENV
+  eq status.success?, true
   File.unlink log_fn
 end
 
@@ -111,20 +111,20 @@ end
 try 'Summarize worker logs' do
   cmd = '../rexec-summary input/worker.log.1 input/worker.log.2 /dev/null | sort -k2'
   out, err, status = Open3.capture3(cmd)
-  eq status.success?, true
   eq err, ''
   eq out, <<~ARGS
     21e00595 172.16.0.2  connect fail >> input/worker.log.1
     be5d3572 172.16.0.3  5/6 complete >> input/worker.log.2
     cd4f00ca 172.16.0.4  6/6 complete >> input/worker.log.1
   ARGS
+  eq status.success?, true
 end
 
 try 'Summarize worker logs and overwrite' do
   cmd = '../rexec-summary input/worker.log.1 input/worker.log.2'
   out, err, status = Open3.capture3(cmd)
-  eq status.success?, true
   eq err, ''
   eq out.split("\n").count, 4
   eq out.split[-1].dump, '"\e[3A"'
+  eq status.success?, true
 end
