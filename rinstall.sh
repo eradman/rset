@@ -159,7 +159,7 @@ fetch_file() {
 			fetch -qo "$SD/$source" "$1"
 			;;
 		*)
-			if command -pv curl > /dev/null; then
+			if command -v curl > /dev/null; then
 				curl -fsLo "$SD/$source" "$1"
 			else
 				wget -qO "$SD/$source" "$1"
