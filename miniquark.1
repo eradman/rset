@@ -6,9 +6,9 @@
 .Nd a minimal web server for retrieving files
 .Sh SYNOPSIS
 .Nm
-.Fl p Ar port
-.Op Fl h Ar host
 .Op Fl d Ar dir
+.Op Fl l Ar address
+.Ar port
 .Sh DESCRIPTION
 .Nm
 is a web server supporting GET/HEAD requests and is easily launched as
@@ -16,17 +16,16 @@ unprivileged user to provide HTTP access a local directory.
 .Pp
 The options are as follows:
 .Bl -tag -width 8n
-.It Fl p Ar port
-The
-.Ar port
-to listen on for incoming connections.
 .It Fl d Ar dir
 Switch to the specified directory.
-.It Fl h Ar host
+.It Fl l Ar address
 Set the hostname or IP address to listen on.
 The default is
 .Ql localhost .
 .El
+.Pp
+.Ar port
+is required, and specifies the TCP port number for incoming connections.
 .Sh FEATURES
 The following request headers are recognized
 .Bl -tag -width 0n

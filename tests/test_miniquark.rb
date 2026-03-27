@@ -77,7 +77,7 @@ socket.bind(Addrinfo.tcp('127.0.0.1', 0))
 port = socket.local_address.ip_port
 socket.close
 
-@pid = spawn('../miniquark', '-p', port.to_s, '-d', File.join(@systmp, 'www'),
+@pid = spawn('../miniquark', '-d', File.join(@systmp, 'www'), port.to_s,
              in: '/dev/null', out: '/dev/null',
              unsetenv_others: true)
 sleep 0.2

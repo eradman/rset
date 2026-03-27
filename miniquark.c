@@ -16,7 +16,7 @@
 #include "sock.h"
 
 struct server {
-	char *host;
+	char *listen_addr;
 	char *port;
 } s;
 
@@ -70,7 +70,7 @@ handlesignals(void (*hdl)(int)) {
 static void
 usage(void) {
 	fprintf(stderr, "release: %s\n", RELEASE);
-	fprintf(stderr, "usage: miniquark -p port [-h host] [-d dir]\n");
+	fprintf(stderr, "usage: miniquark [-d dir] [-l address] port\n");
 	exit(1);
 }
 
@@ -88,29 +88,27 @@ main(int argc, char *argv[]) {
 	/* defaults */
 	char *servedir = ".";
 
-	s.host = "localhost";
+	s.listen_addr = "localhost";
 	s.port = NULL;
 
 	opterr = 0;
-	while ((ch = getopt(argc, argv, "p:h:d:")) != -1) {
+	while ((ch = getopt(argc, argv, "d:l:")) != -1) {
 		switch (ch) {
 		case 'd':
 			servedir = optarg;
 			break;
-		case 'h':
-			s.host = optarg;
-			break;
-		case 'p':
-			s.port = optarg;
+		case 'l':
+			s.listen_addr = optarg;
 			break;
 		default:
 			usage();
 		}
 	}
-	if (argc > optind + 1)
+
+	if (argc != optind + 1)
 		usage();
-	if (s.port == NULL)
-		usage();
+
+	s.port = argv[optind];
 
 	/* Open a new process group */
 	setpgid(0, 0);
@@ -133,7 +131,7 @@ main(int argc, char *argv[]) {
 		if (chdir(servedir) < 0)
 			err(1, "chdir '%s'", servedir);
 
-		addr_count = addr_listen(s.host, s.port, pfd, resolved);
+		addr_count = addr_listen(s.listen_addr, s.port, pfd, resolved);
 		printf("Listening on");
 		for (n = 0; n < addr_count; n++) {
 			inaddr_to_str(&resolved[n], inaddr, sizeof(inaddr));

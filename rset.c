@@ -546,7 +546,7 @@ start_http_server(int stdout_pipe[], int http_port) {
 	int flags;
 	int status;
 	char port[6];
-	char *http_srv_argv[6];
+	char *http_srv_argv[5];
 	char *httpd_bin;
 	pid_t http_server_pid;
 	pid_t rset_pid;
@@ -554,11 +554,10 @@ start_http_server(int stdout_pipe[], int http_port) {
 
 	snprintf(port, sizeof(port), "%u", http_port);
 	http_srv_argv[0] = "miniquark";
-	http_srv_argv[1] = "-p";
-	http_srv_argv[2] = port;
-	http_srv_argv[3] = "-d";
-	http_srv_argv[4] = PUBLIC_DIRECTORY;
-	http_srv_argv[5] = NULL;
+	http_srv_argv[1] = "-d";
+	http_srv_argv[2] = PUBLIC_DIRECTORY;
+	http_srv_argv[3] = port;
+	http_srv_argv[4] = NULL;
 
 	if ((httpd_bin = findprog(http_srv_argv[0])) == 0)
 		not_found(http_srv_argv[0]);
