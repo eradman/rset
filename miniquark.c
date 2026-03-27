@@ -8,8 +8,10 @@
 #include <err.h>
 #include <poll.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "http.h"
@@ -68,9 +70,21 @@ handlesignals(void (*hdl)(int)) {
 }
 
 static void
-usage(void) {
+usage(bool summary) {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr, "usage: miniquark [-d dir] [-l address] port\n");
+	if (!summary) {
+		fprintf(stderr, "hint: use -h to display option summary\n");
+		goto end;
+	}
+
+	printf("summary:\n"
+	       "    -d dir      Switch to the specified directory\n"
+	       "    -l address  Hostname or IP address listen on\n");
+	printf("docs:\n"
+	       "    man miniquark\n");
+
+end:
 	exit(1);
 }
 
@@ -91,6 +105,9 @@ main(int argc, char *argv[]) {
 	s.listen_addr = "localhost";
 	s.port = NULL;
 
+	if (argv[1] && strcmp(argv[1], "-h") == 0)
+		usage(true);
+
 	opterr = 0;
 	while ((ch = getopt(argc, argv, "d:l:")) != -1) {
 		switch (ch) {
@@ -101,12 +118,12 @@ main(int argc, char *argv[]) {
 			s.listen_addr = optarg;
 			break;
 		default:
-			usage();
+			usage(false);
 		}
 	}
 
 	if (argc != optind + 1)
-		usage();
+		usage(false);
 
 	s.port = argv[optind];
 
