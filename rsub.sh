@@ -34,6 +34,19 @@ usage() {
 	>&2 echo "release: ${release}"
 	>&2 echo "usage: rsub [-A] -r line_regex -l line_text target"
 	>&2 echo "usage: rsub target < block_content"
+	if [ -z "$1" ]; then
+		echo >&2 "hint: use -h to display option summary"
+		exit 1
+	fi
+
+	cat <<- HELP
+		summary:
+		    -A             Append line if the pattern is not found
+		    -r line_regex  Regular expression matching the line to replace
+		    -l line_text   Replacement text for a matching line
+		docs:
+		    man rsub
+	HELP
 	exit 1
 }
 
@@ -54,6 +67,7 @@ init() {
 }
 
 parse_args() {
+	[ "x$1" = "x-h" ] && usage $1
 	while getopts Al:r: arg; do
 		case "$arg" in
 			A) append=0 ;;

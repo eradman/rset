@@ -46,7 +46,20 @@ main() {
 
 usage() {
 	>&2 echo "release: ${release}"
-	>&2 echo "usage: rinstall [-a alt_location] [-m mode] [-o owner:group] source [target]"
+	>&2 echo "usage: rinstall [-a location] [-m mode] [-o owner:group] source [target]"
+	if [ -z "$1" ]; then
+		echo >&2 "hint: use -h to display option summary"
+		exit 1
+	fi
+
+	cat <<- HELP
+		summary:
+		    -a location      URL to use if source is not found locally
+		    -m mode          Arguments passed to chmod(1)
+		    -o owner:group   Arguments passed to chown(8)
+		docs:
+		    man rinstall
+	HELP
 	exit 1
 }
 
@@ -65,6 +78,7 @@ init() {
 }
 
 parse_args() {
+	[ "x$1" = "x-h" ] && usage $1
 	while getopts m:o:a: arg; do
 		case "$arg" in
 			o) owner="$OPTARG" ;;

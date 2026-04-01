@@ -21,7 +21,7 @@
 .Nd fetch and install scripts from local or http source
 .Sh SYNOPSIS
 .Nm rinstall
-.Op Fl a Ar URL
+.Op Fl a Ar location
 .Op Fl m Ar mode
 .Op Fl o Ar owner:group
 .Ar source
@@ -73,7 +73,8 @@ variable
 The arguments are as follows:
 .Bl -tag -width Ds
 .It Fl a
-URL to an alternative file location.
+URL to an alternative file location if source was not found using
+.Ev INSTALL_URL .
 .It Fl m
 Mode to set when a file is updated.
 This argument is passed to
