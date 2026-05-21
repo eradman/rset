@@ -45,7 +45,7 @@
  - Add log format variable '%s' for generated session ID
  - Remove '-l' option
  - Tests: use curl(1) on Linux
- - Detect and use native strlcpy(3), strlcat(3), arc4random(3) on Linux
+ - Detect and use native strlcpy(3), arc4random(3) on Linux
  - Upload _rutils and exported paths in two steps for compatibility with busybox tar(1)
  - rsub(1): escape ampersands found in '-l' argument
  - rinstall(1) allow diff(1) behavior to be modified using RINSTALL_DIFF_ARGS
