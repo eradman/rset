@@ -20,6 +20,7 @@
 
 /* forwards */
 
+size_t str_cpy(char *, const char *, size_t);
 int str_to_array(char *[], const char *, int, const char *);
 int array_to_str(char *[], char *, int, const char *);
 int array_append(char *[], int, char *, ...);

@@ -94,7 +94,7 @@ parse_pln(Label **labels) {
 			if (strlen(line) > 2)
 				erry("invalid trailing characters on line %d: '%s'", n, line);
 
-			strlcpy(tmp_src, "/tmp/rset_local.XXXXXX", sizeof tmp_src);
+			str_cpy(tmp_src, "/tmp/rset_local.XXXXXX", sizeof tmp_src);
 			if ((tfd = mkstemp(tmp_src)) == -1)
 				err(1, "open %s", tmp_src);
 		}
@@ -274,7 +274,7 @@ read_label(char *line, Label *label) {
 	line[strlen(line) - 1] = '\0';
 	export = strrchr(line, ':');
 	*export ++= '\0';
-	strlcpy(label->name, line, PLN_LABEL_SIZE);
+	str_cpy(label->name, line, PLN_LABEL_SIZE);
 
 	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES, ",");
 	if (label->n_aliases == PLN_MAX_ALIASES)
@@ -320,16 +320,16 @@ read_option(char *text, Options *op) {
 	v = text;
 
 	if (strcmp(k, "execute_with") == 0)
-		len = strlcpy(op->execute_with, v, PLN_OPTION_SIZE);
+		len = str_cpy(op->execute_with, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "interpreter") == 0)
-		len = strlcpy(op->interpreter, v, PLN_OPTION_SIZE);
+		len = str_cpy(op->interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "local_interpreter") == 0)
-		len = strlcpy(op->local_interpreter, v, PLN_OPTION_SIZE);
+		len = str_cpy(op->local_interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "environment") == 0) {
-		len = strlcpy(op->environment, v, PLN_OPTION_SIZE);
+		len = str_cpy(op->environment, v, PLN_OPTION_SIZE);
 		free(env_split_lines(op->environment, op->environment, 1));
 	} else if (strcmp(k, "environment_file") == 0) {
-		if (strlcpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
+		if (str_cpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
 			content = read_environment_file(op->environment_file);
 			free(env_split_lines(content, op->environment_file, 1));
 			free(content);

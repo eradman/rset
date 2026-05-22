@@ -38,6 +38,31 @@ unsigned session_id;
 int dir_mode = 0700;
 
 /*
+ * str_cpy - copy string, format error and abort on overflow
+ */
+size_t
+str_cpy(char *dst, const char *src, size_t dsize) {
+	char err_str[20];
+	int i;
+	size_t len;
+
+	len = strlen(src);
+	if (len + 1 > dsize) {
+		for (i = 0; i < len && i < sizeof(err_str) - 1; i++) {
+			err_str[i] = *(src + i);
+			/* erase control characters */
+			if ((int) err_str[i] < 32)
+				err_str[i] = ' ';
+		}
+		err_str[i] = '\0';
+		errx(1, "input too long: %s.. > %zu bytes", err_str, dsize);
+	}
+
+	memcpy(dst, src, len + 1);
+	return len;
+}
+
+/*
  * str_to_array - split a string using the input string as the buffer
  * array_to_str - format an array using the output string as the buffer
  * array_append - add a list of arguments to an array
@@ -66,10 +91,10 @@ array_to_str(char *argv[], char *outputstring, int max_length, const char *delim
 	char *p = outputstring;
 
 	while (argv && *argv) {
-		argc += strlcpy(p + argc, *argv, max_length - argc);
+		argc += str_cpy(p + argc, *argv, max_length - argc);
 		argv++;
 		if (argv && *argv)
-			argc += strlcpy(p + argc, delim, max_length - argc);
+			argc += str_cpy(p + argc, delim, max_length - argc);
 	}
 	outputstring[argc] = '\0';
 	return argc;
@@ -206,17 +231,17 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 				index += snprintf(buf + index, sizeof(buf) - index, "%d", exit_code);
 				break;
 			case 'h':
-				index += strlcpy(buf + index, hostname, sizeof(buf) - index);
+				index += str_cpy(buf + index, hostname, sizeof(buf) - index);
 				break;
 			case 'l':
-				index += strlcpy(buf + index, label_name, sizeof(buf) - index);
+				index += str_cpy(buf + index, label_name, sizeof(buf) - index);
 				break;
 			case 's':
 				index += snprintf(buf + index, sizeof(buf) - index, "%08" PRIx32, session_id);
 				break;
 			case 'T':
 				strftime(tmstr, sizeof(tmstr), LOG_TIMESTAMP_FORMAT, tm);
-				index += strlcpy(buf + index, tmstr, sizeof(buf) - index);
+				index += str_cpy(buf + index, tmstr, sizeof(buf) - index);
 				break;
 			case '%':
 				buf[index++] = p[0];

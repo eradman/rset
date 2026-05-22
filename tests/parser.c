@@ -52,7 +52,7 @@ main(int argc, char *argv[]) {
 	case 'H':
 		route_labels[0] = xmalloc(sizeof(Label), "route_labels[]");
 		bzero(route_labels[0], sizeof(Label));
-		strlcpy(route_labels[0]->name, fn, PLN_LABEL_SIZE);
+		str_cpy(route_labels[0]->name, fn, PLN_LABEL_SIZE);
 		route_labels[0]->labels = alloc_labels();
 		route_labels[0]->labels[0] = xmalloc(sizeof(Label), "route_labels[].labels[]");
 		yyfn = fn;
@@ -139,17 +139,17 @@ array_to_json(char *argv[]) {
 	int count = 0;
 	char *p = outputstring;
 
-	count += strlcpy(p + count, "[", size - count);
+	count += str_cpy(p + count, "[", size - count);
 	while (argv && *argv) {
-		count += strlcpy(p + count, "\"", size - count);
-		count += strlcpy(p + count, *argv, size - count);
+		count += str_cpy(p + count, "\"", size - count);
+		count += str_cpy(p + count, *argv, size - count);
 		argv++;
 		if (argv && *argv)
-			count += strlcpy(p + count, "\", ", size - count);
+			count += str_cpy(p + count, "\", ", size - count);
 		else
-			count += strlcpy(p + count, "\"", size - count);
+			count += str_cpy(p + count, "\"", size - count);
 	}
-	count += strlcpy(p + count, "]", size - count);
+	count += str_cpy(p + count, "]", size - count);
 	outputstring[count] = '\0';
 	return outputstring;
 }
