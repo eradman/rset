@@ -24,6 +24,7 @@
 
 #include "missing/compat.h"
 
+#include "rutils.h"
 #include "xlibc.h"
 
 /*
@@ -33,7 +34,7 @@ char *
 xdirname(const char *path) {
 	static char dname[PATH_MAX];
 
-	strlcpy(dname, path, sizeof(dname));
+	str_cpy(dname, path, sizeof(dname));
 	return dirname(dname);
 }
 
@@ -44,7 +45,7 @@ char *
 xbasename(const char *path) {
 	static char dname[PATH_MAX];
 
-	strlcpy(dname, path, sizeof(dname));
+	str_cpy(dname, path, sizeof(dname));
 	return basename(dname);
 }
 

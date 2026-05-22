@@ -340,10 +340,10 @@ update_environment_file(
 		return 0;
 
 	session_id_set = current_session_id();
-	strlcpy(environment_set, op.environment, PLN_OPTION_SIZE);
-	strlcpy(environment_file_set, op.environment_file, PLN_OPTION_SIZE);
+	str_cpy(environment_set, op.environment, PLN_OPTION_SIZE);
+	str_cpy(environment_file_set, op.environment_file, PLN_OPTION_SIZE);
 
-	strlcpy(tmp_src, "/tmp/rset_env_XXXXXX", sizeof tmp_src);
+	str_cpy(tmp_src, "/tmp/rset_env_XXXXXX", sizeof tmp_src);
 	if ((fd = mkstemp(tmp_src)) == -1)
 		err(1, "mkstemp");
 

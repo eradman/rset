@@ -1,7 +1,6 @@
 /* compat.h */
 
 #if defined(_LINUX_PORT)
-size_t strlcpy(char *dst, const char *src, size_t dsize);
 unsigned int arc4random(void);
 long long strtonum(const char *numstr, long long minval, long long maxval, const char **errstrp);
 #endif
