@@ -9,5 +9,3 @@ two:
 	printf "LOCAL_HOSTNAME=$(hostname)"
 }
 	echo "$LOCAL_HOSTNAME"
-
-# vim:noexpandtab:syntax=sh:ts=4

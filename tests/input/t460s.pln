@@ -22,5 +22,3 @@ interpreter=/bin/ksh -x
 
 desktop:
 	pkg_add hermit-font vim--gtk2
-
-# vim:noexpandtab:syntax=sh:ts=4

@@ -255,5 +255,3 @@ check_absolute_path() {
 }
 
 main "$@"
-
-# vim:noexpandtab:syntax=sh:ts=4

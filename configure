@@ -61,5 +61,3 @@ case "${TARGET_OS:-`uname`}" in
 		copy_tests_mk bsd
 		;;
 esac
-
-# vim:noexpandtab:syntax=sh:ts=4
