@@ -385,9 +385,6 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 
 					hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
 					printf("\n");
-
-					if (dryrun_opt)
-						continue;
 				}
 			}
 		}

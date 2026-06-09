@@ -120,6 +120,27 @@ try 'Locate an executable in the current path' do
   eq status.success?, true
 end
 
+# SSH/SCP
+
+try 'Format and run a command line' do
+  cmd = './args'
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq status.success?, true
+  eq out, <<~RESULT
+    ssh -fnNT -R 6000:localhost:65321 -S /tmp/rset_control_172.16.0.5 -M 172.16.0.5
+    0: echo
+    1: ssh
+    2: -fnNT
+    3: -R
+    4: 6000:localhost:65321
+    5: -S
+    6: /tmp/rset_control_172.16.0.5
+    7: -M
+    8: 172.16.0.5
+  RESULT
+end
+
 try 'Start an ssh session' do
   cmd = './ssh_command S 10.0.0.99'
   out, err, status = Open3.capture3({ 'PATH' => "#{Dir.pwd}/stubs" }, cmd)
@@ -252,25 +273,6 @@ try 'Recursively parse routes and hosts' do
   eq out, File.read('expected/recursive.json')
   eq status.success?, true
   JSON.parse(out)
-end
-
-try 'Format and run a command line' do
-  cmd = './args'
-  out, err, status = Open3.capture3(cmd)
-  eq err, ''
-  eq status.success?, true
-  eq out, <<~RESULT
-    ssh -fnNT -R 6000:localhost:65321 -S /tmp/rset_control_172.16.0.5 -M 172.16.0.5
-    0: echo
-    1: ssh
-    2: -fnNT
-    3: -R
-    4: 6000:localhost:65321
-    5: -S
-    6: /tmp/rset_control_172.16.0.5
-    7: -M
-    8: 172.16.0.5
-  RESULT
 end
 
 # Parse Progressive Label Notation (fail)

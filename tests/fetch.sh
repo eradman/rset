@@ -12,6 +12,10 @@ case `uname` in
 		fetch -q -o $dst $src_url
 		;;
 	*)
-		curl -f -s -o $dst $src_url
+		if command -v curl > /dev/null; then
+			curl -fsLo $dst $src_url
+		else
+			wget -qO "$dst" "$src_url"
+		fi
 		;;
 esac
