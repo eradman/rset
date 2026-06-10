@@ -19,6 +19,7 @@ File.write @renv, <<~STUB
   echo renv $*
 STUB
 FileUtils.chmod 0o755, @renv
+FileUtils.chmod 0o750, 'input'
 
 at_exit do
   FileUtils.remove_dir @systmp
@@ -315,6 +316,14 @@ try 'Report a bad regex' do
   eq err[0..20], 'rset: bad expression:'
   eq out, ''
   eq status.success?, false
+end
+
+try 'Skip zero-width match' do
+  cmd = "#{Dir.pwd}/../rset -n -x '^' localhost"
+  out, err, status = Open3.capture3(cmd, chdir: 'input')
+  eq err, ''
+  eq out, File.read('expected/dry_run.out').lines.first
+  eq status.success?, true
 end
 
 try 'Report an unknown option' do

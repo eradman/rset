@@ -265,6 +265,9 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
 
+					if (regmatch.rm_so == regmatch.rm_eo)
+						continue;
+
 					log_msg(label_exec_begin_msg, hostname, host_labels[j]->name, 0);
 
 					/* local begin */
@@ -381,6 +384,9 @@ dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
 				printf("\n");
 				for (j = 0; host_labels[j]; j++) {
 					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
+						continue;
+
+					if (regmatch.rm_so == regmatch.rm_eo)
 						continue;
 
 					hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);
