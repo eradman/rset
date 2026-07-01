@@ -1,4 +1,7 @@
-/* miniquark: see LICENSE file for copyright and license details. */
+/*
+ * http.c
+ * HTTP request handling for miniquark
+ */
 
 #include <errno.h>
 #include <stdio.h>

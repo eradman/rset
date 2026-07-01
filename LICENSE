@@ -15,22 +15,13 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-Source code for `miniquark` is based on `quark` under the following license:
+Source code for `miniquark` is based on `quark` under the ISC-style
+license, to the following copyright holders:
 
-ISC-License
-
-Copyright 2016-2020 Laslo Hunhold <dev@frign.de>
-
-Copyright 2004 Ted Unangst <tedu@openbsd.org>
-Copyright 2004 Todd C. Miller <Todd.Miller@courtesan.com>
-Copyright 2008 Otto Moerbeek <otto@drijf.net>
-Copyright 2017-2018 Hiltjo Posthuma <hiltjo@codemadness.org>
-Copyright 2017-2018 Quentin Rameau <quinq@fifth.space>
-Copyright 2018 Josuah Demangeon <mail@josuah.net>
-Copyright 2018 Dominik Schmidt <domischmidt@swissonline.ch>
-Copyright 2018 Aaron Burrow <burrows@charstarstar.com>
-Copyright 2020 Nihal Jere <nihal@nihaljere.xyz>
-Copyright 2020 Rainer Holzner <rholzner@web.de>
+Laslo Hunhold <dev@frign.de>
+Hiltjo Posthuma <hiltjo@codemadness.org>
+Quentin Rameau <quinq@fifth.space>
+Anselm R Garbe <anselm@garbe.us>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above

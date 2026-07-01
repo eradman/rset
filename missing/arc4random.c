@@ -1,3 +1,8 @@
+/*
+ * arc4random.c
+ * Emulate interface to random number generator
+ */
+
 #include <inttypes.h>
 #include <sys/random.h>
 

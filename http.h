@@ -1,4 +1,7 @@
-/* miniquark: see LICENSE file for copyright and license details. */
+/*
+ * http.h
+ * HTTP request handling for miniquark
+ */
 
 #include <sys/stat.h>
 

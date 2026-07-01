@@ -1,4 +1,7 @@
-/* miniquark: see LICENSE file for copyright and license details. */
+/*
+ * miniquark.c
+ * a minimal web server for retrieving files
+ */
 
 #include <sys/socket.h>
 #include <sys/wait.h>
