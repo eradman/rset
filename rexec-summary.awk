@@ -1,6 +1,7 @@
 #!/usr/bin/awk -f
+# rexec-summary
 # A log parser for rset(1) parallel workers
-# Displays a summary of each session
+# display a summary of each session
 
 # fields:
 #   $1  session ID

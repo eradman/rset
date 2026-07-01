@@ -1,4 +1,5 @@
 #!/bin/sh
+# rinstall
 # A helper utility for rset(1)
 # Install files from the local staging area or a remote URL
 

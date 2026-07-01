@@ -1,4 +1,5 @@
 #!/usr/bin/awk -f
+# labelgrep
 # A pattern searcher for the pln(5) format used by rset(1)
 # Displays the source file, label name, and contents that match
 

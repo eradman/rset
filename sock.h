@@ -1,4 +1,7 @@
-/* miniquark: see LICENSE file for copyright and license details. */
+/*
+ * sock.c
+ * IP/socket functions for miniquark
+ */
 
 #define LISTEN_MAX 4
 

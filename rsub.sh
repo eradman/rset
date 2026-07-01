@@ -1,9 +1,10 @@
 #!/bin/sh
+# rsub
 # A helper utility for rset(1)
 # Substitute lines in a file or append if not found
 
 set_defaults() {
-	ret=1     # global exit statu
+	ret=1     # global exit status
 	append=1  # set to 0 to append text in line-replace mode
 	line_regex=""
 	line_text=""
