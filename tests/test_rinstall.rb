@@ -38,6 +38,8 @@ at_exit do
   Process.kill(15, @wwwserver)
 end
 
+ENV['PATH'] = "#{Dir.pwd}/trace:#{ENV.fetch('PATH', nil)}"
+
 # wait for web server to initialize
 sleep 0.1
 
@@ -66,14 +68,17 @@ puts "\e[32m---\e[39m"
 # Functional tests
 
 try 'Install a file from a remote URL to the staging area' do
-  FileUtils.mkdir_p "#{@wwwtmp}/x/y"
+  FileUtils.mkdir_p "#{@wwwtmp}/x/a"
   fn = "test_#{@tests}.txt"
   dst = "#{@systmp}/#{fn}"
-  src = "#{@wwwtmp}/x/y/#{fn}"
+  src = "#{@wwwtmp}/x/a/#{fn}"
   File.write(src, '123')
-  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 x/y/#{fn} #{dst}"
+  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall -m 644 x/a/#{fn} #{dst}"
   out, err, status = Open3.capture3(cmd, chdir: @systmp)
-  eq err, ''
+  eq err.gsub('\'', ''), <<~RESULT
+    + /bin/mkdir -p #{@systmp}/x/a
+    + /usr/bin/find #{@systmp} -type d -not -user #{Process.uid} -exec chown #{Process.uid} {} ;
+  RESULT
   eq out.chomp, "rinstall: created #{dst}"
   eq status.success?, true
   eq '123', File.read(dst)
@@ -81,14 +86,17 @@ try 'Install a file from a remote URL to the staging area' do
 end
 
 try 'Stage the file by fetching over HTTP when no target is defined' do
-  FileUtils.mkdir_p "#{@wwwtmp}/x/y"
+  FileUtils.mkdir_p "#{@wwwtmp}/x/b"
   fn = "test_#{@tests}.txt"
-  dst = "#{@systmp}/x/y/#{fn}"
-  src = "#{@wwwtmp}/x/y/#{fn}"
+  dst = "#{@systmp}/x/b/#{fn}"
+  src = "#{@wwwtmp}/x/b/#{fn}"
   File.write(src, '123')
-  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall x/y/#{fn}"
+  cmd = "INSTALL_URL=#{@install_url} #{Dir.pwd}/../rinstall x/b/#{fn}"
   out, err, status = Open3.capture3({ 'SD' => @systmp.to_s }, cmd, chdir: @systmp)
-  eq err, ''
+  eq err.gsub('\'', ''), <<~RESULT
+    + /bin/mkdir -p #{@systmp}/x/b
+    + /usr/bin/find #{@systmp} -type d -not -user #{Process.uid} -exec chown #{Process.uid} {} ;
+  RESULT
   eq out, "rinstall: fetched #{dst}\n"
   eq status.exitstatus, 0
   eq '123', File.read(dst)

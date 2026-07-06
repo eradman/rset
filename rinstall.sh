@@ -111,6 +111,7 @@ set_source_target_vars() {
 			>&2 echo "rinstall: could not create a relative path: $SD/$src_rel_path"
 			exit 1
 		}
+		fix_permissions
 
 		if [ "$src_rel_path" = "." ]; then
 			target="$SD/$(basename "$source")"
@@ -143,10 +144,13 @@ download_source() {
 	fi
 
 	# Reconstruct the source's relative path
-	[ -d "$SD/$src_path" ] || mkdir -p "$SD/$src_path" || {
-		>&2 echo "rinstall: could not create a relative path: $SD/$src_path"
-		exit 1
-	}
+	if [ ! -d "$SD/$src_path" ]; then
+		mkdir -p "$SD/$src_path" || {
+			>&2 echo "rinstall: could not create a relative path: $SD/$src_path"
+			exit 1
+		}
+		fix_permissions
+	fi
 
 	fetch_file "$INSTALL_URL/$source"
 	if [ $? -ne 0 ]; then
@@ -253,6 +257,11 @@ check_absolute_path() {
 		*)  return 1
 			;;
 	esac
+}
+
+fix_permissions() {
+	uid=$(stat -f '%u' $SD 2> /dev/null) || uid=$(stat -c '%u' $SD)
+	find $SD -type d -not -user $uid -exec chown $uid {} ';'
 }
 
 main "$@"
