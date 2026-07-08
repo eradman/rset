@@ -1,6 +1,6 @@
 /*
  * miniquark.c
- * a minimal web server for retrieving files
+ * A minimal web server for retrieving files
  */
 
 #include <sys/socket.h>
@@ -20,6 +20,13 @@
 #include "http.h"
 #include "sock.h"
 
+/* forwards */
+static void serve(int, struct sockaddr_storage *);
+static void sigcleanup(int);
+static void handlesignals(void (*hdl)(int));
+static void usage(bool);
+
+/* globals */
 struct server {
 	char *listen_addr;
 	char *port;
