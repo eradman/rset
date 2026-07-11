@@ -22,7 +22,10 @@
 #define LOCAL_INTERPRETER "/bin/sh"
 #define ENVIRONMENT ""
 #define ENVIRONMENT_FILE "/dev/null"
+
+/* limits */
 #define MAX_WORKERS 20
+#define MAX_LABELS 100
 
 /* colors */
 #define HL_REVERSE "\x1b[7m"
