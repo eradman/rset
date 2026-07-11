@@ -43,7 +43,9 @@ addr_listen(const char *host, const char *port, struct pollfd *pfd, struct socka
 
 		pfd[addr_count].fd = insock;
 		pfd[addr_count].events = POLLIN;
-		memcpy(&sa[addr_count], p->ai_addr, sizeof(struct sockaddr_storage));
+		if (p->ai_addrlen > sizeof(struct sockaddr_storage))
+			err(1, "address size exceeds buffer");
+		memcpy(&sa[addr_count], p->ai_addr, p->ai_addrlen);
 		addr_count++;
 	}
 
