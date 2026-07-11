@@ -28,10 +28,10 @@
 /* forwards */
 static void handle_exit(int sig);
 static void usage(bool);
-static void set_options(int argc, char *argv[], char *hostnames[]);
+static char **set_options(int argc, char *argv[]);
+static char **compare_argv_routes(char *hostnames[], Label **route_labels);
 static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
-static void compare_argv_routes(char *hostnames[], Label **route_labels);
 static int execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg);
 static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
 
@@ -71,7 +71,7 @@ main(int argc, char *argv[]) {
 	int worker_argc[MAX_WORKERS];
 	int worker_pid[MAX_WORKERS];
 	char *renv_bin, *rinstall_bin, *rsub_bin;
-	char **hostnames;
+	char **args, **hostnames;
 	char **worker_argv[MAX_WORKERS];
 	char routes_realpath[PATH_MAX];
 	regex_t label_reg;
@@ -86,8 +86,8 @@ main(int argc, char *argv[]) {
 	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
 		err(1, "Failed to set SIGTERM handler");
 
-	hostnames = xcalloc(argc, sizeof(char *), "hostnames");
-	set_options(argc, argv, hostnames);
+	/* arguments are expected to match route labels */
+	args = set_options(argc, argv);
 
 	if ((renv_bin = findprog("renv")) == 0)
 		not_found("renv");
@@ -140,8 +140,8 @@ main(int argc, char *argv[]) {
 	for (i = 0; route_labels[i]; i++)
 		read_host_labels(route_labels[i]);
 
-	/* ensure hostnames are valid */
-	compare_argv_routes(hostnames, route_labels);
+	/* generate list of matching hostnames */
+	hostnames = compare_argv_routes(args, route_labels);
 
 	if (n_parallel > 0) {
 		n_workers = 0;
@@ -434,9 +434,8 @@ end:
 	exit(1);
 }
 
-static void
-set_options(int argc, char *argv[], char *hostnames[]) {
-	int i;
+static char **
+set_options(int argc, char *argv[]) {
 	int ch;
 	const char *errstr;
 	opterr = 0;
@@ -501,34 +500,44 @@ set_options(int argc, char *argv[], char *hostnames[]) {
 	if ((log_directory == NULL) ^ (n_parallel == 0))
 		usage(false);
 
-	for (i = 0; i < argc - optind; i++)
-		hostnames[i] = argv[optind + i];
-	hostnames[i] = NULL;
+	return argv + optind;
 }
+
+/* construct a list of hostnames matching routes */
+
+static char **
+compare_argv_routes(char *args[], Label **route_labels) {
+	int i, j, k;
+	int labels_matched;
+	int n_hosts = 0;
+	char **hostnames;
+
+	hostnames = xcalloc(MAX_LABELS, sizeof(char *), "hostnames");
+
+	for (i = 0; args[i]; i++) {
+		labels_matched = 0;
+		for (j = 0; route_labels[j]; j++) {
+			for (k = 0; k < route_labels[j]->n_aliases; k++) {
+				if (strcmp(args[i], route_labels[j]->aliases[k]) == 0) {
+					hostnames[n_hosts] = route_labels[j]->aliases[k];
+					n_hosts++;
+					labels_matched++;
+				}
+			}
+		}
+		if (labels_matched == 0)
+			errx(1, "No match for '%s' in %s", args[i], routes_file);
+	}
+
+	hostnames[n_hosts] = NULL;
+	return hostnames;
+}
+
+/* failure to locate utility */
 
 static void
 not_found(char *name) {
 	errx(1, "'%s' not found in PATH", name);
-}
-
-/* ensure each hostname is found in the routes */
-
-static void
-compare_argv_routes(char *hostnames[], Label **route_labels) {
-	int i, j, k;
-	int labels_matched;
-
-	for (i = 0; hostnames[i]; i++) {
-		labels_matched = 0;
-		for (j = 0; route_labels[j]; j++) {
-			for (k = 0; k < route_labels[j]->n_aliases; k++) {
-				if (strcmp(hostnames[i], route_labels[j]->aliases[k]) == 0)
-					labels_matched++;
-			}
-		}
-		if (labels_matched == 0)
-			errx(1, "No match for '%s' in %s", hostnames[i], routes_file);
-	}
 }
 
 /* built-in http server */

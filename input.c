@@ -20,7 +20,6 @@
 #include "rutils.h"
 #include "xlibc.h"
 
-#define LABELS_MAX 100
 #define BUFSIZE 4096
 
 /* globals from input.h */
@@ -162,7 +161,7 @@ parse_pln(Label **labels) {
 					    aliases[0]);
 			}
 			n_labels++;
-			if (n_labels == LABELS_MAX)
+			if (n_labels == MAX_LABELS)
 				erry("maximum number of labels (%d) exceeded", n_labels);
 		}
 
@@ -185,8 +184,8 @@ Label **
 alloc_labels() {
 	Label **new_labels;
 
-	new_labels = xmalloc(LABELS_MAX * sizeof(Label *), "new_labels");
-	bzero(new_labels, LABELS_MAX * sizeof(Label *));
+	new_labels = xmalloc(MAX_LABELS * sizeof(Label *), "new_labels");
+	bzero(new_labels, MAX_LABELS * sizeof(Label *));
 
 	return new_labels;
 }
