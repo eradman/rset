@@ -268,7 +268,7 @@ read_label(char *line, Label *label) {
 	if (label->n_aliases == PLN_MAX_ALIASES)
 		errx(1, "> %d aliases specified for label '%s'", PLN_MAX_ALIASES - 2, label->name);
 
-	if (label->n_aliases == 1)
+	if ((pln_mode == RouteLabel) && (label->n_aliases == 1))
 		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
 
 	len = str_to_array(label->export_paths, ltrim(export, ' '), PLN_MAX_PATHS, " ");
