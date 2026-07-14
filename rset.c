@@ -130,6 +130,7 @@ main(int argc, char *argv[]) {
 	/* parse route labels */
 	route_labels = alloc_labels();
 	read_route_labels(routes_file);
+	expand_route_labels();
 
 	if ((rv = regcomp(&label_reg, label_pattern, REG_EXTENDED)) != 0) {
 		regerror(rv, &label_reg, buf, sizeof(buf));

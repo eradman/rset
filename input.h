@@ -14,7 +14,7 @@
 #define PLN_LABEL_SIZE 128
 #define PLN_OPTION_SIZE 90
 #define PLN_MAX_PATHS 32
-#define PLN_MAX_ALIASES 100
+#define PLN_MAX_ALIASES 4
 
 #define MAX_ENVIRONMENT 20 * 1024
 
@@ -48,12 +48,13 @@ void erry(const char *fmt, ...);
 void parse_pln(Label **host_labels);
 void read_route_labels(const char *fn);
 void read_host_labels(Label *route_label);
+void expand_route_labels();
 Label **alloc_labels();
 
 char *ltrim(char *, int);
 void read_label(char *, Label *);
 void read_option(char *, Options *);
-int expand_numeric_range(char **, char *, int);
+int expand_numeric_range(char **, char *);
 char *env_split_lines(const char *, const char *, bool);
 char *read_environment_file(const char *);
 

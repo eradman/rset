@@ -48,6 +48,7 @@ main(int argc, char *argv[]) {
 	switch (mode[0]) {
 	case 'R':
 		read_route_labels(fn);
+		expand_route_labels();
 		break;
 	case 'H':
 		route_labels[0] = xmalloc(sizeof(Label), "route_labels[]");

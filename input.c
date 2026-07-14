@@ -236,6 +236,44 @@ read_host_labels(Label *route_label) {
 }
 
 /*
+ * expand_route_labels - transform host ranges
+ */
+void
+expand_route_labels() {
+	int i, j;
+	int n_exp;
+	int n_routes, n_routes_ext;
+	char *host_range[MAX_LABELS];
+
+	for (n_routes = 0; route_labels[n_routes]; n_routes++)
+		;
+
+	n_routes_ext = n_routes;
+	for (i = 0; i < n_routes; i++) {
+		n_exp = expand_numeric_range(host_range, route_labels[i]->name);
+		if ((n_exp > 0) && (route_labels[i]->n_aliases > 1))
+			errx(1, "'%s' cannot be expanded with aliases defined", route_labels[i]->aliases[0]);
+
+		for (j = 0; j < n_exp; j++) {
+			/* rename first entry */
+			if (j == 0)
+				route_labels[i]->aliases[0] = host_range[j];
+			/* replicate the source label, including pointers to content and options */
+			else {
+				route_labels[n_routes_ext] = xmalloc(sizeof(Label), "labels[]");
+				memcpy(route_labels[n_routes_ext], route_labels[i], sizeof(Label));
+				route_labels[n_routes_ext]->aliases[0] = host_range[j];
+				n_routes_ext++;
+
+				if (n_routes_ext == MAX_LABELS)
+					errx(1, "maximum number of labels (%d) exceeded while expanding '%s'",
+					    n_routes_ext, route_labels[i]->name);
+			}
+		}
+	}
+}
+
+/*
  * ltrim - strim leading characters
  */
 
@@ -264,12 +302,9 @@ read_label(char *line, Label *label) {
 	*export ++= '\0';
 	str_cpy(label->name, line, PLN_LABEL_SIZE);
 
-	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES, ",");
-	if (label->n_aliases == PLN_MAX_ALIASES)
-		errx(1, "> %d aliases specified for label '%s'", PLN_MAX_ALIASES - 2, label->name);
-
-	if ((pln_mode == RouteLabel) && (label->n_aliases == 1))
-		label->n_aliases = expand_numeric_range(label->aliases, label->name, PLN_MAX_ALIASES);
+	label->n_aliases = str_to_array(label->aliases, label->name, PLN_MAX_ALIASES + 1, ",");
+	if (label->n_aliases > PLN_MAX_ALIASES)
+		errx(1, "> %d aliases specified for label '%s'", PLN_MAX_ALIASES, label->name);
 
 	len = str_to_array(label->export_paths, ltrim(export, ' '), PLN_MAX_PATHS, " ");
 	if ((label->export_paths[0] != NULL) && (pln_mode == HostLabel)) {
@@ -341,7 +376,7 @@ read_option(char *text, Options *op) {
 #define MAX_DIGITS 6
 
 int
-expand_numeric_range(char **argv, char *input, int max_elements) {
+expand_numeric_range(char **range, char *input) {
 	int ch;
 	int group;
 	int n;
@@ -433,18 +468,15 @@ expand_numeric_range(char **argv, char *input, int max_elements) {
 		if ((range_numeric[1] - range_numeric[0]) < 1)
 			errx(1, "non-ascending range: %d..%d", range_numeric[0], range_numeric[1]);
 
-		if ((range_numeric[1] - range_numeric[0]) > max_elements)
-			errx(1, "maximum range exceeds %d", max_elements);
+		if ((range_numeric[1] - range_numeric[0]) > MAX_LABELS)
+			errx(1, "maximum range exceeds %d", MAX_LABELS);
 
 		for (seq = range_numeric[0]; seq <= range_numeric[1]; seq++) {
-			asprintf(&argv[hostcount], "%s%d%s", parts[0], seq, parts[1]);
+			asprintf(&range[hostcount], "%s%d%s", parts[0], seq, parts[1]);
 			hostcount++;
 		}
-	} else {
-		argv[0] = (char *) input;
-		hostcount = 1;
 	}
-	argv[hostcount] = NULL;
+	range[hostcount] = NULL;
 	return hostcount;
 }
 

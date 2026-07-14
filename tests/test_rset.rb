@@ -417,8 +417,7 @@ try 'Simple hostlist' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
-    (1)
-    web12.dev
+    (0)
   RESULT
   eq status.success?, true
 end
@@ -466,7 +465,7 @@ try 'Invalid hostlist range' do
 
   cmd = "./hostlist 'web{1..9999}.dev'"
   out, err, status = Open3.capture3(cmd)
-  eq err, "hostlist: maximum range exceeds 50\n"
+  eq err, "hostlist: maximum range exceeds 100\n"
   eq out, ''
   eq status.success?, false
 end
