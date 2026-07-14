@@ -45,7 +45,45 @@
     ]
   },
   {
-    "aliases": ["relay1.local", "relay2.local", "relay3.local"],
+    "aliases": ["relay1.local"],
+    "export_paths": ["common/"],
+    "labels": [
+      {
+        "name": "chroot",
+        "content_size": 146,
+        "options": {
+          "environment": "",
+          "environment_file": "",
+          "interpreter": "",
+          "local_interpreter": "",
+          "execute_with": "doas",
+          "begin": "",
+          "end": ""
+        }
+      }
+    ]
+  },
+  {
+    "aliases": ["relay2.local"],
+    "export_paths": ["common/"],
+    "labels": [
+      {
+        "name": "chroot",
+        "content_size": 146,
+        "options": {
+          "environment": "",
+          "environment_file": "",
+          "interpreter": "",
+          "local_interpreter": "",
+          "execute_with": "doas",
+          "begin": "",
+          "end": ""
+        }
+      }
+    ]
+  },
+  {
+    "aliases": ["relay3.local"],
     "export_paths": ["common/"],
     "labels": [
       {
