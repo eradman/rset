@@ -26,9 +26,13 @@
 evaluates script fragments written in Progressive Label Notation
 .Pq Xr pln 5 ,
 executing each script in sequence using ssh connection multiplexing.
+.Pp
 .Nm
-accepts one or more hostnames which match the labels in
+expects one or more hostnames matching labels in the
 .Ar routes_file .
+If arguments contain characters consistent with a valid network address, they
+are compared with all host aliases, otherwise they are treated as regular
+expressions.
 .Pp
 The arguments are as follows:
 .Bl -tag -width Ds

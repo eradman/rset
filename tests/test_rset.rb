@@ -494,3 +494,26 @@ try 'Raise error if no route match is found' do
   eq err, "rset: No match for 'localhost.xyz' in routes.pln\n"
   eq status.success?, false
 end
+
+try 'Show routes matching a pattern' do
+  out, err, status = nil
+  cmd = "#{Dir.pwd}/../rset -n 'relay1.' 127.0.0.1"
+  Dir.chdir(@mynet) do
+    FileUtils.mkdir_p('_sources')
+    out, err, status = Open3.capture3(cmd)
+  end
+  eq err, ''
+  eq out, File.read('expected/dry_run_pattern.out')
+  eq status.success?, true
+end
+
+try 'Raise error if no route pattern match is found' do
+  FileUtils.mkdir_p("#{@systmp}/_sources")
+  out, err, status = nil
+  cmd = "#{Dir.pwd}/../rset -n '127.+'"
+  Dir.chdir(@mynet) do
+    out, err, status = Open3.capture3(cmd)
+  end
+  eq err, "rset: No match for '127.+' in routes.pln\n"
+  eq status.success?, false
+end

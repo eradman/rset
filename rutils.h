@@ -19,6 +19,7 @@ void check_permissions(const char *);
 int create_dir(const char *);
 void install_if_new(const char *, const char *);
 void hl_range(const char *, const char *, unsigned, unsigned);
+const char *pattern_match(const char *, const char *);
 void log_msg(char *, char *, char *, int);
 void trace_shell(char *);
 void trace_exec(char *[]);

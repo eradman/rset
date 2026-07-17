@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 
 #include <err.h>
+#include <regex.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -190,6 +191,52 @@ hl_range(const char *s, const char *color, unsigned so, unsigned eo) {
 		free(start);
 		free(match);
 	}
+}
+
+/*
+ * pattern_match - match exact string or regular expression
+ */
+const char *
+pattern_match(const char *pattern, const char *string) {
+	char buf[_POSIX2_LINE_MAX];
+	char c;
+	int n, len;
+	int rv;
+	bool is_char, is_digit, is_dash, is_dot, is_colon;
+	bool try_regex = false;
+	const char *match = NULL;
+	regex_t label_reg;
+	regmatch_t regmatch;
+
+	/* test for input consistant with a valid hostname or address */
+	len = strlen(pattern);
+	for (n = 0; n < len; n++) {
+		c = pattern[n];
+		is_char = (c >= 'a') && (c <= 'z');
+		is_digit = (c >= '0') && (c <= '9');
+		is_dash = (c == '-') && (n > 0) && (n + 1 < len);
+		is_dot = (c == '.') && (n > 0) && (n + 1 < len);
+		is_colon = (c == ':') && (n + 1 < len);
+		if (is_char | is_digit | is_dash | is_dot | is_colon)
+			continue;
+		else
+			try_regex = true;
+	}
+
+	if (try_regex) {
+		if ((rv = regcomp(&label_reg, pattern, REG_EXTENDED)) != 0) {
+			regerror(rv, &label_reg, buf, sizeof(buf));
+			errx(1, "bad expression: %s", buf);
+		}
+		if (regexec(&label_reg, string, 1, &regmatch, 0) == 0) {
+			if (regmatch.rm_eo > regmatch.rm_so)
+				match = string;
+		}
+	} else {
+		if (strcmp(pattern, string) == 0)
+			match = string;
+	}
+	return match;
 }
 
 /*
