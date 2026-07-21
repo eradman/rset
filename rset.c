@@ -29,11 +29,11 @@
 static void handle_exit(int sig);
 static void usage(bool);
 static char **set_options(int argc, char *argv[]);
-static char **compare_argv_routes(char *hostnames[], Label **route_labels);
+static char **compare_argv_routes(char *hostnames[]);
 static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
-static int execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg);
-static int dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg);
+static int execute_remote(char *hostnames[], regex_t *label_reg);
+static int dry_run(char *hostnames[], regex_t *label_reg);
 
 /* globals from input.h */
 Label **route_labels;
@@ -142,7 +142,7 @@ main(int argc, char *argv[]) {
 		read_host_labels(route_labels[i]);
 
 	/* generate list of matching hostnames */
-	hostnames = compare_argv_routes(args, route_labels);
+	hostnames = compare_argv_routes(args);
 
 	if (n_parallel > 0) {
 		n_workers = 0;
@@ -174,12 +174,12 @@ main(int argc, char *argv[]) {
 
 	/* main loop */
 	if (dryrun_opt) {
-		ret = dry_run(hostnames, route_labels, &label_reg);
+		ret = dry_run(hostnames, &label_reg);
 		free(hostnames);
 		return ret;
 	}
 
-	ret = execute_remote(hostnames, route_labels, &label_reg);
+	ret = execute_remote(hostnames, &label_reg);
 	free(hostnames);
 	return ret;
 }
@@ -190,7 +190,7 @@ main(int argc, char *argv[]) {
  */
 
 static int
-execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
+execute_remote(char *hostnames[], regex_t *label_reg) {
 	char httpd_log[32768];
 	int i, j, k, l;
 	int nr;
@@ -355,7 +355,7 @@ execute_remote(char *hostnames[], Label **route_labels, regex_t *label_reg) {
  */
 
 static int
-dry_run(char *hostnames[], Label **route_labels, regex_t *label_reg) {
+dry_run(char *hostnames[], regex_t *label_reg) {
 	int i, j, k, l;
 	regmatch_t regmatch;
 	Label **host_labels;
@@ -507,7 +507,7 @@ set_options(int argc, char *argv[]) {
 /* construct a list of hostnames matching routes */
 
 static char **
-compare_argv_routes(char *args[], Label **route_labels) {
+compare_argv_routes(char *args[]) {
 	int i, j, k;
 	int labels_matched;
 	int n_hosts = 0;
