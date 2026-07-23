@@ -77,11 +77,17 @@ socket.bind(Addrinfo.tcp('127.0.0.1', 0))
 port = socket.local_address.ip_port
 socket.close
 
+reader, writer = IO.pipe
 @pid = spawn('../miniquark', '-d', File.join(@systmp, 'www'), port.to_s,
-             in: '/dev/null', out: '/dev/null',
-             unsetenv_others: true)
-sleep 0.2
+             out: writer, unsetenv_others: true)
 today = 'Sat, 11 Jul 2020 01:25:02 GMT'
+
+try 'Wait for miniquark startup line' do
+  line = reader.gets
+  line.gsub!('127.0.0.1 ', '')
+  line.gsub!('::1 ', '')
+  eq line, "Listening on port #{port}\n"
+end
 
 # Fetch content
 
