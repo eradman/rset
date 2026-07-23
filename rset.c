@@ -29,11 +29,11 @@
 static void handle_exit(int sig);
 static void usage(bool);
 static char **set_options(int argc, char *argv[]);
-static char **compare_argv_routes(char *hostnames[]);
+static void compare_argv(char *args[], char *hostnames[], char *m_args[]);
 static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
 static int execute_remote(char *hostnames[], regex_t *label_reg);
-static int dry_run(char *hostnames[], regex_t *label_reg);
+static int dry_run(char *hostnames[], char *m_args[], regex_t *label_reg);
 
 /* globals from input.h */
 Label **route_labels;
@@ -71,7 +71,7 @@ main(int argc, char *argv[]) {
 	int worker_argc[MAX_WORKERS];
 	int worker_pid[MAX_WORKERS];
 	char *renv_bin, *rinstall_bin, *rsub_bin;
-	char **args, **hostnames;
+	char **args, **hostnames, **m_args;
 	char **worker_argv[MAX_WORKERS];
 	char routes_realpath[PATH_MAX];
 	regex_t label_reg;
@@ -142,7 +142,9 @@ main(int argc, char *argv[]) {
 		read_host_labels(route_labels[i]);
 
 	/* generate list of matching hostnames */
-	hostnames = compare_argv_routes(args);
+	hostnames = xcalloc(MAX_LABELS, sizeof(char *), "hostnames");
+	m_args = xcalloc(MAX_LABELS, sizeof(char *), "m_args");
+	compare_argv(args, hostnames, m_args);
 
 	if (n_parallel > 0) {
 		n_workers = 0;
@@ -174,7 +176,7 @@ main(int argc, char *argv[]) {
 
 	/* main loop */
 	if (dryrun_opt) {
-		ret = dry_run(hostnames, &label_reg);
+		ret = dry_run(hostnames, m_args, &label_reg);
 		free(hostnames);
 		return ret;
 	}
@@ -355,9 +357,10 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
  */
 
 static int
-dry_run(char *hostnames[], regex_t *label_reg) {
+dry_run(char *hostnames[], char *m_args[], regex_t *label_reg) {
 	int i, j, k, l;
 	regmatch_t regmatch;
+	regex_t route_reg;
 	Label **host_labels;
 
 	for (i = 0; route_labels[i]; i++) {
@@ -370,8 +373,13 @@ dry_run(char *hostnames[], regex_t *label_reg) {
 				else
 					continue;
 
-				hl_range(hostname, HL_HOST, 0, strlen(hostname));
+				if (regcomp(&route_reg, m_args[k], REG_EXTENDED) != 0)
+					errx(1, "invalid host pattern: %s", m_args[k]);
+				regexec(&route_reg, hostname, 1, &regmatch, 0);
+
+				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
 				printf("\n");
+
 				for (j = 0; host_labels[j]; j++) {
 					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
 						continue;
@@ -506,24 +514,38 @@ set_options(int argc, char *argv[]) {
 
 /* construct a list of hostnames matching routes */
 
-static char **
-compare_argv_routes(char *args[]) {
+static void
+compare_argv(char *args[], char *hostnames[], char *m_args[]) {
 	int i, j, k;
 	int labels_matched;
 	int n_hosts = 0;
-	char **hostnames;
-
-	hostnames = xcalloc(MAX_LABELS, sizeof(char *), "hostnames");
+	const char *match;
 
 	for (i = 0; args[i]; i++) {
 		labels_matched = 0;
 		for (j = 0; route_labels[j]; j++) {
-			for (k = 0; k < route_labels[j]->n_aliases; k++) {
-				if (strcmp(args[i], route_labels[j]->aliases[k]) == 0) {
-					hostnames[n_hosts] = route_labels[j]->aliases[k];
-					n_hosts++;
+			match = pattern_match(args[i], route_labels[j]->aliases[0]);
+
+			/* scan aliases for an exact match */
+			if (!match) {
+				for (k = 1; k < route_labels[j]->n_aliases; k++) {
+					if (strcmp(args[i], route_labels[j]->aliases[k]) == 0)
+						match = route_labels[j]->aliases[k];
+				}
+			}
+			/* skip if already exists to set of hosts */
+			for (k = 0; match && k < n_hosts; k++) {
+				if (strcmp(match, hostnames[k]) == 0) {
+					match = NULL;
 					labels_matched++;
 				}
+			}
+			/* add to list */
+			if (match) {
+				hostnames[n_hosts] = (char *) match;
+				m_args[n_hosts] = args[i];
+				n_hosts++;
+				labels_matched++;
 			}
 		}
 		if (labels_matched == 0)
@@ -531,7 +553,7 @@ compare_argv_routes(char *args[]) {
 	}
 
 	hostnames[n_hosts] = NULL;
-	return hostnames;
+	m_args[n_hosts] = NULL;
 }
 
 /* failure to locate utility */
