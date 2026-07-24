@@ -308,8 +308,8 @@ read_label(char *line, Label *label) {
 
 	len = str_to_array(label->export_paths, ltrim(export, ' '), PLN_MAX_PATHS, " ");
 	if ((label->export_paths[0] != NULL) && (pln_mode == HostLabel)) {
-		regcomp(&label_reg, DEFAULT_LABEL_PATTERN, REG_EXTENDED);
-		if (regexec(&label_reg, label->name, 1, &regmatch, 0) == 0)
+		xregcomp(&label_reg, DEFAULT_LABEL_PATTERN, REG_EXTENDED);
+		if (xregexec(&label_reg, label->name, 1, &regmatch) == 0)
 			erry("export path on label '%s' implies archive/restore and must not match "
 			     "default label pattern '" DEFAULT_LABEL_PATTERN "'",
 			    label->name);

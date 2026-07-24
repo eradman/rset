@@ -62,11 +62,9 @@ int http_port;
  */
 int
 main(int argc, char *argv[]) {
-	char buf[_POSIX2_LINE_MAX];
 	int fd;
 	int i, j;
 	int ret;
-	int rv;
 	int n_workers;
 	int worker_argc[MAX_WORKERS];
 	int worker_pid[MAX_WORKERS];
@@ -132,10 +130,7 @@ main(int argc, char *argv[]) {
 	read_route_labels(routes_file);
 	expand_route_labels();
 
-	if ((rv = regcomp(&label_reg, label_pattern, REG_EXTENDED)) != 0) {
-		regerror(rv, &label_reg, buf, sizeof(buf));
-		errx(1, "bad expression: %s", buf);
-	}
+	xregcomp(&label_reg, label_pattern, REG_EXTENDED);
 
 	/* parse pln files for each host */
 	for (i = 0; route_labels[i]; i++)
@@ -254,10 +249,7 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 				}
 
 				for (j = 0; host_labels[j]; j++) {
-					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
-						continue;
-
-					if (regmatch.rm_so == regmatch.rm_eo)
+					if (xregexec(label_reg, host_labels[j]->name, 1, &regmatch) != 0)
 						continue;
 
 					log_msg(label_exec_begin_msg, hostname, host_labels[j]->name, 0);
@@ -373,18 +365,14 @@ dry_run(char *hostnames[], char *m_args[], regex_t *label_reg) {
 				else
 					continue;
 
-				if (regcomp(&route_reg, m_args[k], REG_EXTENDED) != 0)
-					errx(1, "invalid host pattern: %s", m_args[k]);
-				regexec(&route_reg, hostname, 1, &regmatch, 0);
+				xregcomp(&route_reg, m_args[k], REG_EXTENDED);
+				xregexec(&route_reg, hostname, 1, &regmatch);
 
 				hl_range(hostname, HL_HOST, regmatch.rm_so, regmatch.rm_eo);
 				printf("\n");
 
 				for (j = 0; host_labels[j]; j++) {
-					if (regexec(label_reg, host_labels[j]->name, 1, &regmatch, 0) != 0)
-						continue;
-
-					if (regmatch.rm_so == regmatch.rm_eo)
+					if (xregexec(label_reg, host_labels[j]->name, 1, &regmatch) != 0)
 						continue;
 
 					hl_range(host_labels[j]->name, HL_LABEL, regmatch.rm_so, regmatch.rm_eo);

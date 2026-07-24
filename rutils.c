@@ -198,10 +198,8 @@ hl_range(const char *s, const char *color, unsigned so, unsigned eo) {
  */
 const char *
 pattern_match(const char *pattern, const char *string) {
-	char buf[_POSIX2_LINE_MAX];
 	char c;
 	int n, len;
-	int rv;
 	bool is_char, is_digit, is_dash, is_dot, is_colon;
 	bool try_regex = false;
 	const char *match = NULL;
@@ -224,13 +222,9 @@ pattern_match(const char *pattern, const char *string) {
 	}
 
 	if (try_regex) {
-		if ((rv = regcomp(&label_reg, pattern, REG_EXTENDED)) != 0) {
-			regerror(rv, &label_reg, buf, sizeof(buf));
-			errx(1, "bad expression: %s", buf);
-		}
-		if (regexec(&label_reg, string, 1, &regmatch, 0) == 0) {
-			if (regmatch.rm_eo > regmatch.rm_so)
-				match = string;
+		xregcomp(&label_reg, pattern, REG_EXTENDED);
+		if (xregexec(&label_reg, string, 1, &regmatch) == 0) {
+			match = string;
 		}
 	} else {
 		if (strcmp(pattern, string) == 0)

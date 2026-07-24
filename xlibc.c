@@ -118,3 +118,30 @@ xpipe(int *fildes, const char *name) {
 		err(1, "pipe < %s", name);
 	return ret;
 }
+
+/*
+ * Call regcomp(3) and format expression errors
+ */
+int
+xregcomp(regex_t *preg, const char *pattern, int cflags) {
+	int rv;
+	char buf[100];
+	if ((rv = regcomp(preg, pattern, cflags)) != 0) {
+		regerror(rv, preg, buf, sizeof(buf));
+		errx(1, "bad expression: %s", buf);
+	}
+	return rv;
+}
+
+/*
+ * Call regexec(3) and refuse zero-width matches
+ */
+int
+xregexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[]) {
+	int rv;
+	int eflags = 0;
+	rv = regexec(preg, string, nmatch, pmatch, eflags);
+	if (pmatch->rm_so == pmatch->rm_eo)
+		rv = REG_NOMATCH;
+	return rv;
+}
