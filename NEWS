@@ -1,5 +1,19 @@
 = Release History
 
+== 3.4: August 3, 2026
+
+ - Match route labels using regular expressions, or any alias using exact hostnames
+ - Do not count zero-width regex as a match
+ - All utilities: add usage hint and '-h' flag to display option summary
+ - Detect string copy overflow and abort with an error
+ - rinstall(1) create directories using the same owner as ${SD}
+ - miniquark(1) compare HTTP If-Modified-Since times using GMT
+ - miniquark(1) adjust options to resemble nc(1)
+ - Use 'ustar' format for transfering files on OpenBSD
+ - Replace 'tmppath' pledge with 'wpath cpath' on OpenBSD
+ - Exit without cleanup if LOCAL_CONTROL_SOCKET already exists
+ - Wait 0.5 seconds for SSH control socket to clear
+
 == 3.3: January 17, 2026
 
  - Use session_id for remote stage dir name
