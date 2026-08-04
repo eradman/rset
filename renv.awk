@@ -6,6 +6,8 @@
 # release: ${release}
 
 function err(s) {
+	gsub(/[[:cntrl:]]/, "_")
+	gsub(/[[:blank:]]$/, "_")
 	print "renv: " s ": " $0 > "/dev/stderr"
 	exit 1
 }
@@ -37,7 +39,7 @@ BEGIN {
 /^$|^#/ {
 	next
 }
-/^[_A-Za-z0-9]+="/ {
+/^[_A-Za-z0-9]+=".*"$/ {
 	# erase quotes
 	gsub(/"/, "")
 

@@ -77,18 +77,14 @@ end
 
 try 'Quote malformed lines' do
   cmd = '../renv'
-  # rubocop:disable Layout/TrailingWhitespace
   input = <<~IN
-    SD=""$PWD""  
-    DS=""
+    SD=""$PWD""
     X=""width"" Y=height Z="height"
   IN
-  # rubocop:enable Layout/TrailingWhitespace
   out, err, status = Open3.capture3(cmd, stdin_data: input)
   eq err, ''
   eq out, <<~OUT
     SD="$PWD"
-    DS=""
     X="width Y=height Z=height"
   OUT
   eq status.success?, true
@@ -107,14 +103,14 @@ try 'Escape literals' do
   eq status.success?, true
 end
 
-try 'Print only environment errors' do
+try 'Only print errors using quiet flag' do
   cmd = '../renv - -q'
   input = <<~IN
     SD="$$PWD"
-    DS=
+    DS=\t\t
   IN
   out, err, status = Open3.capture3(cmd, stdin_data: input)
-  eq err, "renv: unknown pattern: DS=\n"
+  eq err, "renv: unknown pattern: DS=__\n"
   eq out, ''
   eq status.exitstatus, 1
 end
