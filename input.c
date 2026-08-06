@@ -350,11 +350,10 @@ read_option(char *text, Options *op) {
 		len = str_cpy(op->local_interpreter, v, PLN_OPTION_SIZE);
 	else if (strcmp(k, "environment") == 0) {
 		len = str_cpy(op->environment, v, PLN_OPTION_SIZE);
-		free(env_split_lines(op->environment, op->environment, 1));
+		env_split_lines(op->environment);
 	} else if (strcmp(k, "environment_file") == 0) {
 		if (str_cpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
 			content = read_environment_file(op->environment_file);
-			free(env_split_lines(content, op->environment_file, 1));
 			free(content);
 		}
 	} else if (strcmp(k, "begin") == 0) {
@@ -482,26 +481,24 @@ expand_numeric_range(char **range, char *input) {
 
 /*
  * env_split_lines - translate space delimited name="value" to lines
- *                   optionally pipe to renv(1)
  */
 
-char *
-env_split_lines(const char *s, const char *option_value, bool verify) {
+void
+env_split_lines(char *str) {
 	int count = 0;
 	char *argv[8];
-	char *new, *p;
+	char *env_str, *p;
 	size_t len;
 
-	len = strlen(s);
-	new = xmalloc(len + 2, "new");
-	memcpy(new, s, len);
+	env_str = xstrdup(str, "env_str");
+	len = strlen(str);
 
 	/* add trailing newline */
 	if (len > 0)
-		new[len++] = '\n';
-	new[len] = '\0';
+		str[len++] = '\n';
+	str[len] = '\0';
 
-	p = new;
+	p = str;
 	while ((p = strchr(p, '"')) != NULL) {
 		p++;
 		/* expect a pair of delimiters */
@@ -510,15 +507,14 @@ env_split_lines(const char *s, const char *option_value, bool verify) {
 	}
 
 	if (count % 2 == 1)
-		errx(1, "no closing quote: %s", option_value);
+		errx(1, "no closing quote: %s", env_str);
+	free(env_str);
 
-	if ((len > 0) && verify) {
+	if (len > 0) {
 		array_append(argv, 0, "renv", "-", "-q", NULL);
-		if (cmd_pipe_stdin(argv, new, len) != 0)
+		if (cmd_pipe_stdin(argv, str, len) != 0)
 			exit(1);
 	}
-
-	return new;
 }
 
 /*

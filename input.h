@@ -55,7 +55,7 @@ char *ltrim(char *, int);
 void read_label(char *, Label *);
 void read_option(char *, Options *);
 int expand_numeric_range(char **, char *);
-char *env_split_lines(const char *, const char *, bool);
+void env_split_lines(char *);
 char *read_environment_file(const char *);
 
 #endif /* _RSET_INPUT_H_ */

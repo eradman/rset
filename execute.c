@@ -313,7 +313,6 @@ update_environment_file(
 	int ret;
 	char cmd[PATH_MAX];
 	char tmp_src[128];
-	char *environment_lines;
 	Options op;
 
 	static unsigned session_id_set = 0;
@@ -336,16 +335,9 @@ update_environment_file(
 	if ((fd = mkstemp(tmp_src)) == -1)
 		err(1, "mkstemp");
 
-	environment_lines = env_split_lines(environment_set, environment_set, 0);
-	write(fd, environment_lines, strlen(environment_lines));
-	free(environment_lines);
-
-	if (env_override) {
-		environment_lines = env_split_lines(env_override, env_override, 0);
-		write(fd, environment_lines, strlen(environment_lines));
-		free(environment_lines);
-	}
-
+	write(fd, environment_set, strlen(environment_set));
+	if (env_override)
+		write(fd, env_override, strlen(env_override));
 	close(fd);
 
 	snprintf(cmd, PATH_MAX, "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",

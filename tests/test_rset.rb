@@ -373,7 +373,7 @@ end
 # Environment
 
 try 'Format environment option on separate lines' do
-  cmd = %(./format_env N 'first="one" second="two"')
+  cmd = %(./format_env 'first="one" second="two"')
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -384,7 +384,7 @@ try 'Format environment option on separate lines' do
 end
 
 try 'No closing quote' do
-  cmd = %(./format_env N 'first="one" second="two')
+  cmd = %(./format_env 'first="one" second="two')
   out, err, status = Open3.capture3(cmd)
   eq err, %(format_env: no closing quote: first="one" second="two\n)
   eq out, ''
@@ -392,7 +392,7 @@ try 'No closing quote' do
 end
 
 try 'Format environment and verify with renv' do
-  cmd = %(./format_env V 'first="one" second="two"')
+  cmd = %(./format_env 'first="one" second="two"')
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -403,7 +403,7 @@ try 'Format environment and verify with renv' do
 end
 
 try 'Format environment and fail verifications with renv' do
-  cmd = %(./format_env V 'HOSTNAME=')
+  cmd = %(./format_env 'HOSTNAME=')
   out, err, status = Open3.capture3(cmd)
   eq err, "renv: unknown pattern: HOSTNAME=\n"
   eq out, ''

@@ -461,8 +461,8 @@ set_options(int argc, char *argv[]) {
 			restore_opt = 1;
 			break;
 		case 'E':
-			env_override = optarg;
-			free(env_split_lines(env_override, env_override, 1));
+			env_override = xstrdup(optarg, "env_override");
+			env_split_lines(env_override);
 			break;
 		case 'F':
 			sshconfig_file = optarg;
