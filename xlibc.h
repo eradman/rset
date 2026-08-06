@@ -21,3 +21,4 @@ void *xrealloc(void *, size_t, const char *);
 int xpipe(int *, const char *);
 int xregcomp(regex_t *, const char *, int);
 int xregexec(const regex_t *, const char *, size_t, regmatch_t[]);
+int xstrnvis(char *, const char *, size_t, int);

@@ -164,27 +164,12 @@ str_or_empty(char *s) {
 
 char *
 quote(char *inputstring) {
-	int i;
-	int count;
 	static int size = 4096;
 	static char *str = NULL;
 
 	if (!str)
 		str = xmalloc(size, "str");
 
-	for (i = 0, count = 0; inputstring[i]; i++, count++) {
-		if (count > size - 2) {
-			size += 4096;
-			str = xrealloc(str, size, "str");
-		}
-
-		switch (inputstring[i]) {
-		case '"':
-		case '\\':
-			str[count++] = '\\';
-		}
-		str[count] = inputstring[i];
-	}
-	str[count] = '\0';
+	xstrnvis(str, inputstring, size, VIS_DQ | VIS_TAB | VIS_NL | VIS_CSTYLE);
 	return str;
 }

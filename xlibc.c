@@ -145,3 +145,20 @@ xregexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmat
 		rv = REG_NOMATCH;
 	return rv;
 }
+
+/*
+ * Use platform-specific implementation of strnvis(3)
+ */
+
+int
+xstrnvis(char *dst, const char *src, size_t dstsize, int flag) {
+	int rv;
+#if defined(_MACOS_PORT) || defined(__FreeBSD__)
+	rv = strnvis(dst, dstsize, src, flag);
+#else
+	rv = strnvis(dst, src, dstsize, flag);
+#endif
+	if (rv == -1)
+		err(1, "strnvis > %s", src);
+	return rv;
+}
