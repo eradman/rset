@@ -373,7 +373,7 @@ end
 # Environment
 
 try 'Format environment option on separate lines' do
-  cmd = %(./format_env 'first="one" second="two"')
+  cmd = %(./format_env E 'first="one" second="two"')
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -383,16 +383,16 @@ try 'Format environment option on separate lines' do
   eq status.success?, true
 end
 
-try 'No closing quote' do
-  cmd = %(./format_env 'first="one" second="two')
+try 'Try environment with missing closing quote' do
+  cmd = %(./format_env E 'first="one" second="two')
   out, err, status = Open3.capture3(cmd)
-  eq err, %(format_env: no closing quote: first="one" second="two\n)
+  eq err, %((null): no closing quote: first="one" second="two\n)
   eq out, ''
   eq status.exitstatus, 1
 end
 
 try 'Format environment and verify with renv' do
-  cmd = %(./format_env 'first="one" second="two"')
+  cmd = %(./format_env E 'first="one" second="two"')
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   eq out, <<~RESULT
@@ -402,10 +402,40 @@ try 'Format environment and verify with renv' do
   eq status.success?, true
 end
 
-try 'Format environment and fail verifications with renv' do
-  cmd = %(./format_env 'HOSTNAME=')
+try 'Format environment and fail verification with renv' do
+  cmd = %(./format_env E 'HOSTNAME=')
   out, err, status = Open3.capture3(cmd)
   eq err, "renv: unknown pattern: HOSTNAME=\n"
+  eq out, ''
+  eq status.success?, false
+end
+
+try 'Use multiple environment files' do
+  cmd = "./format_env F 'input/pg.env input/pkg.env'"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out, <<~RESULT
+    PGDATA="/pg_data/18"
+    LC_ALL="C.UTF-8"
+    ASSUME_ALWAYS_YES="yes"
+  RESULT
+  eq status.success?, true
+end
+
+try 'Try environment file with special characters' do
+  cmd = %(./format_env F 'input/pg.env|')
+  out, err, status = Open3.capture3(cmd)
+  eq err, "(null): invalid filename input/pg.env|\n"
+  eq out, ''
+  eq status.success?, false
+end
+
+try 'Fail verification of environment file with renv' do
+  fn = "#{@systmp}/xyz.env"
+  File.write(fn, "LC_ALL=C.UTF-8\n")
+  cmd = %(./format_env F #{fn})
+  out, err, status = Open3.capture3(cmd)
+  eq err, "renv: unknown pattern: LC_ALL=C.UTF-8\n"
   eq out, ''
   eq status.success?, false
 end

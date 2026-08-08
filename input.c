@@ -333,7 +333,6 @@ read_label(char *line, Label *label) {
  */
 void
 read_option(char *text, Options *op) {
-	char *content;
 	char *k, *v;
 
 	int len = 0;
@@ -352,10 +351,8 @@ read_option(char *text, Options *op) {
 		len = str_cpy(op->environment, v, PLN_OPTION_SIZE);
 		env_split_lines(op->environment);
 	} else if (strcmp(k, "environment_file") == 0) {
-		if (str_cpy(op->environment_file, v, PLN_OPTION_SIZE) > 0) {
-			content = read_environment_file(op->environment_file);
-			free(content);
-		}
+		env_file_check(v);
+		len = str_cpy(op->environment_file, v, PLN_OPTION_SIZE);
 	} else if (strcmp(k, "begin") == 0) {
 		op->begin = xstrdup(v, "op.begin");
 	} else if (strcmp(k, "end") == 0) {
@@ -485,10 +482,10 @@ expand_numeric_range(char **range, char *input) {
 
 void
 env_split_lines(char *str) {
-	int count = 0;
 	char *argv[8];
 	char *env_str, *p;
 	size_t len;
+	int count = 0;
 
 	env_str = xstrdup(str, "env_str");
 	len = strlen(str);
@@ -507,7 +504,7 @@ env_split_lines(char *str) {
 	}
 
 	if (count % 2 == 1)
-		errx(1, "no closing quote: %s", env_str);
+		erry("no closing quote: %s", env_str);
 	free(env_str);
 
 	if (len > 0) {
@@ -518,25 +515,24 @@ env_split_lines(char *str) {
 }
 
 /*
- * read_environment_file - basic validation
+ * env_file_check - ensure filenames are valid .env files
  */
 
-char *
-read_environment_file(const char *environment_file) {
-	char *buf;
-	int fd;
-	size_t len;
+void
+env_file_check(const char *str) {
+	int i;
+	char cmd[PATH_MAX];
+	const char *s;
 
-	buf = xmalloc(MAX_ENVIRONMENT, "buf");
+	/* prevent special shell characters */
+	for (s = str; *s; ++s) {
+		for (i = 0; i < sizeof(SHELL_SPECIAL_CHARS); i++) {
+			if (s[0] == SHELL_SPECIAL_CHARS[i])
+				erry("invalid filename %s", str);
+		}
+	}
 
-	if ((fd = open(environment_file, O_RDONLY)) == -1)
-		err(1, "%s: %s", yyfn, environment_file);
-
-	len = read(fd, buf, MAX_ENVIRONMENT);
-	if (len == MAX_ENVIRONMENT)
-		errx(1, "environment file %s exceeds %dkB", environment_file, MAX_ENVIRONMENT / 1024);
-
-	close(fd);
-	buf[len] = '\0';
-	return buf;
+	snprintf(cmd, PATH_MAX, "renv %s -q", str);
+	if (system(cmd) != 0)
+		exit(1);
 }
