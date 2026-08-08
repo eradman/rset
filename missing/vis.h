@@ -29,7 +29,7 @@
 #define VIS_NOSLASH 0x40 /* inhibit printing '\' */
 #define VIS_GLOB 0x100   /* encode glob(3) magics and '#' */
 
-char *vis(char *, int, int, int);
-int strnvis(char *, const char *, size_t, int);
+int strvis(char *dst, const char *src, int flag);
+int strvisx(char *dst, const char *src, size_t len, int flag);
 
 #endif /* _LINUX_PORT */

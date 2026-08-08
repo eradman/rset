@@ -165,12 +165,11 @@ str_or_empty(char *s) {
 
 char *
 quote(char *inputstring) {
-	static int size = 4096;
 	static char *str = NULL;
 
 	if (!str)
-		str = xmalloc(size, "str");
+		str = xmalloc(PLN_OPTION_SIZE * 4, "str");
 
-	xstrnvis(str, inputstring, size, VIS_DQ | VIS_TAB | VIS_NL | VIS_CSTYLE);
+	strvis(str, inputstring, VIS_DQ | VIS_TAB | VIS_NL | VIS_CSTYLE);
 	return str;
 }
