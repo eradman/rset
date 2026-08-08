@@ -16,7 +16,7 @@
 #define PLN_MAX_PATHS 32
 #define PLN_MAX_ALIASES 4
 
-#define MAX_ENVIRONMENT 20 * 1024
+#define SHELL_SPECIAL_CHARS "*?[#'`;&<>()|]\\$!^~"
 
 typedef struct {
 	char execute_with[PLN_OPTION_SIZE];
@@ -56,6 +56,6 @@ void read_label(char *, Label *);
 void read_option(char *, Options *);
 int expand_numeric_range(char **, char *);
 void env_split_lines(char *);
-char *read_environment_file(const char *);
+void env_file_check(const char *);
 
 #endif /* _RSET_INPUT_H_ */
