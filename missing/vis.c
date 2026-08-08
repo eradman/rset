@@ -36,7 +36,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "missing/bsd-vis.h"
+#include "missing/vis.h"
 
 #define isoctal(c) (((u_char) (c)) >= '0' && ((u_char) (c)) <= '7')
 #define isvisible(c, flag)                                                                         \

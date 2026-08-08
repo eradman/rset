@@ -17,9 +17,3 @@ void setproctitle(const char *fmt, ...);
 #if defined(_MACOS_PORT)
 #define st_mtim st_mtimespec
 #endif
-
-#if defined(_LINUX_PORT)
-#include "bsd-vis.h"
-#else
-#include <vis.h>
-#endif

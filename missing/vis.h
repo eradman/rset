@@ -3,8 +3,7 @@
  * visually encode characters
  */
 
-#include <limits.h>
-#include <sys/types.h>
+#if defined(_LINUX_PORT)
 
 /*
  * to select alternate encoding format
@@ -32,3 +31,5 @@
 
 char *vis(char *, int, int, int);
 int strnvis(char *, const char *, size_t, int);
+
+#endif /* _LINUX_PORT */
