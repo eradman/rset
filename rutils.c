@@ -41,8 +41,8 @@ str_cpy(char *dst, const char *src, size_t dsize) {
 		for (i = 0; i < len && i < sizeof(err_str) - 1; i++) {
 			err_str[i] = *(src + i);
 			/* erase control characters */
-			if ((int) err_str[i] < 32)
-				err_str[i] = ' ';
+			if ((err_str[i] > '\0') && (err_str[i] < ' '))
+				err_str[i] = '+';
 		}
 		err_str[i] = '\0';
 		errx(1, "input too long: %s.. > %zu bytes", err_str, dsize);
