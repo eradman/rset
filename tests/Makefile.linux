@@ -1,4 +1,4 @@
-CPPFLAGS += -I../missing -D_GNU_SOURCE -D_LINUX_PORT
+CPPFLAGS += -D_GNU_SOURCE -D_LINUX_PORT
 EXTRA_SRC = missing/vis.c
 
 include Makefile.bsd

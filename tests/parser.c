@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <vis.h>
 
 #include "missing/compat.h"
 
@@ -12,9 +11,9 @@
 
 /* forwards */
 void indent(int level);
-char *quote(char *str);
 char *array_to_json(char *argv[]);
 char *str_or_empty(char *s);
+char *quote(const char *);
 
 /* globals */
 Label **route_labels;
@@ -164,12 +163,33 @@ str_or_empty(char *s) {
 }
 
 char *
-quote(char *inputstring) {
+quote(const char *inputstring) {
+	int i;
+	int count;
+	static int size = 4096;
 	static char *str = NULL;
 
 	if (!str)
-		str = xmalloc(PLN_OPTION_SIZE * 4, "str");
+		str = xmalloc(size, "str");
 
-	strvis(str, inputstring, VIS_DQ | VIS_TAB | VIS_NL | VIS_CSTYLE);
+	for (i = 0, count = 0; inputstring[i]; i++, count++) {
+		if (count > size - 2) {
+			size += 4096;
+			str = xrealloc(str, size, "str");
+		}
+
+		switch (inputstring[i]) {
+		case '\n':
+			str[count++] = '\\';
+			str[count] = 'n';
+			break;
+		case '"':
+		case '\\':
+			str[count++] = '\\';
+		default:
+			str[count] = inputstring[i];
+		}
+	}
+	str[count] = '\0';
 	return str;
 }
