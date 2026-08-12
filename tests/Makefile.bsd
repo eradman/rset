@@ -1,4 +1,4 @@
-RUBY ?= ruby
+RUBY ?= ruby -E UTF-8
 OBJS += args
 OBJS += cmd_pipe_stdin
 OBJS += cmd_pipe_stdout
@@ -9,6 +9,7 @@ OBJS += hostlist
 OBJS += log_msg
 OBJS += parser
 OBJS += ssh_command
+OBJS += str_cpy
 OBJS += which
 OBJS += worker_argv
 OBJS += worker_exec

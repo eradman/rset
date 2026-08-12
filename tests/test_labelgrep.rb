@@ -31,10 +31,10 @@ try 'Scan multiple files with more than one label' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   expected = <<~OUTPUT
-    input/t460s.pln ([36mcommon packages[0m)
-    [33m12[0m	[4mpkg_add [0mrsync-- ruby%3.2
-    input/t460s.pln ([36mdesktop[0m)
-    [33m24[0m	[4mpkg_add [0mhermit-font vim--gtk2
+    input/t460s.pln (\e[36mcommon packages\e[0m)
+    \e[33m12\e[0m\t\e[4mpkg_add \e[0mrsync-- ruby%3.2
+    input/t460s.pln (\e[36mdesktop\e[0m)
+    \e[33m24\e[0m\t\e[4mpkg_add \e[0mhermit-font vim--gtk2
   OUTPUT
   eq out, expected
   eq status.success?, true
@@ -45,9 +45,9 @@ try 'Find more than one match per label' do
   out, err, status = Open3.capture3(cmd)
   eq err, ''
   expected = <<~OUTPUT
-    input/t460s.pln ([36mcommon packages[0m)
-    [33m13[0m	echo "inet 172.16.0.1/16" > [4m/etc/hostname[0m.vether0
-    [33m14[0m	echo "add vether0" > [4m/etc/hostname[0m.bridge0
+    input/t460s.pln (\e[36mcommon packages\e[0m)
+    \e[33m13\e[0m\techo "inet 172.16.0.1/16" > \e[4m/etc/hostname\e[0m.vether0
+    \e[33m14\e[0m\techo "add vether0" > \e[4m/etc/hostname\e[0m.bridge0
   OUTPUT
   eq out, expected
   eq status.success?, true

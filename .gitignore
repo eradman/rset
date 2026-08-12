@@ -19,6 +19,7 @@ tests/hostlist
 tests/log_msg
 tests/parser
 tests/ssh_command
+tests/str_cpy
 tests/which
 tests/worker_argv
 tests/worker_exec

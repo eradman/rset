@@ -31,21 +31,18 @@ puts "\e[32m---\e[39m"
 
 # Functional tests
 
-try 'Filter environment variables' do
+try 'Ignore comments, accept multibyte characters' do
   cmd = '../renv'
   input = <<~IN
     # default.env
     SD="$PWD"
-    X="width"
-    Y="height"
-
+    PASS=" \u{2713}"
   IN
   out, err, status = Open3.capture3(cmd, stdin_data: input)
   eq err, ''
   eq out, <<~OUT
     SD="$PWD"
-    X="width"
-    Y="height"
+    PASS=" ✓"
   OUT
   eq status.success?, true
 end
