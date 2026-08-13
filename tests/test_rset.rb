@@ -47,6 +47,22 @@ end
 
 puts "\e[32m---\e[39m"
 
+# Error handling
+
+try 'Copy string, raise error for overflow' do
+  cmd = "./str_cpy 4 '\u{25bc}\r\n12345'"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out, "▼\r\n12345"
+  eq status.success?, true
+
+  cmd = "./str_cpy 1 '\u{25bc}\r\n12345'"
+  out, err, status = Open3.capture3(cmd)
+  eq err, "str_cpy: input too long: ▼++12345.. > 10 bytes\n"
+  eq out, ''
+  eq status.success?, false
+end
+
 # Install or update utilities
 
 try 'Install a missing file' do

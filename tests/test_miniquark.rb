@@ -386,7 +386,7 @@ try 'Fetch a 10MB file in parallel with an external utility' do
   6.times do |i|
     dst = "#{@systmp}/largefile.#{i}"
     pids << spawn('./fetch.sh', src_url, dst,
-                  out: ["#{@systmp}/fetch_log", 'w'],
+                  out: ["#{@systmp}/fetch_log.#{i}", 'w'],
                   unsetenv_others: true)
   end
   pids.each { |pid| Process.wait pid }
