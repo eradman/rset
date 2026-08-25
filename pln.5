@@ -7,65 +7,92 @@
 .Sh DESCRIPTION
 Progressive Label Notation
 is a configuration format used by
-.Xr rset 1 ,
-and is designed to be evaluated sequentially.
+.Xr rset 1 .
 .Nm
-supports options defined by
-.Em key=value
-pairs and text fragments designated by tab indentation
-.Bd -literal -offset indent
-interpreter=/bin/sh -x
-
-packages:
-	pkg_add ruby%3.2
-	ln -sf /usr/local/bin/ruby32 /usr/local/bin/ruby
-	ln -sf /usr/local/bin/irb32 /usr/local/bin/irb
-
-services:
-	./rinstall mail/smtpd_relay.conf /etc/mail/smtpd.conf \\
-	    && rcctl restart smtpd
-.Ed
+allows key-value options to be defined inline, and tab-indented code blocks
+called
+.Em labels
+to be executed sequentially.
+Labels support a single type of annotation known as
+.Em export paths .
 .Pp
-A label may also be followed by special content between a pair of braces on the
-beginning of a line.
-A common use for this is to set environment variables using local configuration
-.Bd -literal -offset indent
-www:
-{
-	cat ssl.env
-}
-	echo $SSL_PASSWORD > /etc/keys/global.pass
-.Ed
+.Nm
+files are arranged in a two-level hierarchy: a top-level routes file maps
+hostnames to a list of .pln files.
+All .pln files included in a route label are expected to be executed within a
+single
+.Em session .
 .Sh OPTIONS
-Each option may be set multiple times, and is effective for labels that follow.
-Reset an option to the implementation-defined default using
-.Ql \&=
-without a value.
-.Sh LABELS
-Label names do not need to be unique and may contain any series of
-characters except for single and double quotes.
-A series of pathnames for use by the application may be specified after the
-.Ql \&:
+Options may be set multiple times, and are effective for subsequent labels.
+The value is assigned all text between first `=` character and
+.Aq newline
 .Bd -literal -offset indent
-svc1.local: etc/ rc.d/
-	httpd.pln
+environment=LC_ALL="C.UTF-8"
 .Ed
 .Pp
+An name ending with `=` is an empty assignment and will reset the option to a
+default value.
+.Sh ROUTE LABELS
 Labels may be split into multiple aliases separated by commas
 .Bd -literal -offset indent
-svc1.local,10.0.0.10:
+svc1,10.0.0.10:
 	common.pln
+	svc.pln
 .Ed
 .Pp
-Alternatively, sequence expressions may be used to match a range of hosts
+Alternatively, sequence expressions may be used to define a host range
 .Bd -literal -offset indent
-db{1..4}.local:
-	autofailover.pln
+fs{2..5}.lan:
+	zpool.pln
+.Ed
+.Pp
+A list of pathnames following
+.Ql \&:
+indicate directories to be staged on the remote host
+.Bd -literal -offset indent
+scriptedconfiguration.org: common/ hub/
+	users.pln
+	hub.pln
+.Ed
+.Sh HOST LABELS
+Content defined between
+.Aq tab
+and
+.Aq newline
+is piped verbatim to external commands, avoiding the need to escape special
+characters.
+Empty lines are also permitted
+.Bd -literal -offset indent
+packages:
+	echo "http://cdn.openbsd.org/pub/OpenBSD" > /etc/installurl
+	pkg_add rsync--
+
+	mkdir -p /tftpboot/efi
+.Ed
+.Pp
+A pair of braces immediately following a label captures the output of local
+execution before initiating a remote connection.
+The result of local execution is concatenated with the label content to form
+single script
+.Bd -literal -offset indent
+set date:
+{
+	echo "NOW=$(date +%Y%m%d%H%M)"
+}
+	date $NOW
+.Ed
+.Pp
+In specialized cases, export paths following
+.Ql \&:
+identifies files to send or retrieve
+.Bd -literal -offset indent
+_archive: hub.tar
+	tar -Pp -cf hub.tar /var/www /etc/ssl
 .Ed
 .Sh COMMENTS
-Comments begin with a hash
-.Pq Ql \&#
-character, and can only be used the beginning of a line.
+Comments begin with
+.Ql \&# ,
+and are only recognized at start of a line.
 .Sh SEE ALSO
 .Xr labelgrep 1
 .Sh AUTHORS
