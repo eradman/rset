@@ -11,9 +11,7 @@
           "environment_file": "",
           "interpreter": "",
           "local_interpreter": "",
-          "execute_with": "doas",
-          "begin": "",
-          "end": ""
+          "execute_with": "doas"
         }
       },
       {
@@ -24,9 +22,7 @@
           "environment_file": "",
           "interpreter": "",
           "local_interpreter": "/bin/sh -e",
-          "execute_with": "doas",
-          "begin": "[ -f .lock ] && false || touch .lock",
-          "end": "rm .lock"
+          "execute_with": "doas"
         }
       },
       {
@@ -37,9 +33,7 @@
           "environment_file": "",
           "interpreter": "/bin/ksh -x",
           "local_interpreter": "/bin/sh -e",
-          "execute_with": "doas",
-          "begin": "",
-          "end": ""
+          "execute_with": "doas"
         }
       }
     ]
@@ -56,9 +50,7 @@
           "environment_file": "",
           "interpreter": "",
           "local_interpreter": "",
-          "execute_with": "doas",
-          "begin": "",
-          "end": ""
+          "execute_with": "doas"
         }
       }
     ]
@@ -75,9 +67,7 @@
           "environment_file": "",
           "interpreter": "",
           "local_interpreter": "",
-          "execute_with": "doas",
-          "begin": "",
-          "end": ""
+          "execute_with": "doas"
         }
       }
     ]
@@ -94,9 +84,7 @@
           "environment_file": "",
           "interpreter": "",
           "local_interpreter": "",
-          "execute_with": "doas",
-          "begin": "",
-          "end": ""
+          "execute_with": "doas"
         }
       }
     ]

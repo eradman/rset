@@ -103,11 +103,7 @@ main(int argc, char *argv[]) {
 			indent(5);
 			printf("\"local_interpreter\": \"%s\",\n", host_labels[j]->options.local_interpreter);
 			indent(5);
-			printf("\"execute_with\": \"%s\",\n", host_labels[j]->options.execute_with);
-			indent(5);
-			printf("\"begin\": \"%s\",\n", str_or_empty(host_labels[j]->options.begin));
-			indent(5);
-			printf("\"end\": \"%s\"\n", str_or_empty(host_labels[j]->options.end));
+			printf("\"execute_with\": \"%s\"\n", host_labels[j]->options.execute_with);
 			indent(4);
 			printf("}\n");
 			indent(3);
