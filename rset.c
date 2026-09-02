@@ -43,7 +43,6 @@ int archive_opt;
 int dryrun_opt;
 int restore_opt;
 int tty_opt;
-int stop_on_err_opt;
 int n_parallel;
 char *sshconfig_file;
 char *env_override;
@@ -198,7 +197,6 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 	Label **host_labels;
 
 	int exit_code = 0;
-	int local_exit_code = 0;
 	int scp_exit_code = 0;
 
 	char *host_connect_msg = HL_HOST "%h" HL_RESET;
@@ -255,23 +253,11 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 					log_msg(label_exec_begin_msg, hostname, host_labels[j]->name, 0);
 
 					/* local begin */
-					local_exit_code = local_exec(host_labels[j], host_labels[j]->options.begin);
-
-					if (stop_on_err_opt && local_exit_code != 0) {
-						log_msg(
-						    label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
-						goto exit;
-					}
+					local_exec(host_labels[j], host_labels[j]->options.begin);
 
 					/* restore */
 					if (restore_opt && host_labels[j]->export_paths[0])
 						scp_exit_code = scp_archive(hostname, socket_path, host_labels[j], true);
-
-					if (stop_on_err_opt && scp_exit_code != 0) {
-						log_msg(
-						    label_exec_error_msg, hostname, host_labels[j]->name, scp_exit_code);
-						goto exit;
-					}
 
 					/* remote execution */
 					if (tty_opt)
@@ -281,29 +267,12 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 						exit_code =
 						    ssh_command_pipe(hostname, socket_path, host_labels[j], env_override);
 
-					if (stop_on_err_opt && (exit_code != 0)) {
-						log_msg(label_exec_error_msg, hostname, host_labels[j]->name, exit_code);
-						goto exit;
-					}
-
 					/* archive */
 					if (archive_opt && host_labels[j]->export_paths[0])
 						scp_exit_code = scp_archive(hostname, socket_path, host_labels[j], false);
 
-					if (stop_on_err_opt && scp_exit_code != 0) {
-						log_msg(
-						    label_exec_error_msg, hostname, host_labels[j]->name, scp_exit_code);
-						goto exit;
-					}
-
 					/* local end */
-					local_exit_code = local_exec(host_labels[j], host_labels[j]->options.end);
-
-					if (stop_on_err_opt && local_exit_code != 0) {
-						log_msg(
-						    label_exec_error_msg, hostname, host_labels[j]->name, local_exit_code);
-						goto exit;
-					}
+					local_exec(host_labels[j], host_labels[j]->options.end);
 
 					/* ssh terminated, unable to execute local interpreter */
 					if ((exit_code == 255) || (exit_code == 127))
@@ -321,14 +290,11 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 						warn("read from httpd output");
 				}
 
-			exit:
 				if (socket_path) {
 					if (archive_opt || restore_opt)
-						log_msg(host_disconnect_msg, hostname, "",
-						    stop_on_err_opt ? exit_code : scp_exit_code);
+						log_msg(host_disconnect_msg, hostname, "", scp_exit_code);
 					else
-						log_msg(host_disconnect_msg, hostname, "",
-						    stop_on_err_opt ? exit_code : local_exit_code);
+						log_msg(host_disconnect_msg, hostname, "", exit_code);
 					end_connection(socket_path, hostname);
 					free(socket_path);
 					socket_path = NULL;
@@ -337,10 +303,7 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 		}
 	}
 
-	if (stop_on_err_opt)
-		return exit_code || scp_exit_code;
-	else
-		return 0;
+	return 0;
 }
 
 /*
@@ -403,10 +366,11 @@ static void
 usage(bool summary) {
 	fprintf(stderr, "release: %s\n", RELEASE);
 	fprintf(stderr,
-	    "usage: rset [-AenRt] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
+	    "usage: rset [-AnRt] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
 	    "            [-x label_pattern] hostname ...\n"
-	    "       rset [-e] [-E environment] [-F sshconfig_file] [-f routes_file]\n"
-	    "            [-x label_pattern] -o log_directory -p workers hostname ...\n");
+	    "       rset [-E environment] [-F sshconfig_file] [-f routes_file]\n"
+	    "            [-x label_pattern] -o log_directory -p workers hostname ...\n"
+	    "       rset command\n");
 	if (!summary) {
 		fprintf(stderr, "hint: use -h to display option summary\n");
 		goto end;
@@ -415,7 +379,6 @@ usage(bool summary) {
 	printf("summary:\n"
 	       "    -A                 Download files listed in label export paths\n"
 	       "    -E environment     Key-value environment variables recognized by renv(1)\n"
-	       "    -e                 Exit if any label returns non-zero exit status\n"
 	       "    -F sshconfig_file  Specify a ssh_config(5) file to use\n"
 	       "    -f routes_file     Specify routes file using pln(5) format\n"
 	       "    -o log_directory   Log output of background tasks to directory\n"
@@ -440,16 +403,20 @@ set_options(int argc, char *argv[]) {
 
 	bzero(&op, sizeof op);
 
-	if (argv[1] && strcmp(argv[1], "-h") == 0)
-		usage(true);
+	if (argc == 2) {
+		if (strcmp(argv[1], "-h") == 0)
+			usage(true);
 
-	while ((ch = getopt(argc, argv, "AenRtE:F:f:o:p:x:")) != -1) {
+		if (strcmp(argv[1], "shell-env") == 0) {
+			parallel_env();
+			exit(0);
+		}
+	}
+
+	while ((ch = getopt(argc, argv, "AnRtE:F:f:o:p:x:")) != -1) {
 		switch (ch) {
 		case 'A':
 			archive_opt = 1;
-			break;
-		case 'e':
-			stop_on_err_opt = 1;
 			break;
 		case 'n':
 			dryrun_opt = 1;

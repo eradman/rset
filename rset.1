@@ -6,14 +6,13 @@
 .Nd remote staging and execution tool
 .Sh SYNOPSIS
 .Nm rset
-.Op Fl AenRt
+.Op Fl AnRt
 .Op Fl E Ar environment
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
 .Op Fl x Ar label_pattern
 .Ar hostname ...
 .Nm rset
-.Op Fl e
 .Op Fl E Ar environment
 .Op Fl F Ar sshconfig_file
 .Op Fl f Ar routes_file
@@ -21,6 +20,8 @@
 .Fl o Ar log_directory
 .Fl p Ar workers
 .Ar hostname ...
+.Nm rset
+.Ar command
 .Sh DESCRIPTION
 .Nm
 evaluates script fragments written in Progressive Label Notation
@@ -33,8 +34,7 @@ expects one or more hostnames matching labels in the
 If arguments contain characters consistent with a valid network address, they
 are compared with all host aliases, otherwise they are treated as regular
 expressions.
-.Pp
-The arguments are as follows:
+.Ss Arguments
 .Bl -tag -width Ds
 .It Fl A
 Download files listed in label export paths to the local
@@ -42,8 +42,6 @@ Download files listed in label export paths to the local
 directory in the format
 .Sq hostname:basename(filename) .
 Absolute paths are permitted, or paths relative to the staging directory.
-.It Fl e
-Exit immediately if any label returns non-zero exit status.
 .It Fl n
 Do not connect to remote hosts.
 May be combined with
@@ -90,6 +88,12 @@ script located in the search path.
 .It Fl x
 Execute labels matching the specified regex.
 By default only labels beginning with [0-9a-z] are evaluated.
+.El
+.Ss Commands
+.Bl -tag -width Ds
+.It Cm shell-env
+Print environment used by parallel execution.
+Provides a configuration template for custom status messages.
 .El
 .Sh ENVIRONMENT
 Status messages for each stage of execution may be customized by setting

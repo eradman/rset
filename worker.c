@@ -16,6 +16,31 @@
 #include "worker.h"
 #include "xlibc.h"
 
+/* globals */
+static const Env parallel_status[] = { { "HTTP_TRACE", NULL }, { "SSH_TRACE", NULL },
+	{ "RSET_HOST_CONNECT", "%s|%T|HOST_CONNECT|%h|" },
+	{ "RSET_HOST_CONNECT_ERROR", "%s|%T|HOST_CONNECT_ERROR|%h|%e" },
+	{ "RSET_LABEL_EXEC_BEGIN", "%s|%T|EXEC_BEGIN|%l|" },
+	{ "RSET_LABEL_EXEC_END", "%s|%T|EXEC_END|%l|%e" },
+	{ "RSET_LABEL_EXEC_ERROR", "%s|%T|EXEC_ERROR|%l|%e" },
+	{ "RSET_HOST_DISCONNECT", "%s|%T|HOST_DISCONNECT|%h|%e" }, { NULL, NULL } };
+
+/*
+ * parallel_env - print environment used for parallel execution
+ */
+
+void
+parallel_env() {
+	const Env *env;
+
+	for (env = parallel_status; env->name; ++env) {
+		if (env->value)
+			printf("export %s=\"%s\";\n", env->name, env->value);
+		else
+			printf("unset %s;\n", env->name);
+	}
+}
+
 /*
  * create_worker_argv - assemble argv for workers
  * execute_worker - fork background process and direct stdout/stderr to logfile
@@ -50,6 +75,7 @@ int
 exec_worker(char *log_directory, int worker_id, char *worker_argv[]) {
 	int logfd;
 	pid_t rset_pid;
+	const Env *env;
 
 	rset_pid = fork();
 	if (rset_pid == -1)
@@ -62,14 +88,12 @@ exec_worker(char *log_directory, int worker_id, char *worker_argv[]) {
 		if (dup2(logfd, fileno(stderr)) == -1)
 			err(255, "redirect stderr");
 
-		setenv("RSET_HOST_CONNECT", "%s|%T|HOST_CONNECT|%h|", 1);
-		setenv("RSET_HOST_CONNECT_ERROR", "%s|%T|HOST_CONNECT_ERROR|%h|%e", 1);
-		setenv("RSET_LABEL_EXEC_BEGIN", "%s|%T|EXEC_BEGIN|%l|", 1);
-		setenv("RSET_LABEL_EXEC_END", "%s|%T|EXEC_END|%l|%e", 1);
-		setenv("RSET_LABEL_EXEC_ERROR", "%s|%T|EXEC_ERROR|%l|%e", 1);
-		setenv("RSET_HOST_DISCONNECT", "%s|%T|HOST_DISCONNECT|%h|%e", 1);
-		unsetenv("HTTP_TRACE");
-		unsetenv("SSH_TRACE");
+		for (env = parallel_status; env->name; ++env) {
+			if (env->value)
+				setenv(env->name, env->value, 1);
+			else
+				unsetenv(env->name);
+		}
 
 		execvp(worker_argv[0], worker_argv);
 		err(1, "Failed to start worker '%s'", worker_argv[0]);

@@ -43,6 +43,13 @@ The test suite depends on `ruby` and `bundler`.
 
     make test
 
+Optional Configuration
+----------------------
+
+Add custom status format to default profile
+
+    rset shell-env >> ~/.profile
+
 Examples
 --------
 
