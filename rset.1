@@ -96,6 +96,7 @@ Print environment used by parallel execution.
 Provides a configuration template for custom status messages.
 .El
 .Sh ENVIRONMENT
+.Ss Status Format
 Status messages for each stage of execution may be customized by setting
 .Ev RSET_HOST_CONNECT ,
 .Ev RSET_HOST_CONNECT_ERROR ,
@@ -128,9 +129,17 @@ rfc-3339 timestamp
 literal
 .Ql %
 .El
-.Pp
-Execution on the remote host sets the following environment variables:
-.Bl -tag -width "RSET_ENVIRON"
+.Ss Diagnostics
+.Bl -tag -width "RSET_ENVIRONMENT"
+.It Ev HTTP_TRACE
+If defined, print log messages from
+.Xr miniquark 1 .
+.It Ev SSH_TRACE
+If defined, print commands used for remote execution.
+.El
+.Ss Remote Execution
+The following environment variables are set on the remote host:
+.Bl -tag -width "RSET_ENVIRONENT"
 .It Ev INSTALL_URL
 Used by
 .Xr rinstall 1
@@ -140,57 +149,38 @@ for fetching content from
 Staging directory where
 .Nm
 unpacks utilities and configuration files.
-.It Ev HTTP_TRACE
-If defined, print log messages from
-.Xr miniquark 1 .
-.It Ev SSH_TRACE
-If defined, print commands used for remote execution.
 .El
 .Pp
-Environment state may set for the duration of the ssh session
-using
+State may set for the duration of the ssh session using
 .Xr renv 1
 using
 .Ql name=value
 as the first argument.
-.Sh FILES
-Available hosts and the pathnames to labeled scripts to run are read from
-.Pa routes.pln ,
-located in the current directory.
-.Pp
-A ssh master is established at the beginning of a session and all subsequent
-interactions with a host are run over a socket at
-.Pa /tmp/rset_control_{hostname} .
-.Pp
-The local directory
-.Pa _rutils
-is created if it does not exist, and is shipped to the remote host at the
-beginning of each execution to directory named
-.Pa /tmp/rset_staging_{http_port} .
 .Sh OPTIONS
 The following options are recognized when parsing a
 .Xr pln 5
 file:
-.Ss \&environment=
+.Bl -tag -width Ds
+.It Dv environment=
 Space separated list of environment variables validated by
 .Xr renv 1 .
-.Ss \&environment_file=
+.It Dv environment_file=
 Space separated list of files defining environment variables validated by
 .Xr renv 1 .
-.Ss \&interpreter=
-The interpreter to run a script fragment with.
-Defaults to
-.Pa /bin/sh ,
-but any language may be used that is capable of reading scripts over STDIN.
-.Ss \&local_interpreter=
-The interpreter to evaluate content that is prepended to a script
-Defaults to
+.It Dv interpreter=
+The interpreter used to run scripts on the remote host.
+Default is
 .Pa /bin/sh .
-.Ss \&execute_with=
+.It Dv local_interpreter=
+The interpreter to evaluate content that is prepended to a script
+Default is
+.Pa /bin/sh .
+.It Dv execute_with=
 Command for elevating privileges, such as
 .Xr doas 1
 and
 .Xr sudo 8 .
+.El
 .Sh SEE ALSO
 .Xr rinstall 1 ,
 .Xr rsub 1 ,
