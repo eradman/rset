@@ -42,12 +42,40 @@ Download files listed in label export paths to the local
 directory in the format
 .Sq hostname:basename(filename) .
 Absolute paths are permitted, or paths relative to the staging directory.
+.It Fl E Ar environment
+Set one or more environment variables using the format
+.Sq name="value" ... .
+.It Fl F Ar sshconfig_file
+Specify a
+.Pa config
+file for
+.Xr ssh 1
+to use.
+.It Fl f Ar routes_file
+Specify a
+.Ar routes_file .
+This file is composed of labels which correspond to
+hostnames or IP addresses which are matched against
+.Ar hostname .
+The default is
+.Pa routes.pln .
 .It Fl n
 Do not connect to remote hosts.
 May be combined with
 .Fl x
 to highlight label names that match.
 Special text defined between { and } is still executed locally.
+.It Fl o Ar log_directory
+Log directory to use for background workers.
+Each log file is created for each worker using the format
+.Ql YYYY-MM-DD_HHMMSS.n .
+.It Fl p Ar workers
+Parallel execution distributed across the specified number of workers.
+The log directory must also be specified using
+.Fl o .
+A summary of results is displayed using the
+.Pa rexec-summary
+script located in the search path.
 .It Fl R
 Send files listed in label export paths from the local
 .Pa _archive
@@ -57,35 +85,7 @@ This is the reverse of
 .It Fl t
 Allow TTY input by copying the content of each label to the remote host instead
 of opening a pipe to the interpreter.
-.It Fl E
-Set one or more environment variables using the format
-.Sq name="value" ... .
-.It Fl F
-Specify a
-.Pa config
-file for
-.Xr ssh 1
-to use.
-.It Fl f
-Specify a
-.Ar routes_file .
-This file is composed of labels which correspond to
-hostnames or IP addresses which are matched against
-.Ar hostname .
-The default is
-.Pa routes.pln .
-.It Fl o
-Log directory to use for background workers.
-Each log file is created for each worker using the format
-.Ql YYYY-MM-DD_HHMMSS.n .
-.It Fl p
-Parallel execution distributed across the specified number of workers.
-The log directory must also be specified using
-.Fl o .
-A summary of results is displayed using the
-.Pa rexec-summary
-script located in the search path.
-.It Fl x
+.It Fl x Ar label_pattern
 Execute labels matching the specified regex.
 By default only labels beginning with [0-9a-z] are evaluated.
 .El

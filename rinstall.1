@@ -60,12 +60,12 @@ The arguments are as follows:
 .It Fl a
 URL to an alternative file location if source was not found using
 .Ev INSTALL_URL .
-.It Fl m
-Mode to set when a file is updated.
+.It Fl m Ar mode
+Set file mode.
 This argument is passed to
 .Xr chmod 1 .
-.It Fl o
-Owner and/or group to set.
+.It Fl o Ar owner:group
+Set owner and/or group.
 This argument is passed to
 .Xr chown 8 .
 .El
@@ -83,7 +83,7 @@ The
 .Nm
 utility exits with one of the following values:
 .Pp
-.Bl -tag -width Ds -offset indent -compact
+.Bl -tag -offset indent -compact -width Ds
 .It 0
 Target file was installed or updated
 .It 1

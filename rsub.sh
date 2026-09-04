@@ -33,7 +33,7 @@ main() {
 
 usage() {
 	>&2 echo "release: ${release}"
-	>&2 echo "usage: rsub [-A] -r line_regex -l line_text target"
+	>&2 echo "usage: rsub [-A] -l line_text -r line_regex target"
 	>&2 echo "usage: rsub target < block_content"
 	if [ -z "$1" ]; then
 		echo >&2 "hint: use -h to display option summary"
@@ -43,8 +43,8 @@ usage() {
 	cat <<- HELP
 		summary:
 		    -A             Append line if the pattern is not found
-		    -r line_regex  Regular expression matching the line to replace
 		    -l line_text   Replacement text for a matching line
+		    -r line_regex  Regular expression matching the line to replace
 		docs:
 		    man rsub
 	HELP

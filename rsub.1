@@ -7,8 +7,8 @@
 .Sh SYNOPSIS
 .Nm rsub
 .Op Fl A
-.Fl r Ar line_regex
 .Fl l Ar line_text
+.Fl r Ar line_regex
 .Ar target
 .Nm rsub
 .Ar target
@@ -31,11 +31,11 @@ The arguments for line substitution are as follows:
 .Bl -tag -width Ds
 .It Fl A
 Append line if the pattern is not found.
-.It Fl r
-A regular expression matching the line to replace.
-.It Fl l
+.It Fl l Ar line_text
 The replacement text for a matching line.
 Newlines are not permitted as part of the replacement string.
+.It Fl r Ar line_regex
+A regular expression matching the line to replace.
 .El
 .Sh ENVIRONMENT
 .Bl -tag -width Ds
@@ -74,8 +74,8 @@ Update a managed block of text
 .Bd -literal -offset indent
 $SD/rsub /etc/fstab <<-CONF
 /dev/ada0p1  /vm  ufs  rw  0  0
+CONF
 .Ed
-.Dl CONF
 .Sh SEE ALSO
 .Xr awk 1 ,
 .Xr rinstall 1
