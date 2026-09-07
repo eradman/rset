@@ -17,7 +17,7 @@
 #include "xlibc.h"
 
 /* globals */
-static const Env parallel_status[] = { { "HTTP_TRACE", NULL }, { "SSH_TRACE", NULL },
+static const Env worker_env[] = { { "HTTP_TRACE", NULL }, { "SSH_TRACE", NULL },
 	{ "RSET_HOST_CONNECT", "%s|%T|HOST_CONNECT|%h|" },
 	{ "RSET_HOST_CONNECT_ERROR", "%s|%T|HOST_CONNECT_ERROR|%h|%e" },
 	{ "RSET_LABEL_EXEC_BEGIN", "%s|%T|EXEC_BEGIN|%l|" },
@@ -26,14 +26,14 @@ static const Env parallel_status[] = { { "HTTP_TRACE", NULL }, { "SSH_TRACE", NU
 	{ "RSET_HOST_DISCONNECT", "%s|%T|HOST_DISCONNECT|%h|%e" }, { NULL, NULL } };
 
 /*
- * parallel_env - print environment used for parallel execution
+ * shell_worker_env - print environment used for parallel execution
  */
 
 void
-parallel_env() {
+shell_worker_env() {
 	const Env *env;
 
-	for (env = parallel_status; env->name; ++env) {
+	for (env = worker_env; env->name; ++env) {
 		if (env->value)
 			printf("export %s=\"%s\";\n", env->name, env->value);
 		else
@@ -88,7 +88,7 @@ exec_worker(char *log_directory, int worker_id, char *worker_argv[]) {
 		if (dup2(logfd, fileno(stderr)) == -1)
 			err(255, "redirect stderr");
 
-		for (env = parallel_status; env->name; ++env) {
+		for (env = worker_env; env->name; ++env) {
 			if (env->value)
 				setenv(env->name, env->value, 1);
 			else

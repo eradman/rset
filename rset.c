@@ -370,7 +370,7 @@ usage(bool summary) {
 	    "            [-x label_pattern] hostname ...\n"
 	    "       rset [-E environment] [-F sshconfig_file] [-f routes_file]\n"
 	    "            [-x label_pattern] -o log_directory -p workers hostname ...\n"
-	    "       rset command\n");
+	    "       rset -- command\n");
 	if (!summary) {
 		fprintf(stderr, "hint: use -h to display option summary\n");
 		goto end;
@@ -387,6 +387,8 @@ usage(bool summary) {
 	       "    -R                 Upload files listed in label export paths\n"
 	       "    -t                 Enable TTY input on remote host\n"
 	       "    -x label_pattern   Execute labels matching specified regex\n");
+	printf("commands:\n"
+	       "    wenv               Print shell environment used by workers\n");
 	printf("docs:\n"
 	       "    man rset\n");
 
@@ -400,17 +402,26 @@ set_options(int argc, char *argv[]) {
 	const char *errstr;
 	opterr = 0;
 	Options op;
+	char argv_repr[10];
 
 	bzero(&op, sizeof op);
 
-	if (argc == 2) {
-		if (strcmp(argv[1], "-h") == 0)
-			usage(true);
+	if (argv[1] && strcmp(argv[1], "-h") == 0)
+		usage(true);
 
-		if (strcmp(argv[1], "shell-env") == 0) {
-			parallel_env();
-			exit(0);
+	/* commands */
+	if (argv[1] && strcmp(argv[1], "--") == 0) {
+		if (argc < 3)
+			usage(false);
+
+		if (argc == 3 && strcmp(argv[2], "wenv") == 0)
+			shell_worker_env();
+		else {
+			array_to_str(argv + 2, argv_repr, sizeof(argv_repr), " ");
+			errx(1, "unknown command: '%s'", argv_repr);
 		}
+
+		exit(0);
 	}
 
 	while ((ch = getopt(argc, argv, "AnRtE:F:f:o:p:x:")) != -1) {

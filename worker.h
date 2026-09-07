@@ -7,7 +7,7 @@
 
 /* forwards */
 
-void parallel_env();
+void shell_worker_env();
 int create_worker_argv(char *[], char *[]);
 int exec_worker(char *, int, char *[]);
 void rexec_summary(int, int[], char *);

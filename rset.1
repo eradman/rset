@@ -21,6 +21,7 @@
 .Fl p Ar workers
 .Ar hostname ...
 .Nm rset
+.Ar --
 .Ar command
 .Sh DESCRIPTION
 .Nm
@@ -91,8 +92,8 @@ By default only labels beginning with [0-9a-z] are evaluated.
 .El
 .Ss Commands
 .Bl -tag -width Ds
-.It Cm shell-env
-Print environment used by parallel execution.
+.It Cm wenv
+Print shell environment used by parallel workers.
 Provides a configuration template for custom status messages.
 .El
 .Sh ENVIRONMENT

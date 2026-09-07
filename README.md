@@ -48,7 +48,7 @@ Optional Configuration
 
 Add custom status format to default profile
 
-    rset shell-env >> ~/.profile
+    rset -- wenv >> ~/.profile
 
 Examples
 --------
