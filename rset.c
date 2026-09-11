@@ -50,6 +50,10 @@ char *log_directory;
 char *label_pattern = DEFAULT_LABEL_PATTERN;
 char *routes_file = ROUTES_FILE;
 
+enum {
+	cmd_wenv = 1,
+} command_opt;
+
 /* globals used by signal handlers */
 char *socket_path;
 char *hostname;
@@ -83,9 +87,16 @@ main(int argc, char *argv[]) {
 	if (sigemptyset(&act.sa_mask) & (sigaction(SIGTERM, &act, NULL) != 0))
 		err(1, "Failed to set SIGTERM handler");
 
-	/* arguments are expected to match route labels */
 	args = set_options(argc, argv);
+	(void) args; /* ignore */
 
+	switch (command_opt) {
+	case cmd_wenv:
+		shell_worker_env();
+		return 0;
+	}
+
+	/* locate bundled utilities */
 	if ((renv_bin = findprog("renv")) == 0)
 		not_found("renv");
 	if ((rinstall_bin = findprog("rinstall")) == 0)
@@ -93,7 +104,7 @@ main(int argc, char *argv[]) {
 	if ((rsub_bin = findprog("rsub")) == 0)
 		not_found("rsub");
 
-	/* all operations must be relative to the routes file */
+	/* subsequent operations are relative to the routes file */
 	if (realpath(xdirname(routes_file), routes_realpath) == NULL)
 		err(1, "realpath %s", routes_file);
 	if (chdir(routes_realpath) == -1)
@@ -415,13 +426,13 @@ set_options(int argc, char *argv[]) {
 			usage(false);
 
 		if (argc == 3 && strcmp(argv[2], "wenv") == 0)
-			shell_worker_env();
+			command_opt = cmd_wenv;
 		else {
 			array_to_str(argv + 2, argv_repr, sizeof(argv_repr), " ");
 			errx(1, "unknown command: '%s'", argv_repr);
 		}
 
-		exit(0);
+		return argv + 2;
 	}
 
 	while ((ch = getopt(argc, argv, "AnRtE:F:f:o:p:x:")) != -1) {
