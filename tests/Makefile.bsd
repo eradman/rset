@@ -30,6 +30,7 @@ test: ${OBJS}
 	@${RUBY} test_rinstall.rb
 	@${RUBY} test_labelgrep.rb
 	@${RUBY} test_rset.rb
+	@${RUBY} test_rset_command.rb
 	@${RUBY} test_rset_worker.rb
 
 clean:
