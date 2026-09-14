@@ -92,6 +92,14 @@ By default only labels beginning with [0-9a-z] are evaluated.
 .El
 .Ss Commands
 .Bl -tag -width Ds
+.It Cm init Op Ar template
+Initialize a new project based on examples located under
+.Pa /usr/share .
+Optionally, specify a
+.Ar template
+to use,
+.Qq alpine
+is the default.
 .It Cm wenv
 Print shell environment used by parallel workers.
 Provides a configuration template for custom status messages.

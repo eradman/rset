@@ -2,6 +2,7 @@ RUBOCOP ?= rubocop
 CLANG_FORMAT ?= clang-format
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
+EXAMPLEPREFIX ?= ${PREFIX}/share/examples/rset
 RELEASE = 3.4
 
 RSET_COMPONENTS = execute input rutils worker xlibc
@@ -47,6 +48,7 @@ install: ${PROGS}
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man5
+	@mkdir -p ${DESTDIR}${EXAMPLEPREFIX}
 	install -m 644 labelgrep.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 miniquark.1 ${DESTDIR}${MANPREFIX}/man1
 	install -m 644 pln.5 ${DESTDIR}${MANPREFIX}/man5
@@ -61,6 +63,7 @@ install: ${PROGS}
 	install rinstall ${DESTDIR}${PREFIX}/bin
 	install rset ${DESTDIR}${PREFIX}/bin
 	install rsub ${DESTDIR}${PREFIX}/bin
+	cp -r examples ${DESTDIR}${EXAMPLEPREFIX}
 
 uninstall:
 	rm ${DESTDIR}${MANPREFIX}/man1/labelgrep.1
@@ -77,6 +80,7 @@ uninstall:
 	rm ${DESTDIR}${PREFIX}/bin/rinstall
 	rm ${DESTDIR}${PREFIX}/bin/rset
 	rm ${DESTDIR}${PREFIX}/bin/rsub
+	rm -r ${DESTDIR}${EXAMPLEPREFIX}
 
 test: ${PROGS}
 	make -C tests

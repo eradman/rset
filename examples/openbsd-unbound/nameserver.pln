@@ -1,0 +1,13 @@
+execute_with=doas
+
+etc:
+	mkdir -p /scratch
+	${SD}/rsub /etc/fstab <<-CONF
+	715540d768d309ab.a /scratch ffs rw,nodev,nosuid,noexec,noatime 1 2
+	CONF
+	mount -a
+
+services:
+	rcctl enable unbound
+	rcctl start unbound
+	${SD}/rinstall nameserver/unbound.conf /var/unbound/etc/ && unbound-control reload

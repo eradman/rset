@@ -18,6 +18,8 @@ unsigned current_session_id();
 void check_permissions(const char *);
 int create_dir(const char *);
 void install_if_new(const char *, const char *);
+void assert_not_exists(const char *);
+char *list_dir_match(const char *, const char *);
 void hl_range(const char *, const char *, unsigned, unsigned);
 const char *pattern_match(const char *, const char *);
 void log_msg(char *, char *, char *, int);
