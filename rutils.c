@@ -36,6 +36,11 @@ str_cpy(char *dst, const char *src, size_t dsize) {
 	int i;
 	size_t len;
 
+	if (!src) {
+		*dst = '\0';
+		return 0;
+	}
+
 	len = strlen(src);
 	if (len + 1 > dsize) {
 		for (i = 0; i < len && i < sizeof(err_str) - 1; i++) {
