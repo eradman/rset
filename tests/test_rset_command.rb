@@ -7,6 +7,10 @@ require 'tempfile'
 
 # Setup
 @systmp = Dir.mktmpdir
+@mynet = "#{@systmp}/mynet"
+FileUtils.cp_r 'input', @mynet
+FileUtils.chmod 0o700, @mynet
+FileUtils.cp_r '../examples/openbsd-unbound', @systmp
 
 at_exit do
   FileUtils.remove_dir @systmp
@@ -34,14 +38,14 @@ puts "\e[32m---\e[39m"
 
 # Usage test
 
-try 'Missing command' do
+try 'Show usage for missing command' do
   cmd = '../rset --'
   _, err, status = Open3.capture3(cmd)
   eq err.include?('usage: rset'), true
   eq status.success?, false
 end
 
-try 'Invalid command' do
+try 'Reject invalid command' do
   ['shell', 'wenv wenv'].each do |option|
     cmd = "../rset -- #{option}"
     _, err, status = Open3.capture3(cmd)
@@ -66,4 +70,40 @@ try 'Print shell environment compatible with eval' do
     export RSET_HOST_DISCONNECT="%s|%T|HOST_DISCONNECT|%h|%e";
   SHELL
   eq status.success?, true
+end
+
+# Repo initialization
+
+try 'Abort initializtion if existing routes file exists' do
+  cmd = "#{Dir.pwd}/../rset -- init"
+  Dir.chdir(@mynet) do
+    _, err, status = Open3.capture3(cmd)
+    eq err, "rset: routes.pln already exists\n"
+    eq status.success?, false
+  end
+end
+
+try 'Example path not found' do
+  FileUtils.mkdir_p("#{@systmp}/alt")
+  cmd = "#{Dir.pwd}/../rset -- init openbsd"
+  Dir.chdir("#{@systmp}/alt") do
+    _, err, status = Open3.capture3(cmd)
+    eq err.lines.first, "rset: examples not found in search path:\n"
+    eq status.success?, false
+  end
+end
+
+try 'Initialize new repository' do
+  FileUtils.mkdir_p("#{@systmp}/alt")
+  cmd = "#{Dir.pwd}/../rset -- init openbsd"
+  Dir.chdir("#{@systmp}/alt") do
+    _, _, status = Open3.capture3({ 'RSET_EXAMPLE_PATH' => @systmp }, cmd)
+    eq status.success?, true
+    eq File.stat('.gitignore').mode.to_s(8), '100640'
+    eq File.stat('routes.pln').mode.to_s(8), '100640'
+    eq File.stat('.').mode.to_s(8), '40700'
+    eq Dir.exist?('_archive'), true
+    eq Dir.exist?('_rutils'), true
+    eq Dir.exist?('_sources'), true
+  end
 end

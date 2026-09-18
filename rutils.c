@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+#include <dirent.h>
 #include <err.h>
 #include <regex.h>
 #include <stdarg.h>
@@ -140,6 +141,8 @@ check_permissions(const char *dir) {
 /*
  * create_dir - ensure a directory exists
  * install_if_new - ensure a file is up to date
+ * assert_not_exists - abort if a file already exists
+ * list_dir_match - return first directory matching prefix
  */
 int
 create_dir(const char *dir) {
@@ -178,6 +181,36 @@ install_if_new(const char *src, const char *dst) {
 	waitpid(pid, &status, 0);
 	if (status != 0)
 		warnx("copy failed %s -> %s", src, dst);
+}
+
+void
+assert_not_exists(const char *filename) {
+	struct stat sb;
+
+	if (stat(filename, &sb) != -1)
+		errx(1, "%s already exists", filename);
+}
+
+char *
+list_dir_match(const char *base_path, const char *file_prefix) {
+	struct dirent *dp;
+	DIR *dfd = opendir(base_path);
+	size_t len;
+	static char match[PATH_MAX];
+
+	match[0] = '\0';
+	len = strlen(file_prefix);
+
+	if (dfd == NULL)
+		errx(1, "unable to open directory: '%s'", base_path);
+	while ((dp = readdir(dfd)) != NULL) {
+		if ((strlen(dp->d_name) >= len) && strncmp(dp->d_name, file_prefix, len) == 0) {
+			snprintf(match, PATH_MAX, "%s/%s", base_path, dp->d_name);
+			return match;
+		}
+	}
+	closedir(dfd);
+	return NULL;
 }
 
 /*

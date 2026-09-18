@@ -1,5 +1,6 @@
 CPPFLAGS += -D_GNU_SOURCE -D_LINUX_PORT -Imissing
 MANPREFIX ?= ${PREFIX}/share/man
+EXAMPLEPREFIX ?= ${PREFIX}/share/doc/rset/examples
 EXTRA_SRC = missing/setproctitle.c missing/strtonum.c
 
 include Makefile.bsd

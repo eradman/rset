@@ -1,0 +1,9 @@
+execute_with=doas
+
+packages:
+	apk add unbound
+
+services:
+	rc-update add unbound default -q
+	rc-service unbound start -q
+	${SD}/rinstall nameserver/unbound.conf /etc/unbound/ && unbound-control reload
