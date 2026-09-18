@@ -1,0 +1,6 @@
+execute_with=doas
+
+services:
+	rcctl enable unbound
+	rcctl start unbound
+	${SD}/rinstall nameserver/unbound.conf /var/unbound/etc/ && unbound-control reload

@@ -1,0 +1,5 @@
+# Define host connection options in ~/.ssh/config
+# See man 5 ssh_config
+
+ns1: nameserver/
+	nameserver.pln

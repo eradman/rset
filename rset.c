@@ -34,6 +34,7 @@ static void not_found(char *name);
 static void start_http_server(int stdout_pipe[], int http_port);
 static int execute_remote(char *hostnames[], regex_t *label_reg);
 static int dry_run(char *hostnames[], char *m_args[], regex_t *label_reg);
+static int init_repository(const char *);
 
 /* globals from input.h */
 Label **route_labels;
@@ -52,6 +53,7 @@ char *routes_file = ROUTES_FILE;
 
 enum {
 	cmd_wenv = 1,
+	cmd_init = 2,
 } command_opt;
 
 /* globals used by signal handlers */
@@ -88,13 +90,20 @@ main(int argc, char *argv[]) {
 		err(1, "Failed to set SIGTERM handler");
 
 	args = set_options(argc, argv);
-	(void) args; /* ignore */
 
 	switch (command_opt) {
 	case cmd_wenv:
 		shell_worker_env();
-		return 0;
+		break;
+	case cmd_init:
+		if (args[1])
+			init_repository(args[1]);
+		else
+			init_repository("alpine");
+		break;
 	}
+	if (command_opt && args)
+		return 0;
 
 	/* locate bundled utilities */
 	if ((renv_bin = findprog("renv")) == 0)
@@ -399,6 +408,7 @@ usage(bool summary) {
 	       "    -t                 Enable TTY input on remote host\n"
 	       "    -x label_pattern   Execute labels matching specified regex\n");
 	printf("commands:\n"
+	       "    init [prefix]      Initialize a new repository matching example directory\n"
 	       "    wenv               Print shell environment used by workers\n");
 	printf("docs:\n"
 	       "    man rset\n");
@@ -425,7 +435,9 @@ set_options(int argc, char *argv[]) {
 		if (argc < 3)
 			usage(false);
 
-		if (argc == 3 && strcmp(argv[2], "wenv") == 0)
+		if ((argc == 3 || argc == 4) && strcmp(argv[2], "init") == 0)
+			command_opt = cmd_init;
+		else if (argc == 3 && strcmp(argv[2], "wenv") == 0)
 			command_opt = cmd_wenv;
 		else {
 			array_to_str(argv + 2, argv_repr, sizeof(argv_repr), " ");
@@ -606,4 +618,69 @@ start_http_server(int stdout_pipe[], int http_port) {
 			err(1, "terminate http_server with pid %d", http_server_pid);
 		exit(WEXITSTATUS(status));
 	}
+}
+
+/*
+ * Generate skeleton repository from share/examples/
+ */
+int
+init_repository(const char *prefix) {
+	char proj[DIR_MAX];
+	int i;
+	char *rset_bin, *bin_dir, *examples_dir;
+	char *match;
+	char search_path[3][DIR_MAX];
+	char *cmd[5];
+
+	if (getcwd(proj, DIR_MAX) == NULL)
+		err(1, "getcwd");
+
+	/* checks */
+	assert_not_exists(".gitignore");
+	assert_not_exists("routes.pln");
+
+	/* infer examples path relative to rset binary */
+	rset_bin = findprog("rset");
+	if (rset_bin == NULL)
+		errx(1, "rset not found in PATH");
+	bin_dir = xdirname(rset_bin);
+
+	/* possible locations */
+	str_cpy(search_path[0], getenv("RSET_EXAMPLE_PATH"), DIR_MAX);
+	snprintf(search_path[1], DIR_MAX, EXAMPLE_RELPATH, bin_dir);
+	snprintf(search_path[2], DIR_MAX, EXAMPLE_RELPATH_ALT, bin_dir);
+
+	for (i = 0; i < 3; i++) {
+		if ((examples_dir = realpath(search_path[i], NULL)))
+			break;
+	}
+	if (examples_dir == NULL)
+		errx(1, "examples not found in search path:\n  %s\n  %s\n  %s",
+		    search_path[0][0] ? search_path[0] : "RSET_EXAMPLE_PATH", search_path[1],
+		    search_path[2]);
+
+	match = list_dir_match(examples_dir, prefix);
+	if (match == NULL)
+		errx(1, "'%s' does not match any directory in %s", prefix, examples_dir);
+
+	/* set permissions */
+	if (chmod(proj, S_IRWXU) == -1)
+		err(1, "chmod %s", proj);
+	umask(026);
+
+	/* standard directories */
+	create_dir(REPLICATED_DIRECTORY);
+	create_dir(ARCHIVE_DIRECTORY);
+	create_dir(PUBLIC_DIRECTORY);
+
+	/* copy */
+	if (chdir(match) == -1)
+		err(1, "chdir %s", match);
+	cmd[0] = "cp";
+	cmd[1] = "-r";
+	cmd[2] = ".";
+	cmd[3] = proj;
+	cmd[4] = NULL;
+
+	return run(cmd);
 }

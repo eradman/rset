@@ -92,6 +92,13 @@ By default only labels beginning with [0-9a-z] are evaluated.
 .El
 .Ss Commands
 .Bl -tag -width Ds
+.It Cm init Op Ar prefix
+Initialize a new repository based examples, typically installed in
+.Pa /usr/share/examples/rset/ .
+Optionally, use an example matching the specified
+.Ar prefix ,
+.Ql alpine
+is the default.
 .It Cm wenv
 Print shell environment used by parallel workers.
 Provides a configuration template for custom status messages.

@@ -43,3 +43,8 @@
 #else
 #define TAR_OPTIONS ""
 #endif
+
+/* paths relative to rset bin */
+#define DIR_MAX 200
+#define EXAMPLE_RELPATH "%s/../share/examples/rset"
+#define EXAMPLE_RELPATH_ALT "%s/../share/doc/rset/examples"
