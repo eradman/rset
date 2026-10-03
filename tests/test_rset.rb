@@ -511,7 +511,7 @@ try 'Invalid hostlist range' do
 
   cmd = "./hostlist 'web{1..9999}.dev'"
   out, err, status = Open3.capture3(cmd)
-  eq err, "hostlist: maximum range exceeds 100\n"
+  eq err, "hostlist: maximum range exceeds 1000\n"
   eq out, ''
   eq status.success?, false
 end
@@ -562,4 +562,30 @@ try 'Raise error if no route pattern match is found' do
   end
   eq err, "rset: No match for '127.+' in routes.pln\n"
   eq status.success?, false
+end
+
+try 'Match extended list of hosts' do
+  File.open("#{@mynet}/routes_ext.pln", 'w') do |f|
+    f.write("\nedge1{:\n")
+    f.write("\nedge2{:\n")
+    f.write("\nkubectl{10..19}:\n")
+    (100..209).step(1) do |n|
+      f.write("\nkubewk#{n}:\n")
+    end
+    f.write("\nblk{1..80}:\n")
+  end
+
+  cmd = "#{Dir.pwd}/../rset -f #{@mynet}/routes_ext.pln -n 'kube.+'"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out.scan('kube').length, 120
+  eq out.scan('blk').length, 0
+  eq status.success?, true
+
+  cmd = "#{Dir.pwd}/../rset -f #{@mynet}/routes_ext.pln -n 'blk.+'"
+  out, err, status = Open3.capture3(cmd)
+  eq err, ''
+  eq out.scan('kube').length, 0
+  eq out.scan('blk').length, 80
+  eq status.success?, true
 end
