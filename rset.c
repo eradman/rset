@@ -71,6 +71,7 @@ main(int argc, char *argv[]) {
 	int i, j;
 	int ret;
 	int n_workers;
+	int n_routes;
 	int worker_argc[MAX_WORKERS];
 	int worker_pid[MAX_WORKERS];
 	char *renv_bin, *rinstall_bin, *rsub_bin;
@@ -152,12 +153,12 @@ main(int argc, char *argv[]) {
 	xregcomp(&label_reg, label_pattern, REG_EXTENDED);
 
 	/* parse pln files for each host */
-	for (i = 0; route_labels[i]; i++)
-		read_host_labels(route_labels[i]);
+	for (n_routes = 0; route_labels[n_routes]; n_routes++)
+		read_host_labels(route_labels[n_routes]);
 
 	/* generate list of matching hostnames */
-	hostnames = xcalloc(MAX_LABELS, sizeof(char *), "hostnames");
-	m_args = xcalloc(MAX_LABELS, sizeof(char *), "m_args");
+	hostnames = xcalloc(n_routes + 1, sizeof(char *), "hostnames");
+	m_args = xcalloc(n_routes + 1, sizeof(char *), "m_args");
 	compare_argv(args, hostnames, m_args);
 
 	if (n_parallel > 0) {

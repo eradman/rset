@@ -11,6 +11,7 @@
 #ifndef _RSET_INPUT_H_
 #define _RSET_INPUT_H_
 
+#define PLN_ARRAY 100
 #define PLN_LABEL_SIZE 128
 #define PLN_OPTION_SIZE 90
 #define PLN_MAX_PATHS 32
@@ -45,11 +46,12 @@ extern Label **route_labels;
 /* forwards */
 
 void erry(const char *fmt, ...);
-void parse_pln(Label **host_labels);
+Label **parse_pln(Label **host_labels);
 void read_route_labels(const char *fn);
 void read_host_labels(Label *route_label);
 void expand_route_labels();
 Label **alloc_labels();
+Label **realloc_route_labels(int);
 
 char *ltrim(char *, int);
 void read_label(char *, Label *);

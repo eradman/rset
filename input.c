@@ -47,7 +47,7 @@ erry(const char *fmt, ...) {
 	exit(1);
 }
 
-void
+Label **
 parse_pln(Label **labels) {
 	int content_allocation = 0;
 	int error_code;
@@ -161,8 +161,15 @@ parse_pln(Label **labels) {
 					    aliases[0]);
 			}
 			n_labels++;
-			if (n_labels == MAX_LABELS)
-				erry("maximum number of labels (%d) exceeded", n_labels);
+
+			if ((pln_mode == RouteLabel) && (n_labels == MAX_ROUTE_LABELS))
+				erry("maximum number of route labels (%d) exceeded", n_labels);
+			if (n_labels % PLN_ARRAY == 0) {
+				if (pln_mode == RouteLabel)
+					labels = realloc_route_labels(n_labels);
+				else
+					erry("maximum number of labels (%d) exceeded", n_labels);
+			}
 		}
 
 		/* unknown */
@@ -175,19 +182,33 @@ parse_pln(Label **labels) {
 	free(line);
 	if (ferror(yyin))
 		err(1, "getline");
+
+	bzero(&labels[n_labels], sizeof(Label *));
+	return labels;
 }
 
 /*
- * alloc_labels - allocate memory for Label struct
+ * alloc_labels - allocate memory for Label array
+ * realloc_route_labels - extend memory allocated to route Label array
  */
 Label **
 alloc_labels() {
 	Label **new_labels;
 
-	new_labels = xmalloc(MAX_LABELS * sizeof(Label *), "new_labels");
-	bzero(new_labels, MAX_LABELS * sizeof(Label *));
+	new_labels = xmalloc(PLN_ARRAY * sizeof(Label *), "new_labels");
+	bzero(new_labels, PLN_ARRAY * sizeof(Label *));
 
 	return new_labels;
+}
+
+Label **
+realloc_route_labels(int n_labels) {
+	int n_alloc;
+
+	n_alloc = 1 + (n_labels / PLN_ARRAY);
+	route_labels = xrealloc(route_labels, PLN_ARRAY * n_alloc * sizeof(Label *), "route_Labels");
+
+	return route_labels;
 }
 
 /*
@@ -201,7 +222,7 @@ read_route_labels(const char *fn) {
 		err(1, "%s", fn);
 
 	pln_mode = RouteLabel;
-	parse_pln(route_labels);
+	route_labels = parse_pln(route_labels);
 	fclose(yyin);
 }
 
@@ -243,14 +264,19 @@ expand_route_labels() {
 	int i, j;
 	int n_exp;
 	int n_routes, n_routes_ext;
-	char *host_range[MAX_LABELS];
+	char **host_range;
 
+	host_range = xmalloc(MAX_HOST_RANGE * sizeof(char *), "host_range");
 	for (n_routes = 0; route_labels[n_routes]; n_routes++)
 		;
 
 	n_routes_ext = n_routes;
 	for (i = 0; i < n_routes; i++) {
 		n_exp = expand_numeric_range(host_range, route_labels[i]->name);
+		if (n_exp > MAX_HOST_RANGE)
+			errx(1, "maximum number of labels (%d) exceeded while expanding '%s'", MAX_HOST_RANGE,
+			    route_labels[i]->name);
+
 		if ((n_exp > 0) && (route_labels[i]->n_aliases > 1))
 			errx(1, "'%s' cannot be expanded with aliases defined", route_labels[i]->aliases[0]);
 
@@ -258,19 +284,24 @@ expand_route_labels() {
 			/* rename first entry */
 			if (j == 0)
 				route_labels[i]->aliases[0] = host_range[j];
+
 			/* replicate the source label, including pointers to content and options */
 			else {
+				if (n_routes_ext == MAX_ROUTE_LABELS)
+					erry("maximum number of route labels (%d) exceeded", n_routes_ext);
+				if (n_routes_ext % PLN_ARRAY == 0)
+					realloc_route_labels(n_routes_ext);
+
 				route_labels[n_routes_ext] = xmalloc(sizeof(Label), "labels[]");
 				memcpy(route_labels[n_routes_ext], route_labels[i], sizeof(Label));
 				route_labels[n_routes_ext]->aliases[0] = host_range[j];
 				n_routes_ext++;
-
-				if (n_routes_ext == MAX_LABELS)
-					errx(1, "maximum number of labels (%d) exceeded while expanding '%s'",
-					    n_routes_ext, route_labels[i]->name);
 			}
 		}
 	}
+
+	bzero(&route_labels[n_routes_ext], sizeof(Label *));
+	free(host_range);
 }
 
 /*
@@ -464,8 +495,8 @@ expand_numeric_range(char **range, char *input) {
 		if ((range_numeric[1] - range_numeric[0]) < 1)
 			errx(1, "non-ascending range: %d..%d", range_numeric[0], range_numeric[1]);
 
-		if ((range_numeric[1] - range_numeric[0]) > MAX_LABELS)
-			errx(1, "maximum range exceeds %d", MAX_LABELS);
+		if ((range_numeric[1] - range_numeric[0]) > MAX_HOST_RANGE)
+			errx(1, "maximum range exceeds %d", MAX_HOST_RANGE);
 
 		for (seq = range_numeric[0]; seq <= range_numeric[1]; seq++) {
 			asprintf(&range[hostcount], "%s%d%s", parts[0], seq, parts[1]);

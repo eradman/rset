@@ -25,7 +25,8 @@
 
 /* limits */
 #define MAX_WORKERS 20
-#define MAX_LABELS 100
+#define MAX_HOST_RANGE 1000
+#define MAX_ROUTE_LABELS 10000
 
 /* colors */
 #define HL_REVERSE "\x1b[7m"

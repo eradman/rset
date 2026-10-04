@@ -8,7 +8,7 @@ Label **route_labels;
 
 int
 main(int argc, char **argv) {
-	char *hostlist[MAX_LABELS];
+	char *hostlist[PLN_ARRAY];
 	int n;
 	int n_hosts;
 
