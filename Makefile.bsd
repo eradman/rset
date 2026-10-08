@@ -3,7 +3,7 @@ CLANG_FORMAT ?= clang-format
 PREFIX ?= /usr/local
 MANPREFIX ?= ${PREFIX}/man
 EXAMPLEPREFIX ?= ${PREFIX}/share/examples/rset
-RELEASE = 3.4
+RELEASE = 3.5
 
 RSET_COMPONENTS = execute input rutils worker xlibc
 RSET_OBJS = ${RSET_COMPONENTS:=.o} compat.o rset.o

@@ -1,5 +1,17 @@
 = Release History
 
+== 3.5: October 8, 2026
+
+ - Dynamically allocate route labels; use arbitrary limit of 10000 routes
+ - Set a limit of 1000 for range expansion
+ - New 'init' command with example configurations for 'alpine' and 'openbsd'
+ - New 'wenv' command, use custom log format to supersede '-e' flag
+ - Display multibyte characters in error messages
+ - Enable environment_file= to accept multiple pathnames
+ - pln(5): no longer document single-use options
+ - pln(5): rewrite man page and organize in three major sections
+ - renv(1): require closing quote, reject trailing whitespace
+
 == 3.4: August 3, 2026
 
  - Match route labels using regular expressions, or any alias using exact hostnames
