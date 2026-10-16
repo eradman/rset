@@ -43,7 +43,7 @@ erry(const char *fmt, ...) {
 	fprintf(stderr, "%s: ", yyfn);
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);
-	write(STDERR_FILENO, "\n", 1);
+	xwrite(STDERR_FILENO, "\n", 1, "STDERR");
 	exit(1);
 }
 
@@ -122,8 +122,7 @@ parse_pln(Label **labels) {
 			case Unset:
 				erry("indented text in unexpected context on line %d", n);
 			case Local:
-				if ((write(tfd, line + 1, linelen - 1)) == -1)
-					err(1, "write");
+				xwrite(tfd, line + 1, linelen - 1, "tfd");
 				break;
 			case Remote:
 				lp = labels[n_labels - 1];

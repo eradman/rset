@@ -322,7 +322,7 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 		p++;
 	}
 	buf[index++] = '\n';
-	write(STDOUT_FILENO, buf, index);
+	xwrite(STDOUT_FILENO, buf, index, "STDOUT");
 }
 
 /*

@@ -145,8 +145,7 @@ cmd_pipe_stdin(char *const argv[], char *input, size_t len) {
 		err(1, "could not exec %s", argv[0]);
 	}
 	close(stdin_pipe[0]);
-	if (write(stdin_pipe[1], input, len) == -1)
-		err(1, "write to child");
+	xwrite(stdin_pipe[1], input, len, "stdin_pipe[1]");
 	close(stdin_pipe[1]);
 	if (waitpid(pid, &status, 0) == -1)
 		err(1, "wait on pid %d", pid);
@@ -335,9 +334,9 @@ update_environment_file(
 	if ((fd = mkstemp(tmp_src)) == -1)
 		err(1, "mkstemp");
 
-	write(fd, environment_set, strlen(environment_set));
+	xwrite(fd, environment_set, strlen(environment_set), "environment_set");
 	if (env_override)
-		write(fd, env_override, strlen(env_override));
+		xwrite(fd, env_override, strlen(env_override), "env_override");
 	close(fd);
 
 	snprintf(cmd, PATH_MAX, "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",

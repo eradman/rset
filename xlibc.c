@@ -145,3 +145,15 @@ xregexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmat
 		rv = REG_NOMATCH;
 	return rv;
 }
+
+/*
+ * Call write(2) and exit on failure
+ */
+size_t
+xwrite(int fd, const void *buf, size_t nbytes, const char *name) {
+	size_t wbytes;
+	wbytes = write(fd, buf, nbytes);
+	if (wbytes == -1)
+		errx(1, "write > %s", name);
+	return wbytes;
+}

@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "execute.h"
+#include "xlibc.h"
 
 /* globals */
 Label **route_labels;
@@ -21,7 +22,7 @@ main(int argc, char *argv[]) {
 	}
 
 	output = cmd_pipe_stdout(argv + 1, &error_code, &output_size);
-	write(1, output, output_size);
+	xwrite(STDOUT_FILENO, output, output_size, "STDOUT");
 	fprintf(stderr, "output_size: %d\n", output_size);
 	fprintf(stderr, "strlen: %lu\n", (unsigned long) strlen(output));
 	free(output);
