@@ -39,7 +39,7 @@ stagedir() {
 	static int len = 0;
 
 	if (len == 0)
-		len = snprintf(path, sizeof path, REMOTE_STAGE_DIR, current_session_id());
+		len = xsnprintf(path, sizeof path, REMOTE_STAGE_DIR, current_session_id());
 	return path;
 }
 
@@ -205,7 +205,7 @@ findprog(char *prog) {
 		while (len > 0 && p[len - 1] == '/')
 			p[--len] = '\0'; /* strip trailing '/' */
 
-		(void) snprintf(filename, PATH_MAX, "%s/%s", p, prog);
+		xsnprintf(filename, PATH_MAX, "%s/%s", p, prog);
 		if ((stat(filename, &sbuf) == 0) && S_ISREG(sbuf.st_mode) && access(filename, X_OK) == 0) {
 			(void) free(bp);
 			return filename;
@@ -259,7 +259,7 @@ start_connection(
 	}
 
 	/* construct command to execute on remote host  */
-	snprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
+	xsnprintf(port_forwarding, 64, "%d:localhost:%d", INSTALL_PORT, http_port);
 
 	if (xstat(socket_path, &sb, -1) == 0) {
 		fprintf(stderr,
@@ -281,7 +281,7 @@ start_connection(
 	if ((ret = run(argv)) != 0)
 		return ret;
 
-	snprintf(cmd, PATH_MAX,
+	xsnprintf(cmd, PATH_MAX,
 	    "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
 	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
 	    socket_path, host_name, stagedir(), stagedir());
@@ -293,7 +293,7 @@ start_connection(
 	if (path && *path) {
 		array_to_str(route_label->export_paths, path_repr, sizeof(path_repr), " ");
 
-		snprintf(cmd, PATH_MAX,
+		xsnprintf(cmd, PATH_MAX,
 		    "tar " TAR_OPTIONS " -cf - %s "
 		    "| ssh -q -S %s %s 'tar -xf - -C %s'",
 		    path_repr, socket_path, host_name, stagedir());
@@ -339,7 +339,8 @@ update_environment_file(
 		xwrite(fd, env_override, strlen(env_override), "env_override");
 	close(fd);
 
-	snprintf(cmd, PATH_MAX, "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
+	xsnprintf(cmd, PATH_MAX,
+	    "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
 	    op.environment_file, tmp_src, socket_path, host_name, stagedir(), stagedir());
 	trace_shell(cmd);
 	ret = system(cmd);
@@ -365,7 +366,7 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, const ch
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.interpreter, host_label->options.interpreter, INTERPRETER);
 
-	snprintf(cmd, sizeof(cmd),
+	xsnprintf(cmd, sizeof(cmd),
 	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s'; exec %s\"",
@@ -395,7 +396,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, const cha
 		return ret;
 
 	/* copy the contents of the script */
-	snprintf(cmd, sizeof(cmd), "cat > %s/_script", stagedir());
+	xsnprintf(cmd, sizeof(cmd), "cat > %s/_script", stagedir());
 	/* construct ssh command */
 	argc = 0;
 	argc = array_append(argv, argc, "ssh", "-T", "-S", socket_path, NULL);
@@ -407,7 +408,7 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, const cha
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
 	apply_default(op.environment_file, host_label->options.environment_file, ENVIRONMENT_FILE);
 
-	snprintf(cmd, sizeof(cmd),
+	xsnprintf(cmd, sizeof(cmd),
 	    "%s sh -c \""
 	    "cd %s; set -a; . ./final.env; . ./local.env; "
 	    "SD='%s'; exec %s %s/_script\"",
@@ -434,19 +435,19 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, bool upload) 
 	char *argv[32];
 	int ret = 0;
 
-	snprintf(scp_opt, sizeof(scp_opt), "ControlPath=%s", socket_path);
+	xsnprintf(scp_opt, sizeof(scp_opt), "ControlPath=%s", socket_path);
 	argc = array_append(argv, 0, "scp", "-o", scp_opt, NULL);
 
 	for (i = 0; host_label->export_paths[i]; i++) {
 		path = host_label->export_paths[i];
 
 		if (path[0] == '/')
-			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s", host_name, path);
+			xsnprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s", host_name, path);
 		else
-			snprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s/%s", host_name, stagedir(), path);
+			xsnprintf(scp_arg[0], sizeof(scp_arg[0]), "%s:%s/%s", host_name, stagedir(), path);
 
 		archive_name = xbasename(path);
-		snprintf(
+		xsnprintf(
 		    scp_arg[1], sizeof(scp_arg[1]), ARCHIVE_DIRECTORY "/%s:%s", host_name, archive_name);
 
 		if (upload)

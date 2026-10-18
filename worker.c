@@ -115,7 +115,7 @@ rexec_summary(int n_workers, int worker_pid[], char *log_directory) {
 
 	status_argv[0] = "rexec-summary";
 	for (i = 1; i <= n_workers; i++)
-		asprintf(&status_argv[i], "%s/%s.%d", log_directory, get_tmstr(), i);
+		xasprintf(&status_argv[i], "%s/%s.%d", log_directory, get_tmstr(), i);
 	status_argc = i;
 	status_argv[status_argc] = NULL;
 
@@ -175,7 +175,7 @@ open_log(char *log_directory, int worker_id) {
 	int logfd;
 	char logfn[PATH_MAX];
 
-	snprintf(logfn, sizeof logfn, "%s/%s.%d", log_directory, get_tmstr(), worker_id);
+	xsnprintf(logfn, sizeof logfn, "%s/%s.%d", log_directory, get_tmstr(), worker_id);
 	logfd = open(logfn, O_RDWR | O_CREAT, 0640);
 	if (logfd == -1)
 		err(1, "open %s", logfn);

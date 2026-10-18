@@ -255,7 +255,7 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 
 				len = PLN_LABEL_SIZE + sizeof(LOCAL_CONTROL_SOCKET);
 				socket_path = xmalloc(len, "socket_path");
-				snprintf(socket_path, len, LOCAL_CONTROL_SOCKET, hostname);
+				xsnprintf(socket_path, len, LOCAL_CONTROL_SOCKET, hostname);
 
 				ret = start_connection(
 				    socket_path, hostname, route_labels[i], http_port, sshconfig_file);
@@ -566,7 +566,7 @@ start_http_server(int stdout_pipe[], int http_port) {
 	pid_t rset_pid;
 	sigset_t set;
 
-	snprintf(port, sizeof(port), "%u", http_port);
+	xsnprintf(port, sizeof(port), "%u", http_port);
 	http_srv_argv[0] = "miniquark";
 	http_srv_argv[1] = "-d";
 	http_srv_argv[2] = PUBLIC_DIRECTORY;
@@ -648,8 +648,8 @@ init_repository(const char *prefix) {
 
 	/* possible locations */
 	str_cpy(search_path[0], getenv("RSET_EXAMPLE_PATH"), DIR_MAX);
-	snprintf(search_path[1], DIR_MAX, EXAMPLE_RELPATH, bin_dir);
-	snprintf(search_path[2], DIR_MAX, EXAMPLE_RELPATH_ALT, bin_dir);
+	xsnprintf(search_path[1], DIR_MAX, EXAMPLE_RELPATH, bin_dir);
+	xsnprintf(search_path[2], DIR_MAX, EXAMPLE_RELPATH_ALT, bin_dir);
 
 	for (i = 0; i < 3; i++) {
 		if ((examples_dir = realpath(search_path[i], NULL)))

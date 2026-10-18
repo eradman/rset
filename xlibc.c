@@ -6,6 +6,8 @@
 #include <err.h>
 #include <libgen.h>
 #include <limits.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -156,4 +158,38 @@ xwrite(int fd, const void *buf, size_t nbytes, const char *name) {
 	if (wbytes == -1)
 		errx(1, "write > %s", name);
 	return wbytes;
+}
+
+/*
+ * Call snprintf(3) and assert that string was not truncated
+ */
+int
+xsnprintf(char *str, size_t size, const char *format, ...) {
+	int req_size;
+	va_list va;
+	va_start(va, format);
+	req_size = vsnprintf(str, size, format, va);
+	va_end(va);
+
+	if (req_size < 0)
+		err(1, "snprintf > '%s'", format);
+	if (req_size > size)
+		errx(1, "formatted input too long: '%s' > %zu bytes", format, size);
+	return req_size;
+}
+
+/*
+ * Call asprintf(3) and exit on failure
+ */
+int
+xasprintf(char **ret, const char *format, ...) {
+	int alloc_size;
+	va_list va;
+	va_start(va, format);
+	alloc_size = vasprintf(ret, format, va);
+	va_end(va);
+
+	if (alloc_size < 0)
+		err(1, "asprintf > '%s'", format);
+	return alloc_size;
 }
