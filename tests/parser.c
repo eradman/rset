@@ -61,7 +61,7 @@ main(int argc, char *argv[]) {
 		parse_pln(route_labels[0]->labels);
 		break;
 	}
-	chdir(xdirname(fn));
+	xchdir(xdirname(fn));
 
 	printf("[\n");
 	for (i = 0; route_labels[i]; i++) {

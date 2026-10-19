@@ -24,3 +24,4 @@ int xregexec(const regex_t *, const char *, size_t, regmatch_t[]);
 size_t xwrite(int, const void *, size_t, const char *);
 int xsnprintf(char *, size_t, const char *, ...);
 int xasprintf(char **, const char *, ...);
+int xchdir(const char *);

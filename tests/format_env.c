@@ -23,6 +23,7 @@ main(int argc, char *argv[]) {
 	char cmd[PATH_MAX];
 	char *env;
 	char *mode;
+	int rv = 0;
 
 	if (argc != 3)
 		usage();
@@ -37,9 +38,9 @@ main(int argc, char *argv[]) {
 	case 'F':
 		env_file_check(env);
 		xsnprintf(cmd, PATH_MAX, "cat %s", env);
-		system(cmd);
+		rv = system(cmd);
 		break;
 	}
 
-	return 0;
+	return rv;
 }

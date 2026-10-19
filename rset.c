@@ -117,8 +117,7 @@ main(int argc, char *argv[]) {
 	/* subsequent operations are relative to the routes file */
 	if (realpath(xdirname(routes_file), routes_realpath) == NULL)
 		err(1, "realpath %s", routes_file);
-	if (chdir(routes_realpath) == -1)
-		err(1, "chdir %s", routes_realpath);
+	xchdir(routes_realpath);
 
 	/* try opening the routes file */
 	if ((fd = open(routes_file, O_RDONLY)) == -1)
@@ -675,8 +674,7 @@ init_repository(const char *prefix) {
 	create_dir(PUBLIC_DIRECTORY);
 
 	/* copy */
-	if (chdir(match) == -1)
-		err(1, "chdir %s", match);
+	xchdir(match);
 	cmd[0] = "cp";
 	cmd[1] = "-r";
 	cmd[2] = ".";

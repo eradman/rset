@@ -193,3 +193,15 @@ xasprintf(char **ret, const char *format, ...) {
 		err(1, "asprintf > '%s'", format);
 	return alloc_size;
 }
+
+/*
+ * Call chdir(2) and exit on failure
+ */
+int
+xchdir(const char *path) {
+	int rv;
+	rv = chdir(path);
+	if (rv == -1)
+		err(1, "chdir %s", path);
+	return rv;
+}
