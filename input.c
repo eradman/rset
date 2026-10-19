@@ -498,7 +498,7 @@ expand_numeric_range(char **range, char *input) {
 			errx(1, "maximum range exceeds %d", MAX_HOST_RANGE);
 
 		for (seq = range_numeric[0]; seq <= range_numeric[1]; seq++) {
-			asprintf(&range[hostcount], "%s%d%s", parts[0], seq, parts[1]);
+			xasprintf(&range[hostcount], "%s%d%s", parts[0], seq, parts[1]);
 			hostcount++;
 		}
 	}
@@ -562,7 +562,7 @@ env_file_check(const char *str) {
 		}
 	}
 
-	snprintf(cmd, PATH_MAX, "renv %s -q", str);
+	xsnprintf(cmd, PATH_MAX, "renv %s -q", str);
 	if (system(cmd) != 0)
 		exit(1);
 }

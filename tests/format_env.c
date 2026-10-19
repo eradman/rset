@@ -36,7 +36,7 @@ main(int argc, char *argv[]) {
 		break;
 	case 'F':
 		env_file_check(env);
-		snprintf(cmd, PATH_MAX, "cat %s", env);
+		xsnprintf(cmd, PATH_MAX, "cat %s", env);
 		system(cmd);
 		break;
 	}

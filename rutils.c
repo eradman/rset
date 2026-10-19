@@ -205,7 +205,7 @@ list_dir_match(const char *base_path, const char *file_prefix) {
 		errx(1, "unable to open directory: '%s'", base_path);
 	while ((dp = readdir(dfd)) != NULL) {
 		if ((strlen(dp->d_name) >= len) && strncmp(dp->d_name, file_prefix, len) == 0) {
-			snprintf(match, PATH_MAX, "%s/%s", base_path, dp->d_name);
+			xsnprintf(match, PATH_MAX, "%s/%s", base_path, dp->d_name);
 			return match;
 		}
 	}
@@ -296,7 +296,7 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 			p++;
 			switch (p[0]) {
 			case 'e':
-				index += snprintf(buf + index, sizeof(buf) - index, "%d", exit_code);
+				index += xsnprintf(buf + index, sizeof(buf) - index, "%d", exit_code);
 				break;
 			case 'h':
 				index += str_cpy(buf + index, hostname, sizeof(buf) - index);
@@ -305,7 +305,7 @@ log_msg(char *template, char *hostname, char *label_name, int exit_code) {
 				index += str_cpy(buf + index, label_name, sizeof(buf) - index);
 				break;
 			case 's':
-				index += snprintf(buf + index, sizeof(buf) - index, "%08" PRIx32, session_id);
+				index += xsnprintf(buf + index, sizeof(buf) - index, "%08" PRIx32, session_id);
 				break;
 			case 'T':
 				strftime(tmstr, sizeof(tmstr), LOG_TIMESTAMP_FORMAT, tm);
