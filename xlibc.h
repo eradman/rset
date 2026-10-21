@@ -13,15 +13,19 @@
 
 char *xdirname(const char *);
 char *xbasename(const char *);
+int xchdir(const char *);
+
 int xstat(const char *, struct stat *, int);
+int xpipe(int *, const char *);
+size_t xwrite(int, const void *, size_t, const char *);
+
 void *xstrdup(const char *, const char *);
 void *xcalloc(size_t, size_t, const char *);
 void *xmalloc(size_t, const char *);
 void *xrealloc(void *, size_t, const char *);
-int xpipe(int *, const char *);
+
 int xregcomp(regex_t *, const char *, int);
 int xregexec(const regex_t *, const char *, size_t, regmatch_t[]);
-size_t xwrite(int, const void *, size_t, const char *);
+
 int xsnprintf(char *, size_t, const char *, ...);
 int xasprintf(char **, const char *, ...);
-int xchdir(const char *);

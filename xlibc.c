@@ -19,7 +19,9 @@
 #include "xlibc.h"
 
 /*
- * Mimic dirname(3) on OpenBSD which does not modify it's input
+ * xdirname - mimic dirname(3) on OpenBSD which does not modify input
+ * xbasename - mimic basename(3) on OpenBSD which does not modify input
+ * xchdir - call chdir(2) and exit on failure
  */
 char *
 xdirname(const char *path) {
@@ -29,9 +31,6 @@ xdirname(const char *path) {
 	return dirname(dname);
 }
 
-/*
- * Mimic basename(3) on OpenBSD which does not modify it's input
- */
 char *
 xbasename(const char *path) {
 	static char dname[PATH_MAX];
@@ -40,8 +39,19 @@ xbasename(const char *path) {
 	return basename(dname);
 }
 
+int
+xchdir(const char *path) {
+	int rv;
+	rv = chdir(path);
+	if (rv == -1)
+		err(1, "chdir %s", path);
+	return rv;
+}
+
 /*
- * Like stat(2) but retry until expected status
+ * xstat - call stat(2) and retry until expected status
+ * xpipe - call pipe(2) and exit on failure
+ * xwrite - call write(2) and exit on failure
  */
 int
 xstat(const char *path, struct stat *sb, int expected) {
@@ -59,21 +69,39 @@ xstat(const char *path, struct stat *sb, int expected) {
 	return ret;
 }
 
-/*
- * Call strdup(3) and exit on failure
- */
-void *
-xstrdup(const char *s, const char *name) {
-	void *p;
-	p = strdup(s);
-	if (p == NULL)
-		err(1, "strdup > %s", name);
-	return p;
+int
+xpipe(int *fildes, const char *var_name) {
+	int ret;
+	ret = pipe(fildes);
+	if (ret == -1)
+		err(1, "pipe < %s", var_name);
+	return ret;
+}
+
+size_t
+xwrite(int fd, const void *buf, size_t nbytes, const char *var_name) {
+	size_t wbytes;
+	wbytes = write(fd, buf, nbytes);
+	if (wbytes == -1)
+		errx(1, "write > %s", var_name);
+	return wbytes;
 }
 
 /*
- * Call calloc(3) and exit on failure
+ * xstrdup - call strdup(3) and exit on failure
+ * xcalloc - call calloc(3) and exit on failure
+ * xmalloc - call malloc(3) and exit on failure
+ * xrealloc - call realloc(3) and exit on failure or if request limit is exceeded
  */
+void *
+xstrdup(const char *s, const char *var_name) {
+	void *p;
+	p = strdup(s);
+	if (p == NULL)
+		err(1, "strdup > %s", var_name);
+	return p;
+}
+
 void *
 xcalloc(size_t nmemb, size_t size, const char *name) {
 	void *p;
@@ -83,46 +111,29 @@ xcalloc(size_t nmemb, size_t size, const char *name) {
 	return p;
 }
 
-/*
- * Call malloc(3) and exit on failure
- */
 void *
-xmalloc(size_t size, const char *name) {
+xmalloc(size_t size, const char *var_name) {
 	void *p;
 	p = malloc(size);
 	if (p == NULL)
-		err(1, "malloc > %s", name);
+		err(1, "malloc > %s", var_name);
 	return p;
 }
 
-/*
- * Call realloc(3) and exit on failure or if request is over a limit
- */
 void *
-xrealloc(void *ptr, size_t size, const char *name) {
+xrealloc(void *ptr, size_t size, const char *var_name) {
 	void *p;
 	if (size > REALLOC_MAX_SIZE)
-		errx(1, "realloc > %s exceeds %d", name, REALLOC_MAX_SIZE);
+		errx(1, "realloc > %s exceeds %d", var_name, REALLOC_MAX_SIZE);
 	p = realloc(ptr, size);
 	if (p == NULL)
-		err(1, "realloc > %s", name);
+		err(1, "realloc > %s", var_name);
 	return p;
 }
 
 /*
- * Call pipe(2) and exit on failure
- */
-int
-xpipe(int *fildes, const char *name) {
-	int ret;
-	ret = pipe(fildes);
-	if (ret == -1)
-		err(1, "pipe < %s", name);
-	return ret;
-}
-
-/*
- * Call regcomp(3) and format expression errors
+ * xregcomp - call regcomp(3) and format expression errors
+ * xregexec - call regexec(3) and refuse zero-width matches
  */
 int
 xregcomp(regex_t *preg, const char *pattern, int cflags) {
@@ -135,9 +146,6 @@ xregcomp(regex_t *preg, const char *pattern, int cflags) {
 	return rv;
 }
 
-/*
- * Call regexec(3) and refuse zero-width matches
- */
 int
 xregexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[]) {
 	int rv;
@@ -149,19 +157,8 @@ xregexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmat
 }
 
 /*
- * Call write(2) and exit on failure
- */
-size_t
-xwrite(int fd, const void *buf, size_t nbytes, const char *name) {
-	size_t wbytes;
-	wbytes = write(fd, buf, nbytes);
-	if (wbytes == -1)
-		errx(1, "write > %s", name);
-	return wbytes;
-}
-
-/*
- * Call snprintf(3) and assert that string was not truncated
+ * xsnprintf - call snprintf(3) and assert that string was not truncated
+ * xasprintf - call asprintf(3) and exit on failure
  */
 int
 xsnprintf(char *str, size_t size, const char *format, ...) {
@@ -178,9 +175,6 @@ xsnprintf(char *str, size_t size, const char *format, ...) {
 	return req_size;
 }
 
-/*
- * Call asprintf(3) and exit on failure
- */
 int
 xasprintf(char **ret, const char *format, ...) {
 	int alloc_size;
@@ -192,16 +186,4 @@ xasprintf(char **ret, const char *format, ...) {
 	if (alloc_size < 0)
 		err(1, "asprintf > '%s'", format);
 	return alloc_size;
-}
-
-/*
- * Call chdir(2) and exit on failure
- */
-int
-xchdir(const char *path) {
-	int rv;
-	rv = chdir(path);
-	if (rv == -1)
-		err(1, "chdir %s", path);
-	return rv;
 }
