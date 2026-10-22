@@ -20,7 +20,6 @@ int xpipe(int *, const char *);
 size_t xwrite(int, const void *, size_t, const char *);
 
 void *xstrdup(const char *, const char *);
-void *xcalloc(size_t, size_t, const char *);
 void *xmalloc(size_t, const char *);
 void *xrealloc(void *, size_t, const char *);
 

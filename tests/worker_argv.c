@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "worker.h"
+#include "xlibc.h"
 
 /* globals */
 Label **route_labels;
@@ -19,7 +20,7 @@ main(int argc, char **argv) {
 	}
 
 	optind = argc - 1; /* assume last arg is a hostname */
-	worker_argv = calloc(sizeof(char *), argc);
+	worker_argv = xmalloc(argc * sizeof(char *), "worker_argv");
 	worker_argc = create_worker_argv(argv, worker_argv);
 
 	printf("(%d)\n", worker_argc);

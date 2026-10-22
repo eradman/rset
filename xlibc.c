@@ -89,7 +89,6 @@ xwrite(int fd, const void *buf, size_t nbytes, const char *var_name) {
 
 /*
  * xstrdup - call strdup(3) and exit on failure
- * xcalloc - call calloc(3) and exit on failure
  * xmalloc - call malloc(3) and exit on failure
  * xrealloc - call realloc(3) and exit on failure or if request limit is exceeded
  */
@@ -99,15 +98,6 @@ xstrdup(const char *s, const char *var_name) {
 	p = strdup(s);
 	if (p == NULL)
 		err(1, "strdup > %s", var_name);
-	return p;
-}
-
-void *
-xcalloc(size_t nmemb, size_t size, const char *name) {
-	void *p;
-	p = calloc(nmemb, size);
-	if (p == NULL)
-		err(1, "calloc > %s", name);
 	return p;
 }
 

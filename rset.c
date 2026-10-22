@@ -156,8 +156,8 @@ main(int argc, char *argv[]) {
 		read_host_labels(route_labels[n_routes]);
 
 	/* generate list of matching hostnames */
-	hostnames = xcalloc(n_routes + 1, sizeof(char *), "hostnames");
-	m_args = xcalloc(n_routes + 1, sizeof(char *), "m_args");
+	hostnames = xmalloc((n_routes + 1) * sizeof(char *), "hostnames");
+	m_args = xmalloc((n_routes + 1) * sizeof(char *), "m_args");
 	compare_argv(args, hostnames, m_args);
 
 	if (n_parallel > 0) {
@@ -168,7 +168,7 @@ main(int argc, char *argv[]) {
 		for (i = 0; hostnames[i]; i++) {
 			j = i % n_parallel;
 			if (j + 1 > n_workers) {
-				worker_argv[n_workers] = xcalloc(argc, sizeof(char *), "worker_argv[]");
+				worker_argv[n_workers] = xmalloc(argc * sizeof(char *), "worker_argv[]");
 				worker_argc[n_workers] = create_worker_argv(argv, worker_argv[n_workers]);
 				n_workers++;
 			}
