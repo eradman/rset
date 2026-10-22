@@ -55,36 +55,36 @@ xchdir(const char *path) {
  */
 int
 xstat(const char *path, struct stat *sb, int expected) {
+	int rv;
 	int i;
-	int ret;
 	struct timespec delay = { 0, 1000000 };
 
 	/* wait up to 0.5 seconds */
 	for (i = 0; i < 5; i++) {
-		ret = stat(path, sb);
-		if (ret == expected)
+		rv = stat(path, sb);
+		if (rv == expected)
 			break;
 		nanosleep(&delay, NULL);
 	}
-	return ret;
+	return rv;
 }
 
 int
 xpipe(int *fildes, const char *var_name) {
-	int ret;
-	ret = pipe(fildes);
-	if (ret == -1)
+	int rv;
+	rv = pipe(fildes);
+	if (rv == -1)
 		err(1, "pipe < %s", var_name);
-	return ret;
+	return rv;
 }
 
 size_t
 xwrite(int fd, const void *buf, size_t nbytes, const char *var_name) {
-	size_t wbytes;
-	wbytes = write(fd, buf, nbytes);
-	if (wbytes == -1)
+	size_t rv;
+	rv = write(fd, buf, nbytes);
+	if (rv == -1)
 		errx(1, "write > %s", var_name);
-	return wbytes;
+	return rv;
 }
 
 /*
@@ -162,28 +162,28 @@ xregexec(const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmat
  */
 int
 xsnprintf(char *str, size_t size, const char *format, ...) {
-	int req_size;
+	int rv;
 	va_list va;
 	va_start(va, format);
-	req_size = vsnprintf(str, size, format, va);
+	rv = vsnprintf(str, size, format, va);
 	va_end(va);
 
-	if (req_size < 0)
+	if (rv < 0)
 		err(1, "snprintf > '%s'", format);
-	if (req_size > size)
+	if (rv > size)
 		errx(1, "formatted input too long: '%s' > %zu bytes", format, size);
-	return req_size;
+	return rv;
 }
 
 int
 xasprintf(char **ret, const char *format, ...) {
-	int alloc_size;
+	int rv;
 	va_list va;
 	va_start(va, format);
-	alloc_size = vasprintf(ret, format, va);
+	rv = vasprintf(ret, format, va);
 	va_end(va);
 
-	if (alloc_size < 0)
+	if (rv < 0)
 		err(1, "asprintf > '%s'", format);
-	return alloc_size;
+	return rv;
 }

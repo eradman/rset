@@ -67,9 +67,9 @@ int http_port;
  */
 int
 main(int argc, char *argv[]) {
+	int rv;
 	int fd;
 	int i, j;
-	int ret;
 	int n_workers;
 	int n_routes;
 	int worker_argc[MAX_WORKERS];
@@ -190,14 +190,14 @@ main(int argc, char *argv[]) {
 
 	/* main loop */
 	if (dryrun_opt) {
-		ret = dry_run(hostnames, m_args, &label_reg);
+		rv = dry_run(hostnames, m_args, &label_reg);
 		free(hostnames);
-		return ret;
+		return rv;
 	}
 
-	ret = execute_remote(hostnames, &label_reg);
+	rv = execute_remote(hostnames, &label_reg);
 	free(hostnames);
-	return ret;
+	return rv;
 }
 
 /*
@@ -207,10 +207,10 @@ main(int argc, char *argv[]) {
 
 static int
 execute_remote(char *hostnames[], regex_t *label_reg) {
+	int rv;
 	char httpd_log[32768];
 	int i, j, k, l;
 	int nr;
-	int ret;
 	int stdout_pipe[2];
 	size_t len;
 	regmatch_t regmatch;
@@ -256,10 +256,10 @@ execute_remote(char *hostnames[], regex_t *label_reg) {
 				socket_path = xmalloc(len, "socket_path");
 				xsnprintf(socket_path, len, LOCAL_CONTROL_SOCKET, hostname);
 
-				ret = start_connection(
+				rv = start_connection(
 				    socket_path, hostname, route_labels[i], http_port, sshconfig_file);
-				if (ret != 0) {
-					log_msg(host_connect_error_msg, hostname, "", ret);
+				if (rv != 0) {
+					log_msg(host_connect_error_msg, hostname, "", rv);
 					end_connection(socket_path, hostname);
 					free(socket_path);
 					socket_path = NULL;

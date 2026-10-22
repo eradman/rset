@@ -241,8 +241,8 @@ verify_ssh_agent() {
 int
 start_connection(
     char *socket_path, char *host_name, Label *route_label, int http_port, const char *ssh_config) {
+	int rv;
 	int argc;
-	int ret;
 	char cmd[PATH_MAX];
 	char port_forwarding[64];
 	char path_repr[PLN_LABEL_SIZE];
@@ -278,16 +278,16 @@ start_connection(
 	else
 		array_append(argv, argc, host_name, NULL);
 	trace_exec(argv);
-	if ((ret = run(argv)) != 0)
-		return ret;
+	if ((rv = run(argv)) != 0)
+		return rv;
 
 	xsnprintf(cmd, PATH_MAX,
 	    "tar " TAR_OPTIONS " -cf - -C " REPLICATED_DIRECTORY " . "
 	    "| ssh -q -S %s %s 'mkdir %s; tar -xf - -C %s'",
 	    socket_path, host_name, stagedir(), stagedir());
 	trace_shell(cmd);
-	if ((ret = system(cmd)) != 0)
-		return ret;
+	if ((rv = system(cmd)) != 0)
+		return rv;
 
 	path = route_label->export_paths;
 	if (path && *path) {
@@ -299,8 +299,8 @@ start_connection(
 		    path_repr, socket_path, host_name, stagedir());
 
 		trace_shell(cmd);
-		if ((ret = system(cmd)) != 0)
-			return ret;
+		if ((rv = system(cmd)) != 0)
+			return rv;
 	}
 	return 0;
 }
@@ -308,8 +308,8 @@ start_connection(
 int
 update_environment_file(
     char *host_name, char *socket_path, Label *host_label, const char *env_override) {
+	int rv;
 	int fd;
-	int ret;
 	char cmd[PATH_MAX];
 	char tmp_src[128];
 	Options op;
@@ -343,24 +343,24 @@ update_environment_file(
 	    "renv %s %s | ssh -q -S %s %s 'cat > %s/final.env; touch %s/local.env'",
 	    op.environment_file, tmp_src, socket_path, host_name, stagedir(), stagedir());
 	trace_shell(cmd);
-	ret = system(cmd);
+	rv = system(cmd);
 	unlink(tmp_src);
 
-	return ret;
+	return rv;
 }
 
 int
 ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, const char *env_override) {
+	int rv;
 	int argc;
-	int ret;
 	char cmd[PATH_MAX];
 	char *argv[32];
 	Options op;
 
 	/* setup environment file */
-	ret = update_environment_file(host_name, socket_path, host_label, env_override);
-	if (ret != 0)
-		return ret;
+	rv = update_environment_file(host_name, socket_path, host_label, env_override);
+	if (rv != 0)
+		return rv;
 
 	/* construct command to execute on remote host  */
 	apply_default(op.execute_with, host_label->options.execute_with, EXECUTE_WITH);
@@ -378,22 +378,22 @@ ssh_command_pipe(char *host_name, char *socket_path, Label *host_label, const ch
 
 	array_append(argv, argc, host_name, cmd, NULL);
 	trace_exec(argv);
-	ret = cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
-	return ret;
+	rv = cmd_pipe_stdin(argv, host_label->content, host_label->content_size);
+	return rv;
 }
 
 int
 ssh_command_tty(char *host_name, char *socket_path, Label *host_label, const char *env_override) {
+	int rv;
 	int argc;
-	int ret;
 	char cmd[PATH_MAX];
 	char *argv[32];
 	Options op;
 
 	/* setup environment file */
-	ret = update_environment_file(host_name, socket_path, host_label, env_override);
-	if (ret != 0)
-		return ret;
+	rv = update_environment_file(host_name, socket_path, host_label, env_override);
+	if (rv != 0)
+		return rv;
 
 	/* copy the contents of the script */
 	xsnprintf(cmd, sizeof(cmd), "cat > %s/_script", stagedir());
@@ -420,12 +420,13 @@ ssh_command_tty(char *host_name, char *socket_path, Label *host_label, const cha
 
 	array_append(argv, argc, host_name, cmd, NULL);
 	trace_exec(argv);
-	ret = run(argv);
-	return ret;
+	rv = run(argv);
+	return rv;
 }
 
 int
 scp_archive(char *host_name, char *socket_path, Label *host_label, bool upload) {
+	int rv = 0;
 	int i;
 	int argc;
 	char scp_opt[PLN_LABEL_SIZE];
@@ -433,7 +434,6 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, bool upload) 
 	char *path;
 	char *archive_name;
 	char *argv[32];
-	int ret = 0;
 
 	xsnprintf(scp_opt, sizeof(scp_opt), "ControlPath=%s", socket_path);
 	argc = array_append(argv, 0, "scp", "-o", scp_opt, NULL);
@@ -456,10 +456,10 @@ scp_archive(char *host_name, char *socket_path, Label *host_label, bool upload) 
 			array_append(argv, argc, scp_arg[0], scp_arg[1], NULL);
 
 		trace_exec(argv);
-		ret = ret || run(argv);
+		rv = rv || run(argv);
 	}
 
-	return ret;
+	return rv;
 }
 
 void
@@ -484,17 +484,17 @@ end_connection(char *socket_path, char *host_name) {
 
 int
 local_exec(Label *host_label, char *cmd) {
+	int rv = 0;
 	char *argv[4];
 	size_t len;
 	Options op;
-	int ret = 0;
 
 	if ((cmd) && (len = strlen(cmd)) > 0) {
 		apply_default(op.local_interpreter, host_label->options.interpreter, INTERPRETER);
 		array_append(argv, 0, op.local_interpreter, NULL);
-		ret = cmd_pipe_stdin(argv, cmd, len);
+		rv = cmd_pipe_stdin(argv, cmd, len);
 	}
-	return ret;
+	return rv;
 }
 
 /* internal utility functions */
